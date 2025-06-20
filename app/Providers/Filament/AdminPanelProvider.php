@@ -20,39 +20,46 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AdminPanelProvider extends PanelProvider
 {
-    public function panel(Panel $panel): Panel
-    {
-        return $panel
-            ->default()
-            ->id('admin')
-            ->path('admin')
-            ->login()
-            ->colors([
-                'primary' => Color::Amber,
-            ])
-            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
-            ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
-            ->pages([
-                Pages\Dashboard::class,
-            ])
-            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
-            ->widgets([
-                Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
-            ])
-            ->middleware([
-                EncryptCookies::class,
-                AddQueuedCookiesToResponse::class,
-                StartSession::class,
-                AuthenticateSession::class,
-                ShareErrorsFromSession::class,
-                VerifyCsrfToken::class,
-                SubstituteBindings::class,
-                DisableBladeIconComponents::class,
-                DispatchServingFilamentEvent::class,
-            ])
-            ->authMiddleware([
-                Authenticate::class,
-            ]);
-    }
+  public function panel(Panel $panel): Panel
+  {
+    return $panel
+      ->default()
+      ->id('admin')
+      ->path('admin')
+      ->login()
+      ->registration()
+      ->passwordReset()
+      ->emailVerification()
+      ->profile()
+      ->favicon(asset('favicon.png'))
+      ->colors([
+        'primary' => Color::Cyan,
+      ])
+      ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
+      ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
+      ->pages([
+        Pages\Dashboard::class,
+      ])
+      ->databaseNotifications()
+      ->sidebarCollapsibleOnDesktop()
+      ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
+      ->widgets([
+        // Widgets\AccountWidget::class,
+        // Widgets\FilamentInfoWidget::class,
+      ])
+      ->middleware([
+        EncryptCookies::class,
+        AddQueuedCookiesToResponse::class,
+        StartSession::class,
+        AuthenticateSession::class,
+        ShareErrorsFromSession::class,
+        VerifyCsrfToken::class,
+        SubstituteBindings::class,
+        DisableBladeIconComponents::class,
+        DispatchServingFilamentEvent::class,
+      ])
+      ->authMiddleware([
+        Authenticate::class,
+      ]);
+  }
 }

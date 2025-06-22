@@ -1,0 +1,27 @@
+name: Deploy Laravel Application to Server
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: SSH Pull Latest Code & Laravel Commands
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.GH_SERVER_HOST }}
+          username: ${{ secrets.GH_SERVER_USER }}
+          key: ${{ secrets.GH_SERVER_SSH_KEY }}
+          port: ${{ secrets.GH_SERVER_PORT }}
+          script: |
+            cd ${{ secrets.GH_SERVER_PATH }}
+            git pull origin main
+            composer install --no-interaction --prefer-dist --optimize-autoloader
+            php artisan migrate --force
+            php artisan optimize:clear

@@ -32,7 +32,7 @@ class AdminPanelProvider extends PanelProvider
       ->passwordReset()
       ->emailVerification()
       ->profile()
-      ->favicon(asset('favicon.png'))
+      ->favicon(asset('favicon.ico'))
       ->colors([
         'primary' => Color::Cyan,
       ])

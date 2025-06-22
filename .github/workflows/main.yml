@@ -25,3 +25,5 @@ jobs:
             composer install --no-interaction --prefer-dist --optimize-autoloader
             php artisan migrate --force
             php artisan optimize:clear
+            php artisan filament:optimize
+

@@ -58,22 +58,28 @@ class UserResource extends Resource
               ->minLength(8)
               ->required(fn (Forms\Get $get) => $get('id') === null),
 
-            Forms\Components\CheckboxList::make('roles')
-              ->relationship('roles', 'name')
-              ->searchable(),
-          ]),
+            Forms\Components\DateTimePicker::make('email_verified_at')
+              ->label('Verifikasi pada')
+              ->native(false)
+              ->disabledOn('create')
+              ->displayFormat('d/m/Y H:i'),
 
-        Forms\Components\Section::make()
-          ->description('Foto profil pengguna')
-          ->collapsible()
-          ->columnSpan(1)
-          ->schema([
             Forms\Components\FileUpload::make('avatar_url')
               ->label('Foto Profil')
               ->disk('public')
               ->directory('images/profile')
               ->image()
               ->imageEditor(),
+          ]),
+
+        Forms\Components\Section::make()
+          ->description('Hak akses pengguna')
+          ->collapsible()
+          ->columnSpan(1)
+          ->schema([
+            Forms\Components\CheckboxList::make('roles')
+              ->relationship('roles', 'name')
+              ->searchable(),
           ])
       ])
       ->columns(3);
@@ -101,17 +107,17 @@ class UserResource extends Resource
           ->sortable(),
         Tables\Columns\TextColumn::make('email_verified_at')
           ->label('Verifikasi pada')
-          ->dateTime('d M Y H:i')
+          ->dateTime('d/m/Y H:i')
           ->sortable()
           ->toggleable(),
         Tables\Columns\TextColumn::make('created_at')
           ->label('Dibuat pada')
-          ->dateTime('d M Y H:i')
+          ->dateTime('d/m/Y H:i')
           ->sortable()
           ->toggleable(isToggledHiddenByDefault: true),
         Tables\Columns\TextColumn::make('updated_at')
           ->label('Diubah pada')
-          ->dateTime('d M Y H:i')
+          ->dateTime('d/m/Y H:i')
           ->sortable()
           ->toggleable(),
       ])

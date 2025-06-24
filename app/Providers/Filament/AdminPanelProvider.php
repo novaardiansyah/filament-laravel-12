@@ -2,7 +2,7 @@
 
 namespace App\Providers\Filament;
 
-use App\Livewire\AccountSettingsPage;
+use CharrafiMed\GlobalSearchModal\GlobalSearchModalPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -19,6 +19,7 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Jeffgreco13\FilamentBreezy\BreezyCore;
+use Filament\Forms\Components\FileUpload;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -61,19 +62,26 @@ class AdminPanelProvider extends PanelProvider
       ->authMiddleware([
         Authenticate::class,
       ])
-      ->plugin(
+      ->plugins([
         BreezyCore::make()
           ->myProfile(
             shouldRegisterUserMenu: true,
             hasAvatars: true,
-            // shouldRegisterNavigation: true,
           )
           ->enableTwoFactorAuthentication()
-          ->enableBrowserSessions(),
-      )
+          ->enableBrowserSessions()
+          ->avatarUploadComponent(fn() => 
+            FileUpload::make('avatar_url')
+              ->disk('public')
+              ->directory('images/profile')
+              ->image()
+              ->imageEditor(),
+          ),
+          GlobalSearchModalPlugin::make()
+      ])
     ->navigationItems([
       NavigationItem::make('Profil Saya')
-        ->url(uri('admin/my-profile'))
+        ->url(uri(url('admin/my-profile')))
         ->icon('heroicon-o-user')
         ->isActiveWhen(fn () => request()->is('admin/my-profile*'))
     ]);

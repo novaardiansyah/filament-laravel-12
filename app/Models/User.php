@@ -5,6 +5,7 @@ namespace App\Models;
 use Filament\Models\Contracts\HasAvatar;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
@@ -15,7 +16,7 @@ use Jeffgreco13\FilamentBreezy\Traits\TwoFactorAuthenticatable;
 class User extends Authenticatable implements FilamentUser, MustVerifyEmail, HasAvatar
 {
   /** @use HasFactory<\Database\Factories\UserFactory> */
-  use HasFactory, Notifiable, TwoFactorAuthenticatable;
+  use HasFactory, Notifiable, TwoFactorAuthenticatable, SoftDeletes;
 
   /**
    * The attributes that are mass assignable.
@@ -57,8 +58,8 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail, Has
     return true;
   }
 
-    public function getFilamentAvatarUrl(): ?string
-    {
-      return $this->avatar_url ? Storage::url($this->avatar_url) : null ;
-    }
+  public function getFilamentAvatarUrl(): ?string
+  {
+    return $this->avatar_url ? Storage::url($this->avatar_url) : null ;
+  }
 }

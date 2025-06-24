@@ -36,7 +36,7 @@ class UserResource extends Resource
         Forms\Components\Section::make()
           ->description('Informasi akun pengguna')
           ->collapsible()
-          ->columns(1)
+          ->columns(2)
           ->columnSpan(2)
           ->schema([
             Forms\Components\TextInput::make('name')
@@ -57,6 +57,10 @@ class UserResource extends Resource
               ->revealable()
               ->minLength(8)
               ->required(fn (Forms\Get $get) => $get('id') === null),
+
+            Forms\Components\CheckboxList::make('roles')
+              ->relationship('roles', 'name')
+              ->searchable(),
           ]),
 
         Forms\Components\Section::make()

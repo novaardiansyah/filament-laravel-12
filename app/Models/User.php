@@ -12,11 +12,12 @@ use Filament\Panel;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Facades\Storage;
 use Jeffgreco13\FilamentBreezy\Traits\TwoFactorAuthenticatable;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements FilamentUser, MustVerifyEmail, HasAvatar
 {
   /** @use HasFactory<\Database\Factories\UserFactory> */
-  use HasFactory, Notifiable, TwoFactorAuthenticatable, SoftDeletes;
+  use HasFactory, Notifiable, TwoFactorAuthenticatable, SoftDeletes, HasRoles;
 
   /**
    * The attributes that are mass assignable.

@@ -101,6 +101,12 @@ class UserResource extends Resource
           ->label('Nama Lengkap')
           ->searchable()
           ->sortable(),
+        Tables\Columns\TextColumn::make('roles.name')
+          ->label('Role')
+          ->formatStateUsing(fn ($state) => collect((array) $state)
+            ->map(fn ($role) => ucwords(str_replace('_', ' ', $role)))
+            ->implode(', ')
+          ),
         Tables\Columns\TextColumn::make('email')
           ->label('Email')
           ->searchable()

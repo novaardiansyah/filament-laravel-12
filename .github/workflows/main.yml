@@ -45,17 +45,6 @@ jobs:
             cd ${{ secrets.GH_SERVER_PATH }}
             php artisan migrate --force
 
-      - name: SSH Shield Generate
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.GH_SERVER_HOST }}
-          username: ${{ secrets.GH_SERVER_USER }}
-          key: ${{ secrets.GH_SERVER_SSH_KEY }}
-          port: ${{ secrets.GH_SERVER_PORT }}
-          script: |
-            cd ${{ secrets.GH_SERVER_PATH }}
-            php artisan shield:generate --panel=admin
-
       - name: SSH Artisan Optimize
         uses: appleboy/ssh-action@v1
         with:

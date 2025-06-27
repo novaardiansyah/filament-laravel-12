@@ -14,6 +14,7 @@
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
         "mokhosh/filament-kanban": "^2.10",
+        "pxlrbt/filament-excel": "^2.4",
         "stechstudio/filament-impersonate": "^3.16",
         "z3d0x/filament-logger": "^0.8.0"
     },

@@ -13,6 +13,8 @@ use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\Indicator;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
+use pxlrbt\FilamentExcel\Exports\ExcelExport;
 
 class UserResource extends Resource
 {
@@ -56,7 +58,7 @@ class UserResource extends Resource
               ->password()
               ->revealable()
               ->minLength(8)
-              ->required(fn (Forms\Get $get) => $get('id') === null),
+              ->required(fn(Forms\Get $get) => $get('id') === null),
 
             Forms\Components\DateTimePicker::make('email_verified_at')
               ->label('Verifikasi pada')
@@ -103,9 +105,10 @@ class UserResource extends Resource
           ->sortable(),
         Tables\Columns\TextColumn::make('roles.name')
           ->label('Role')
-          ->formatStateUsing(fn ($state) => collect((array) $state)
-            ->map(fn ($role) => ucwords(str_replace('_', ' ', $role)))
-            ->implode(', ')
+          ->formatStateUsing(
+            fn($state) => collect((array) $state)
+              ->map(fn($role) => ucwords(str_replace('_', ' ', $role)))
+              ->implode(', ')
           ),
         Tables\Columns\TextColumn::make('email')
           ->label('Email')
@@ -158,17 +161,17 @@ class UserResource extends Resource
             return $query
               ->when(
                 $data['from_created_at'],
-                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
+                fn(Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
               )
               ->when(
                 $data['end_created_at'],
-                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
+                fn(Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
               );
           })
           ->columns(2)
       ], layout: FiltersLayout::Modal)
       ->filtersFormColumns(2)
-      ->filtersFormSchema(fn (array $filters): array => [
+      ->filtersFormSchema(fn(array $filters): array => [
         Forms\Components\Section::make('')
           ->description('Filter data berdasarkan kriteria berikut:')
           ->schema([
@@ -185,6 +188,13 @@ class UserResource extends Resource
           Tables\Actions\ForceDeleteAction::make(),
           Tables\Actions\RestoreAction::make(),
         ]),
+      ])
+      ->headerActions([
+        ExportAction::make()->exports([
+          ExcelExport::make('table')->fromTable()
+            ->except(['index', 'avatar_url'])
+            ->queue(),
+        ])
       ])
       ->bulkActions([
         Tables\Actions\BulkActionGroup::make([
@@ -205,9 +215,9 @@ class UserResource extends Resource
   public static function getPages(): array
   {
     return [
-      'index'  => Pages\ListUsers::route('/'),
+      'index' => Pages\ListUsers::route('/'),
       'create' => Pages\CreateUser::route('/create'),
-      'edit'   => Pages\EditUser::route('/{record}/edit'),
+      'edit' => Pages\EditUser::route('/{record}/edit'),
     ];
   }
 }

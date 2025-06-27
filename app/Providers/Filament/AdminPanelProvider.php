@@ -2,6 +2,8 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Widgets\ActivityLogTable;
+use App\Filament\Widgets\UserStatsOverview;
 use CharrafiMed\GlobalSearchModal\GlobalSearchModalPlugin;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\Authenticate;
@@ -46,8 +48,10 @@ class AdminPanelProvider extends PanelProvider
       ])
       ->databaseNotifications()
       ->sidebarCollapsibleOnDesktop()
-      ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
+      // ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
       ->widgets([
+        UserStatsOverview::class,
+        ActivityLogTable::class,
       ])
       ->middleware([
         EncryptCookies::class,

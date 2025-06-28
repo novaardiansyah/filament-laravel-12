@@ -60,4 +60,16 @@ jobs:
             php artisan route:cache
             php artisan view:cache
             php artisan event:cache
+    
+      - name: SSH Restart Artisan Workers
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.GH_SERVER_HOST }}
+          username: ${{ secrets.GH_SERVER_USER }}
+          key: ${{ secrets.GH_SERVER_SSH_KEY }}
+          port: ${{ secrets.GH_SERVER_PORT }}
+          script: |
+            cd ${{ secrets.GH_SERVER_PATH }}
+            php artisan queue:restart
+            php artisan schedule:restart
             

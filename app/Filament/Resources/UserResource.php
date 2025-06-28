@@ -192,6 +192,7 @@ class UserResource extends Resource
       ->headerActions([
         ExportAction::make()->exports([
           ExcelExport::make('table')->fromTable()
+            ->askForFilename('Users')
             ->except(['index', 'avatar_url'])
             ->queue(),
         ])

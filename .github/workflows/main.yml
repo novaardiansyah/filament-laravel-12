@@ -70,6 +70,5 @@ jobs:
           port: ${{ secrets.GH_SERVER_PORT }}
           script: |
             cd ${{ secrets.GH_SERVER_PATH }}
-            php artisan queue:restart
-            php artisan schedule:restart
-            
+            sh ./app/CronJob/queue.sh
+            sh ./app/CronJob/schedule.sh

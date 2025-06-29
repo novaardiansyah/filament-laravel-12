@@ -3,10 +3,12 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserResource\Pages;
+use App\Jobs\UserResource\MakePdfJob;
 use App\Models\User;
 use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Enums\FiltersLayout;
@@ -23,6 +25,7 @@ class UserResource extends Resource
   protected static ?string $navigationIcon = 'heroicon-o-user-group';
   protected static ?string $navigationGroup = 'Hak Akses';
   protected static ?int $navigationSort = 10;
+  protected static ?string $modelLabel = 'Pengguna';
 
   protected static ?string $recordTitleAttribute = 'name';
 
@@ -192,10 +195,23 @@ class UserResource extends Resource
       ->headerActions([
         ExportAction::make()->exports([
           ExcelExport::make('table')->fromTable()
-            ->askForFilename('Users')
             ->except(['index', 'avatar_url'])
             ->queue(),
-        ])
+        ]),
+
+        Tables\Actions\Action::make('print_pdf')
+          ->label('Cetak PDF')
+          ->color('primary')
+          ->icon('heroicon-o-printer')
+          ->action(function (): void {
+            MakePdfJob::dispatch(user: auth()->user());
+
+            Notification::make()
+              ->title('Cetak PDF dalam antrian')
+              ->body('Cetak PDF telah masuk antrian. Anda akan diberitahu ketika file siap diunduh.')
+              ->success()
+              ->send();
+          })
       ])
       ->bulkActions([
         Tables\Actions\BulkActionGroup::make([

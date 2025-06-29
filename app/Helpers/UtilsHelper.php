@@ -12,7 +12,7 @@ function carbonTranslatedFormat(string $date, string $format = 'd/m/Y H:i'): str
   return Carbon::parse($date)->translatedFormat($format);
 }
 
-function makePdf(string $filename, Model $user, Illuminate\Contracts\View\View $view): bool
+function makePdf(\Mpdf\Mpdf $mpdf, string $filename, Model $user): bool
 {
   $extension                = 'pdf';
   $directory                = 'filament-pdf';
@@ -20,8 +20,6 @@ function makePdf(string $filename, Model $user, Illuminate\Contracts\View\View $
   $filename                 = "{$filenameWithoutExtension}.{$extension}";
   $filepath                 = "{$directory}/{$filename}";
 
-  $mpdf = new \Mpdf\Mpdf();
-  $mpdf->WriteHTML($view);
   $mpdf->Output(storage_path("app/{$filepath}"), 'F');
 
   $fileUrl = URL::temporarySignedRoute(

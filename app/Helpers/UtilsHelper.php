@@ -12,7 +12,7 @@ function carbonTranslatedFormat(string $date, string $format = 'd/m/Y H:i'): str
   return Carbon::parse($date)->translatedFormat($format);
 }
 
-function makePdf(string $filename, Model $user, Illuminate\Contracts\View\View $view)
+function makePdf(string $filename, Model $user, Illuminate\Contracts\View\View $view): bool
 {
   $extension                = 'pdf';
   $directory                = 'filament-pdf';
@@ -44,4 +44,6 @@ function makePdf(string $filename, Model $user, Illuminate\Contracts\View\View $
         ->button()
     ])
     ->sendToDatabase($user);
+
+  return true;
 }

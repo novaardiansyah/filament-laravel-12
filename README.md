@@ -34,10 +34,10 @@ Need to chat? Feel free to drop me a line via [Email](mailto:novaardiansyah78@gm
 
 Get a glimpse of the app's enchanting world by exploring the current progress here. Stay tuned for screenshots and mockups!
 
-<img src="./public/preview/image-1.png" width="300" />
-<img src="./public/preview/image-2.png" width="300" />
-<img src="./public/preview/image-3.png" width="300" />
-<img src="./public/preview/image-4.png" width="300" />
+<img src="./public/preview/image-1.png" width="500" />
+<img src="./public/preview/image-2.png" width="500" />
+<img src="./public/preview/image-3.png" width="500" />
+<img src="./public/preview/image-4.png" width="500" />
 
 ## Project Status 🚀 
 

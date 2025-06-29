@@ -5,4 +5,6 @@ use Illuminate\Support\Facades\Route;
 
 Route::get("/", fn() => redirect("/admin"));
 
-Route::get('download/{path}/{extension}', [DownloadController::class, 'index'])->name('download');
+Route::get('download/{path}/{extension}', [DownloadController::class, 'index'])
+  ->name('download')
+  ->middleware('signed');

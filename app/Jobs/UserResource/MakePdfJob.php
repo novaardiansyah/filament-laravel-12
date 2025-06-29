@@ -21,12 +21,29 @@ class MakePdfJob implements ShouldQueue
   /**
    * Execute the job.
    */
-  public function handle(): void
+  public function handle(): bool
   {
-    $now  = now()->translatedFormat('d/m/Y H:i');
-    $data = User::with(['roles:id,name'])->get();
-    $view = view('UserResource.MakePdf', compact('data', 'now'));
+    $now = now()->translatedFormat('d/m/Y H:i');
+    
+    $rowIndex = 1;
+    $rowsView = '';
 
-    makePdf('users', $this->user, $view);
+    User::with(['roles:id,name'])->chunk(200, function ($users) use (&$rowIndex, &$rowsView) {
+      foreach ($users as $user) {
+        $rowsView .= view('UserResource.MakePdfRow', [
+          'item'      => $user,
+          'loopIndex' => $rowIndex++,
+        ])->render();
+      }
+    });
+
+    $view = view('UserResource.MakePdf', [
+      'rows' => $rowsView,
+      'now'  => $now,
+    ]);
+
+    $result = makePdf('users', $this->user, $view);
+
+    return $result;
   }
 }

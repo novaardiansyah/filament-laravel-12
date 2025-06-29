@@ -32,7 +32,7 @@ Need to chat? Feel free to drop me a line via [Email](mailto:novaardiansyah78@gm
 
 ## Sneak Peek 🌟
 
-Get a glimpse of the app's enchanting world by exploring the current progress here. Stay tuned for screenshots and mockups!
+Get a glimpse of the [app's](https://laravel-12.novaardiansyah.my.id) enchanting world by exploring the current progress here. Stay tuned for screenshots and mockups!
 
 <img src="./public/preview/image-1.png" width="500" />
 <img src="./public/preview/image-2.png" width="500" />

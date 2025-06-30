@@ -196,6 +196,7 @@ class UserResource extends Resource
         ExportAction::make()->exports([
           ExcelExport::make('table')->fromTable()
             ->except(['index', 'avatar_url'])
+            ->withChunkSize(200)
             ->queue(),
         ]),
 

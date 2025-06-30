@@ -32,10 +32,11 @@ class ActivityLogTable extends BaseWidget
           ->label('Jenis')
           ->badge()
           ->color(fn(string $state): string => match ($state) {
-            'Resource' => 'success',
-            'Access' => 'danger',
+            'Resource'     => 'success',
+            'Access'       => 'danger',
             'Notification' => 'primary',
-            'Model' => 'warning',
+            'Model'        => 'warning',
+            default        => 'primary',
           })
           ->sortable(),
         Tables\Columns\TextColumn::make('event')

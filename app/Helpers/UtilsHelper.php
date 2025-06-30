@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\ActivityLog;
 use Carbon\Carbon;
 use Ramsey\Uuid\Uuid;
 use Illuminate\Support\Facades\URL;
@@ -12,11 +13,11 @@ function carbonTranslatedFormat(string $date, string $format = 'd/m/Y H:i'): str
   return Carbon::parse($date)->translatedFormat($format);
 }
 
-function makePdf(\Mpdf\Mpdf $mpdf, string $filename, Model $user): bool
+function makePdf(\Mpdf\Mpdf $mpdf, string $name, Model $user): bool
 {
   $extension                = 'pdf';
   $directory                = 'filament-pdf';
-  $filenameWithoutExtension = Uuid::uuid4() . "-{$filename}";
+  $filenameWithoutExtension = Uuid::uuid4() . "-{$name}";
   $filename                 = "{$filenameWithoutExtension}.{$extension}";
   $filepath                 = "{$directory}/{$filename}";
 
@@ -42,6 +43,18 @@ function makePdf(\Mpdf\Mpdf $mpdf, string $filename, Model $user): bool
         ->button()
     ])
     ->sendToDatabase($user);
+
+  ActivityLog::create([
+    'log_name'    => 'Export',
+    'description' => "{$user->name} Export {$name}.{$extension}",
+    'event'       => 'Export PDF',
+    'causer_type' => 'App\Models\User',
+    'causer_id'   => $user->id,
+    'properties'  => [
+      'filepath'   => $filepath,
+      'signed_url' => $fileUrl,
+    ]
+  ]);
 
   return true;
 }

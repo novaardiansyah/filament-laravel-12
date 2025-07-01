@@ -45,7 +45,7 @@ jobs:
             cd ${{ secrets.GH_SERVER_PATH }}
             php artisan migrate --force
 
-      - name: SSH Artisan Optimize
+      - name: SSH Artisan Optimize and Prepare
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.GH_SERVER_HOST }}
@@ -55,6 +55,8 @@ jobs:
           script: |
             cd ${{ secrets.GH_SERVER_PATH }}
             php artisan optimize:clear
+            chmod +x ./deploy/expect/shield-generate.sh
+            ./deploy/expect/shield-generate.sh
             php artisan filament:optimize
             php artisan config:cache
             php artisan route:cache
@@ -72,14 +74,3 @@ jobs:
             cd ${{ secrets.GH_SERVER_PATH }}
             sudo supervisorctl restart ${{ secrets.GH_SERVER_SUPERVISOR_PREFIX }}-queue 
             sudo supervisorctl restart ${{ secrets.GH_SERVER_SUPERVISOR_PREFIX }}-schedule
-
-      - name: SSH Execute Custom Script
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.GH_SERVER_HOST }}
-          username: ${{ secrets.GH_SERVER_USER }}
-          key: ${{ secrets.GH_SERVER_SSH_KEY }}
-          port: ${{ secrets.GH_SERVER_PORT }}
-          script: |
-            cd ${{ secrets.GH_SERVER_PATH }}
-            ./deploy/expect/shield-generate.sh

@@ -73,8 +73,7 @@ class UserResource extends Resource
               ->label('Foto Profil')
               ->directory('images/profile')
               ->image()
-              ->imageEditor()
-              ->disk('s3'),
+              ->imageEditor(),
           ]),
 
         Forms\Components\Section::make()
@@ -101,8 +100,7 @@ class UserResource extends Resource
           ->label('Foto Profil')
           ->circular()
           ->size(40)
-          ->toggleable()
-          ->disk('s3'),
+          ->toggleable(),
         Tables\Columns\TextColumn::make('name')
           ->label('Nama Lengkap')
           ->searchable()

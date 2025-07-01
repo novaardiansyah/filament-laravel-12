@@ -10,6 +10,7 @@ use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Support\Enums\MaxWidth;
 use Filament\Tables;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\Indicator;
@@ -73,7 +74,9 @@ class UserResource extends Resource
               ->label('Foto Profil')
               ->directory('images/profile')
               ->image()
-              ->imageEditor(),
+              ->imageEditor()
+              ->enableOpen()
+              ->enableDownload(),
           ]),
 
         Forms\Components\Section::make()
@@ -183,6 +186,11 @@ class UserResource extends Resource
       ])
       ->actions([
         Tables\Actions\ActionGroup::make([
+          Tables\Actions\ViewAction::make()
+            ->color('info')
+            ->modalWidth(MaxWidth::SixExtraLarge)
+            ->slideOver(),
+
           Tables\Actions\EditAction::make()
             ->color('primary'),
 

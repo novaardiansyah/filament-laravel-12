@@ -71,10 +71,10 @@ class UserResource extends Resource
 
             Forms\Components\FileUpload::make('avatar_url')
               ->label('Foto Profil')
-              ->disk('public')
               ->directory('images/profile')
               ->image()
-              ->imageEditor(),
+              ->imageEditor()
+              ->disk('s3'),
           ]),
 
         Forms\Components\Section::make()
@@ -101,7 +101,8 @@ class UserResource extends Resource
           ->label('Foto Profil')
           ->circular()
           ->size(40)
-          ->toggleable(),
+          ->toggleable()
+          ->disk('s3'),
         Tables\Columns\TextColumn::make('name')
           ->label('Nama Lengkap')
           ->searchable()

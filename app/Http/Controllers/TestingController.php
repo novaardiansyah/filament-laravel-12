@@ -19,7 +19,7 @@ class TestingController extends Controller
     $extension = $file->getClientOriginalExtension();
 
     $res = Storage::disk('s3')->putFileAs(
-      'avatars',
+      'images/profile',
       $file,
       now()->format('YmdHis') . '.' . $extension,
       [

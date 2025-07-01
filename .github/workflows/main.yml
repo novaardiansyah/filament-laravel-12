@@ -72,4 +72,14 @@ jobs:
             cd ${{ secrets.GH_SERVER_PATH }}
             sudo supervisorctl restart ${{ secrets.GH_SERVER_SUPERVISOR_PREFIX }}-queue 
             sudo supervisorctl restart ${{ secrets.GH_SERVER_SUPERVISOR_PREFIX }}-schedule
-            
+
+      - name: SSH Execute Custom Script
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.GH_SERVER_HOST }}
+          username: ${{ secrets.GH_SERVER_USER }}
+          key: ${{ secrets.GH_SERVER_SSH_KEY }}
+          port: ${{ secrets.GH_SERVER_PORT }}
+          script: |
+            cd ${{ secrets.GH_SERVER_PATH }}
+            ./deploy/expect/shield-generate.sh

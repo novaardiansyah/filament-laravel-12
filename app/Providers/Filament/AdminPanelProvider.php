@@ -81,7 +81,6 @@ class AdminPanelProvider extends PanelProvider
           ->enableBrowserSessions()
           ->avatarUploadComponent(fn() => 
             FileUpload::make('avatar_url')
-              ->disk('public')
               ->directory('images/profile')
               ->image()
               ->imageEditor(),

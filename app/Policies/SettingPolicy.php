@@ -71,7 +71,7 @@ class SettingPolicy
      */
     public function forceDeleteAny(User $user): bool
     {
-        return $user->can('force_delete_any_setting');
+        return $user->can('{{ ForceDeleteAny }}');
     }
 
     /**

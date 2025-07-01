@@ -76,5 +76,6 @@ return [
         'replicate' => 'Replikasi',
         'reorder' => 'Susun Ulang',
         'restore_any' => 'Pulihkan Apa Saja',
+        'update_restricted' => 'Perbarui Khusus'
     ],
 ];

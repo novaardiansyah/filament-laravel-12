@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use App\Filament\Widgets\ActivityLogTable;
 use App\Filament\Widgets\UserStatsOverview;
+use App\Models\Setting;
 use CharrafiMed\GlobalSearchModal\GlobalSearchModalPlugin;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\Authenticate;
@@ -30,6 +31,7 @@ class AdminPanelProvider extends PanelProvider
   {
     return $panel
       ->default()
+      ->brandName(fn () => Setting::where('key', 'site_name')->first()?->value ?? 'Aplikasi')
       ->id('admin')
       ->path('admin')
       ->login()
@@ -38,9 +40,12 @@ class AdminPanelProvider extends PanelProvider
       ->emailVerification()
       ->profile()
       ->favicon(asset('favicon.ico'))
-      ->colors([
-        'primary' => Color::Cyan,
-      ])
+      ->colors(function () {
+        $color = Setting::where('key', 'site_theme')->first()?->value ?? 'Cyan';
+        return [
+          'primary' => Color::{$color}
+        ];
+      })
       ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
       ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
       ->pages([
@@ -84,7 +89,8 @@ class AdminPanelProvider extends PanelProvider
               ->directory('images/profile')
               ->image()
               ->imageEditor()
-              ->enableOpen(),
+              ->enableOpen()
+              ->enableDownload(),
           ),
           GlobalSearchModalPlugin::make()
       ])

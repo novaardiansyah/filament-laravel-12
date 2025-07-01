@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\SettingResource\Pages;
 use App\Models\Setting;
+use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -13,7 +14,7 @@ use Filament\Tables\Table;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
 use pxlrbt\FilamentExcel\Exports\ExcelExport;
 
-class SettingResource extends Resource 
+class SettingResource extends Resource implements HasShieldPermissions
 {
   protected static ?string $model = Setting::class;
 
@@ -24,20 +25,82 @@ class SettingResource extends Resource
   protected static ?string $pluralModelLabel = 'Aplikasi';
   protected static ?string $recordTitleAttribute = 'name';
 
+  public static function getPermissionPrefixes(): array
+  {
+    return [
+      'view',
+      'view_any',
+      'create',
+      'update',
+      'restore',
+      'restore_any',
+      'replicate',
+      'reorder',
+      'delete',
+      'delete_any',
+      'force_delete',
+      'update_restricted',
+    ];
+  }
+
+  public static function canUpdateRestrictedSetting(): bool
+  {
+    static $condition;
+
+    if ($condition === null) {
+      $condition = auth()->user() && auth()->user()->can('update_restricted_setting');
+    }
+
+    return $condition;
+  }
+
   public static function form(Form $form): Form
   {
     return $form
       ->schema([
         Forms\Components\Section::make()
-          ->description('Informasi akun pengguna')
+          ->description('Pengaturan umum aplikasi')
           ->collapsible()
           ->columns(1)
+          ->columnSpan(2)
+          ->schema([
+            Forms\Components\Textarea::make('value')
+              ->label('Nilai')
+              ->required()
+              ->rows(3)
+              ->visible(fn(Forms\Get $get) => !$get('has_options'))
+              ->maxLength(255),
+
+            Forms\Components\Select::make('value_option')
+              ->label('Pilihan nilai')
+              ->required()
+              ->visible(fn(Forms\Get $get) => $get('has_options'))
+              ->native(false)
+              ->searchable()
+              ->options(function (Forms\Get $get) {
+                $options = $get('options') ?? [];
+                return collect($options)->mapWithKeys(function ($option) {
+                  return [$option => $option];
+                });
+              }),
+
+            Forms\Components\Textarea::make('description')
+              ->label('Keterangan')
+              ->maxLength(1000)
+              ->rows(4)
+              ->placeholder('Masukkan keterangan pengaturan ini'),
+          ]),
+
+        Forms\Components\Section::make()
+          ->description('Pengaturan tambahan')
+          ->collapsible()
           ->columnSpan(2)
           ->schema([
             Forms\Components\TextInput::make('name')
               ->label('Nama pengaturan')
               ->required()
               ->live(debounce: 1000)
+              ->readOnly(!static::canUpdateRestrictedSetting())
               ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
                 $name = $get('name');
                 if ($name) {
@@ -52,52 +115,22 @@ class SettingResource extends Resource
               ->maxLength(255)
               ->unique(ignoreRecord: true)
               ->regex('/^[a-zA-Z0-9_]+$/')
-              ->readOnly()
+              ->readOnly(!static::canUpdateRestrictedSetting())
               ->helperText('Hanya boleh menggunakan huruf, angka, dan garis bawah. Contoh: site_name, max_upload_size'),
 
-            Forms\Components\Textarea::make('value')
-              ->label('Nilai')
-              ->required()
-              ->rows(4)
-              ->visible(fn (Forms\Get $get) => !$get('has_options'))
-              ->maxLength(255),
-
-            Forms\Components\Select::make('value_option')
-              ->label('Pilihan nilai')
-              ->required()
-              ->visible(fn (Forms\Get $get) => $get('has_options'))
-              ->native(false)
-              ->searchable()
-              ->options(function (Forms\Get $get) {
-                $options = $get('options') ?? [];
-                return collect($options)->mapWithKeys(function ($option) {
-                  return [$option => $option];
-                });
-              })
-          ]),
-
-        Forms\Components\Section::make()
-          ->description('Informasi tambahan')
-          ->collapsible()
-          ->columnSpan(2)
-          ->schema([
             Forms\Components\Toggle::make('has_options')
               ->label('Punya opsi nilai')
-              ->live(debounce: 1000),
+              ->live(debounce: 1000)
+              ->visible(static::canUpdateRestrictedSetting()),
 
             Forms\Components\TagsInput::make('options')
               ->label('Opsi nilai')
               ->placeholder('Masukkan opsi nilai, pisahkan dengan koma')
               ->separator(',')
-              ->visible(fn (Forms\Get $get) => $get('has_options'))
+              ->visible(fn(Forms\Get $get) => $get('has_options'))
               ->live(debounce: 1000)
-              ->helperText('Gunakan ini jika pengaturan ini memiliki beberapa opsi nilai. Contoh: "Cyan, Neutral, Zinc, etc."'),
-
-            Forms\Components\Textarea::make('description')
-              ->label('Keterangan')
-              ->maxLength(1000)
-              ->rows(4)
-              ->placeholder('Masukkan keterangan pengaturan ini'),
+              ->helperText('Gunakan ini jika pengaturan ini memiliki beberapa opsi nilai. Contoh: "Cyan, Neutral, Zinc, etc."')
+              ->visible(static::canUpdateRestrictedSetting()),
           ])
       ])
       ->columns(4);
@@ -159,7 +192,7 @@ class SettingResource extends Resource
           Tables\Actions\ViewAction::make()
             ->color('info')
             ->slideOver(),
-          
+
           Tables\Actions\EditAction::make()
             ->color('primary'),
 

@@ -19,17 +19,32 @@ class EditSetting extends EditRecord
 
   protected function mutateFormDataBeforeSave(array $data): array
   {
-    if ($data['has_options']) {
+    $record = $this->getRecord();
+
+    if ($data['has_options'] ?? $record->has_options) {
       $data['value'] = $data['value_option'];
     }
+
+    $options = $data['options'] ?? $record->options;
+
+    if (is_string($options)) {
+      $options = array_map('trim', explode(',', $options));
+      sort($options);
+      $options = implode(',', $options);
+      $data['options'] = $options;
+    }
+
     return $data;
   }
 
   protected function mutateFormDataBeforeFill(array $data): array
   {
-    if ($data['has_options']) {
+    $record = $this->getRecord();
+
+    if ($data['has_options'] ?? $record->has_options) {
       $data['value_option'] = $data['value'];
     }
+
     return $data;
   }
 

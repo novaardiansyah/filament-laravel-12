@@ -12,7 +12,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: SSH Pull Latest Code
+      - name: SSH Deploy Application
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.GH_SERVER_HOST }}
@@ -22,38 +22,8 @@ jobs:
           script: |
             cd ${{ secrets.GH_SERVER_PATH }}
             git pull origin main
-
-      - name: SSH Composer Install
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.GH_SERVER_HOST }}
-          username: ${{ secrets.GH_SERVER_USER }}
-          key: ${{ secrets.GH_SERVER_SSH_KEY }}
-          port: ${{ secrets.GH_SERVER_PORT }}
-          script: |
-            cd ${{ secrets.GH_SERVER_PATH }}
             composer install --no-interaction --prefer-dist --optimize-autoloader
-      
-      - name: SSH Artisan Migrate
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.GH_SERVER_HOST }}
-          username: ${{ secrets.GH_SERVER_USER }}
-          key: ${{ secrets.GH_SERVER_SSH_KEY }}
-          port: ${{ secrets.GH_SERVER_PORT }}
-          script: |
-            cd ${{ secrets.GH_SERVER_PATH }}
             php artisan migrate --force
-
-      - name: SSH Artisan Optimize and Prepare
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.GH_SERVER_HOST }}
-          username: ${{ secrets.GH_SERVER_USER }}
-          key: ${{ secrets.GH_SERVER_SSH_KEY }}
-          port: ${{ secrets.GH_SERVER_PORT }}
-          script: |
-            cd ${{ secrets.GH_SERVER_PATH }}
             php artisan optimize:clear
             chmod +x ./deploy/expect/shield-generate.sh
             ./deploy/expect/shield-generate.sh
@@ -62,15 +32,5 @@ jobs:
             php artisan route:cache
             php artisan view:cache
             php artisan event:cache
-
-      - name: SSH Supervisor Restart
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.GH_SERVER_HOST }}
-          username: ${{ secrets.GH_SERVER_USER }}
-          key: ${{ secrets.GH_SERVER_SSH_KEY }}
-          port: ${{ secrets.GH_SERVER_PORT }}
-          script: |
-            cd ${{ secrets.GH_SERVER_PATH }}
             sudo supervisorctl restart ${{ secrets.GH_SERVER_SUPERVISOR_PREFIX }}-queue 
             sudo supervisorctl restart ${{ secrets.GH_SERVER_SUPERVISOR_PREFIX }}-schedule

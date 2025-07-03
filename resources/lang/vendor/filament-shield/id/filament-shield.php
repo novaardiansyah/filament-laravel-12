@@ -34,8 +34,8 @@ return [
     'nav.group' => 'Pengaturan',
     'nav.role.label' => 'Hak Akses',
     'nav.role.icon' => 'heroicon-o-shield-check',
-    'resource.label.role' => 'Role',
-    'resource.label.roles' => 'Role',
+    'resource.label.role' => 'Hak Akses',
+    'resource.label.roles' => 'Hak Akses',
 
     /*
     |--------------------------------------------------------------------------

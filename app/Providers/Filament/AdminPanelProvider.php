@@ -100,8 +100,14 @@ class AdminPanelProvider extends PanelProvider
           ),
           GlobalSearchModalPlugin::make()
       ])
+    ->navigationGroups([
+      'Pengguna',
+      'Keuangan',
+      'Pengaturan',
+    ])
     ->navigationItems([
       NavigationItem::make('Profil Saya')
+        ->group('Pengguna')
         ->url(uri(url('admin/my-profile')))
         ->icon('heroicon-o-user')
         ->isActiveWhen(fn () => request()->is('admin/my-profile*'))

@@ -1,0 +1,36 @@
+name: Deploy Production Application to Server
+
+on:
+  push:
+    branches: [production]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: SSH Deploy Application
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.GH_SERVER_HOST_1 }}
+          username: ${{ secrets.GH_SERVER_USER }}
+          key: ${{ secrets.GH_SERVER_SSH_KEY }}
+          port: ${{ secrets.GH_SERVER_PORT }}
+          script: |
+            cd ${{ secrets.GH_SERVER_PATH_1 }}
+            git pull origin main
+            composer install --no-interaction --prefer-dist --optimize-autoloader
+            php artisan migrate --force
+            php artisan optimize:clear
+            chmod +x ./deploy/expect/shield-generate.sh
+            ./deploy/expect/shield-generate.sh
+            php artisan filament:optimize
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+            php artisan event:cache
+            sudo supervisorctl restart ${{ secrets.GH_SERVER_SUPERVISOR_PREFIX_1 }}-queue 
+            sudo supervisorctl restart ${{ secrets.GH_SERVER_SUPERVISOR_PREFIX_1 }}-schedule

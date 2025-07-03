@@ -35,8 +35,14 @@ class AdminPanelProvider extends PanelProvider
       ->id('admin')
       ->path('admin')
       ->login()
-      ->registration()
-      ->passwordReset()
+      ->when(
+        Setting::where('key', 'site_registration')->first()?->value === 'Ya',
+        fn ($panel) => $panel->registration()
+      )
+      ->when(
+        Setting::where('key', 'site_password_reset')->first()?->value === 'Ya',
+        fn ($panel) => $panel->passwordReset()
+      )
       ->emailVerification()
       ->profile()
       ->favicon(asset('favicon.ico'))

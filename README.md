@@ -32,13 +32,27 @@ Need to chat? Feel free to drop me a line via [Email](mailto:novaardiansyah78@gm
 
 ## Sneak Peek 🌟
 
-Get a glimpse of the [app's](https://laravel-12.novaardiansyah.my.id) enchanting world by exploring the current progress here. Stay tuned for screenshots and mockups!
+Get a glimpse of the [app's](https://laravel-12.novaardiansyah.my.id) enchanting world by exploring the current progress here. 
 
 <img src="./public/preview/image-1.png" width="500" />
 <img src="./public/preview/image-5.png" width="500" />
 <img src="./public/preview/image-3.png" width="500" />
 <img src="./public/preview/image-4.png" width="500" />
 <img src="./public/preview/image-6.png" width="500" />
+
+## Demo Credentials 🧪
+
+You can try out the [demo version](https://laravel-12.novaardiansyah.my.id) using the following credentials, or create your own account:
+
+#### Super Admin
+- **Email:** `demo_sa@novadev.my.id`
+- **Password:** `eoNRv4EycUenK1kSFxmTfUZxGKN31R8Q`
+
+#### User
+- **Email:** `demo_user@novadev.my.id`
+- **Password:** `v77hVChH7K4VXHv9gfkVY8pFkV4Ixw1s`
+
+> **Important:** The demo environment is reset periodically. Any changes you make may be reverted to maintain a clean testing experience for everyone. If you encounter any issues or have questions, feel free to reach out!
 
 ## Project Status 🚀 
 

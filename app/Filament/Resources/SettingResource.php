@@ -59,6 +59,48 @@ class SettingResource extends Resource implements HasShieldPermissions
     return $form
       ->schema([
         Forms\Components\Section::make()
+          ->description('Pengaturan tambahan')
+          ->collapsible()
+          ->columnSpan(2)
+          ->schema([
+            Forms\Components\TextInput::make('name')
+              ->label('Nama pengaturan')
+              ->required()
+              ->live(onBlur: true)
+              ->readOnly(!static::canUpdateRestrictedSetting())
+              ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
+                $name = $get('name');
+                if ($name) {
+                  $key = strtolower(str_replace(' ', '_', $name));
+                  $set('key', $key);
+                }
+              }),
+
+            Forms\Components\TextInput::make('key')
+              ->label('Alias')
+              ->required()
+              ->maxLength(255)
+              ->unique(ignoreRecord: true)
+              ->regex('/^[a-zA-Z0-9_]+$/')
+              ->readOnly(!static::canUpdateRestrictedSetting())
+              ->helperText('Hanya boleh menggunakan huruf, angka, dan garis bawah. Contoh: site_name, max_upload_size'),
+
+            Forms\Components\Toggle::make('has_options')
+              ->label('Punya opsi nilai')
+              ->live()
+              ->visible(static::canUpdateRestrictedSetting()),
+
+            Forms\Components\TagsInput::make('options')
+              ->label('Opsi nilai')
+              ->placeholder('Masukkan opsi nilai, pisahkan dengan koma')
+              ->separator(',')
+              ->visible(fn(Forms\Get $get) => $get('has_options'))
+              ->live(onBlur: true)
+              ->helperText('Tekan Enter untuk menambahkan opsi baru')
+              ->visible(static::canUpdateRestrictedSetting()),
+            ]),
+
+        Forms\Components\Section::make()
           ->description('Pengaturan umum aplikasi')
           ->collapsible()
           ->columns(1)
@@ -89,48 +131,6 @@ class SettingResource extends Resource implements HasShieldPermissions
               ->maxLength(1000)
               ->rows(4)
               ->placeholder('Masukkan keterangan pengaturan ini'),
-          ]),
-
-        Forms\Components\Section::make()
-          ->description('Pengaturan tambahan')
-          ->collapsible()
-          ->columnSpan(2)
-          ->schema([
-            Forms\Components\TextInput::make('name')
-              ->label('Nama pengaturan')
-              ->required()
-              ->live(debounce: 1000)
-              ->readOnly(!static::canUpdateRestrictedSetting())
-              ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
-                $name = $get('name');
-                if ($name) {
-                  $key = strtolower(str_replace(' ', '_', $name));
-                  $set('key', $key);
-                }
-              }),
-
-            Forms\Components\TextInput::make('key')
-              ->label('Alias')
-              ->required()
-              ->maxLength(255)
-              ->unique(ignoreRecord: true)
-              ->regex('/^[a-zA-Z0-9_]+$/')
-              ->readOnly(!static::canUpdateRestrictedSetting())
-              ->helperText('Hanya boleh menggunakan huruf, angka, dan garis bawah. Contoh: site_name, max_upload_size'),
-
-            Forms\Components\Toggle::make('has_options')
-              ->label('Punya opsi nilai')
-              ->live(debounce: 1000)
-              ->visible(static::canUpdateRestrictedSetting()),
-
-            Forms\Components\TagsInput::make('options')
-              ->label('Opsi nilai')
-              ->placeholder('Masukkan opsi nilai, pisahkan dengan koma')
-              ->separator(',')
-              ->visible(fn(Forms\Get $get) => $get('has_options'))
-              ->live(debounce: 1000)
-              ->helperText('Gunakan ini jika pengaturan ini memiliki beberapa opsi nilai. Contoh: "Cyan, Neutral, Zinc, etc."')
-              ->visible(static::canUpdateRestrictedSetting()),
           ])
       ])
       ->columns(4);

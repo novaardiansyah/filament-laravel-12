@@ -13,6 +13,22 @@ function carbonTranslatedFormat(string $date, string $format = 'd/m/Y H:i'): str
   return Carbon::parse($date)->translatedFormat($format);
 }
 
+function toIndonesianCurrency(float $number = 0, int $precision = 0, string $currency = 'Rp', bool $showCurrency = true)
+{
+  $result = 0;
+
+  if ($number < 0) {
+    $result = '-' . $currency . number_format(abs($number), $precision, ',', '.');
+  } else {
+    $result = $currency . number_format($number, $precision, ',', '.');
+  }
+
+  if ($showCurrency) return $result;
+
+  $replace = str_replace(range(0, 9), '-', $result);
+  return $replace;
+}
+
 function makePdf(\Mpdf\Mpdf $mpdf, string $name, Model $user): bool
 {
   $extension                = 'pdf';

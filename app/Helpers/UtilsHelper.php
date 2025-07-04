@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\ActivityLog;
+use App\Models\Generate;
 use Carbon\Carbon;
 use Ramsey\Uuid\Uuid;
 use Illuminate\Support\Facades\URL;
@@ -73,4 +74,34 @@ function makePdf(\Mpdf\Mpdf $mpdf, string $name, Model $user): bool
   ]);
 
   return true;
+}
+
+function getCode(int $id, bool $isNotPreview = true)
+{
+  $genn = Generate::find($id);
+  if (!$genn) return 'ER00001';
+
+  $date = now()->translatedFormat('ymd');
+  $separator = Carbon::createFromFormat('ymd', $genn->separator)->translatedFormat('ymd');
+
+  if ($genn->queue == 9999 || (substr($date, 0, 4) != substr($separator, 0, 4))) {
+    $genn->queue = 1;
+    $genn->separator = $date;
+  }
+
+  $queue = substr($date, 0, 4) . str_pad($genn->queue, 4, '0', STR_PAD_LEFT) . substr($date, 4, 2);
+
+  if ($genn->prefix) $queue = $genn->prefix . $queue;
+  if ($genn->suffix) $queue .= $genn->suffix;
+
+  if ($isNotPreview) {
+    $genn->queue += 1;
+    $genn->save();
+  } else {
+    if ($genn->isDirty()) {
+      $genn->save();
+    }
+  }
+
+  return $queue;
 }

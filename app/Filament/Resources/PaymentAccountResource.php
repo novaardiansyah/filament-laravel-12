@@ -33,7 +33,7 @@ class PaymentAccountResource extends Resource
     static $condition;
 
     if ($condition === null) {
-      $condition = Setting::where('key', 'show_payment_currency')->first()?->value === 'Ya';
+      $condition = Setting::showPaymentCurrency();
     }
 
     return $condition;

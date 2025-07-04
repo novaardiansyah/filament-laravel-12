@@ -103,6 +103,7 @@ class AdminPanelProvider extends PanelProvider
     ->navigationGroups([
       'Pengguna',
       'Keuangan',
+      'Master Data',
       'Pengaturan',
     ])
     ->navigationItems([

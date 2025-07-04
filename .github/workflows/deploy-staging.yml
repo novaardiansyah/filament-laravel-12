@@ -21,7 +21,9 @@ jobs:
           port: ${{ secrets.GH_SERVER_PORT }}
           script: |
             cd ${{ secrets.GH_SERVER_PATH }}
-            git pull origin main
+            git fetch origin
+            git checkout staging
+            git pull origin staging
             php artisan optimize:clear
             composer install --no-interaction --prefer-dist --optimize-autoloader
             php artisan migrate --force

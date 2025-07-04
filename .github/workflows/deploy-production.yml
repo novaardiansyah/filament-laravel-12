@@ -21,10 +21,12 @@ jobs:
           port: ${{ secrets.GH_SERVER_PORT }}
           script: |
             cd ${{ secrets.GH_SERVER_PATH_1 }}
-            git pull origin main
+            git fetch origin
+            git checkout production
+            git pull origin production
+            php artisan optimize:clear
             composer install --no-interaction --prefer-dist --optimize-autoloader
             php artisan migrate --force
-            php artisan optimize:clear
             chmod +x ./deploy/expect/shield-generate.sh
             ./deploy/expect/shield-generate.sh
             php artisan filament:optimize

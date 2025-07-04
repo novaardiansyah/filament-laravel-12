@@ -13,4 +13,9 @@ class Setting extends Model
     'has_options' => 'boolean',
     'options'     => 'array',
   ];
+
+  public static function showPaymentCurrency(): bool
+  {
+    return Setting::where('key', 'show_payment_currency')->first()?->value === 'Ya';
+  }
 }

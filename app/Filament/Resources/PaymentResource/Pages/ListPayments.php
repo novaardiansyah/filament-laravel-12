@@ -29,8 +29,6 @@ class ListPayments extends ListRecords
         ->modifyQueryUsing(fn ($query) => $query->where('type_id', 3)),
       'Tarik Tunai' => Tab::make()
         ->modifyQueryUsing(fn ($query) => $query->where('type_id', 4)),
-      'Deleted' => Tab::make()
-        ->modifyQueryUsing(fn ($query) => $query->onlyTrashed()),
       'All' => Tab::make(),
     ]; 
   }

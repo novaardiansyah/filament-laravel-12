@@ -31,17 +31,17 @@ class AdminPanelProvider extends PanelProvider
   {
     return $panel
       ->default()
-      ->brandName(fn () => Setting::where('key', 'site_name')->first()?->value ?? 'Aplikasi')
+      ->brandName(fn() => Setting::where('key', 'site_name')->first()?->value ?? 'Aplikasi')
       ->id('admin')
       ->path('admin')
       ->login()
       ->when(
         Setting::where('key', 'site_registration')->first()?->value === 'Ya',
-        fn ($panel) => $panel->registration()
+        fn($panel) => $panel->registration()
       )
       ->when(
         Setting::where('key', 'site_password_reset')->first()?->value === 'Ya',
-        fn ($panel) => $panel->passwordReset()
+        fn($panel) => $panel->passwordReset()
       )
       ->emailVerification()
       ->profile()
@@ -82,7 +82,23 @@ class AdminPanelProvider extends PanelProvider
         config('filament-logger.activity_resource')
       ])
       ->plugins([
-        FilamentShieldPlugin::make(),
+        FilamentShieldPlugin::make()
+          ->gridColumns([
+            'default' => 1,
+            'sm'      => 2,
+            'lg'      => 2
+          ])
+          ->sectionColumnSpan(1)
+          ->checkboxListColumns([
+            'default' => 1,
+            'sm'      => 2,
+            'lg'      => 4,
+          ])
+          ->resourceCheckboxListColumns([
+            'default' => 1,
+            'sm'      => 2,
+          ]),
+
         BreezyCore::make()
           ->myProfile(
             shouldRegisterUserMenu: true,
@@ -90,7 +106,8 @@ class AdminPanelProvider extends PanelProvider
           )
           ->enableTwoFactorAuthentication()
           ->enableBrowserSessions()
-          ->avatarUploadComponent(fn() => 
+          ->avatarUploadComponent(
+            fn() =>
             FileUpload::make('avatar_url')
               ->directory('images/profile')
               ->image()
@@ -98,20 +115,20 @@ class AdminPanelProvider extends PanelProvider
               ->enableOpen()
               ->enableDownload(),
           ),
-          GlobalSearchModalPlugin::make()
+        GlobalSearchModalPlugin::make()
       ])
-    ->navigationGroups([
-      'Pengguna',
-      'Keuangan',
-      'Master Data',
-      'Pengaturan',
-    ])
-    ->navigationItems([
-      NavigationItem::make('Profil Saya')
-        ->group('Pengguna')
-        ->url(uri(url('admin/my-profile')))
-        ->icon('heroicon-o-user')
-        ->isActiveWhen(fn () => request()->is('admin/my-profile*'))
-    ]);
+      ->navigationGroups([
+        'Pengguna',
+        'Keuangan',
+        'Master Data',
+        'Pengaturan',
+      ])
+      ->navigationItems([
+        NavigationItem::make('Profil Saya')
+          ->group('Pengguna')
+          ->url(uri(url('admin/my-profile')))
+          ->icon('heroicon-o-user')
+          ->isActiveWhen(fn() => request()->is('admin/my-profile*'))
+      ]);
   }
 }

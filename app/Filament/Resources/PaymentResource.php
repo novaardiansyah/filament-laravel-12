@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\PaymentResource\Pages;
 use App\Filament\Resources\PaymentResource\RelationManagers;
+use App\Filament\Resources\PaymentResource\RelationManagers\ItemsRelationManager;
 use App\Models\Payment;
 use App\Models\PaymentAccount;
 use App\Models\PaymentType;
@@ -29,6 +30,17 @@ class PaymentResource extends Resource
   protected static ?string $navigationGroup = 'Keuangan';
   protected static ?int $navigationSort = 20;
   protected static ?string $label = 'Keuangan';
+
+  protected static function showPaymentCurrency(): bool
+  {
+    static $condition;
+
+    if ($condition === null) {
+      $condition = Setting::showPaymentCurrency();
+    }
+
+    return $condition;
+  }
 
   public static function form(Form $form): Form
   {
@@ -148,17 +160,6 @@ class PaymentResource extends Resource
           ->columnSpan(1)
       ])
       ->columns(3);
-  }
-
-  protected static function showPaymentCurrency(): bool
-  {
-    static $condition;
-
-    if ($condition === null) {
-      $condition = Setting::showPaymentCurrency();
-    }
-
-    return $condition;
   }
 
   public static function table(Table $table): Table
@@ -331,7 +332,7 @@ class PaymentResource extends Resource
   public static function getRelations(): array
   {
     return [
-      //
+      ItemsRelationManager::class
     ];
   }
 

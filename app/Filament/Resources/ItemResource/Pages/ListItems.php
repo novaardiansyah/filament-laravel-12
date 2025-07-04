@@ -27,8 +27,7 @@ class ListItems extends ListRecords
         ->modifyQueryUsing(fn ($query) => $query->where('type_id', 2)),
       'Deleted' => Tab::make()
         ->modifyQueryUsing(fn ($query) => $query->onlyTrashed()),
-      'All' => Tab::make()
-        ->modifyQueryUsing(fn ($query) => $query),
+      'All' => Tab::make(),
     ]; 
   }
 }

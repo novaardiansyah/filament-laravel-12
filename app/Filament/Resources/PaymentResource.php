@@ -3,7 +3,6 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\PaymentResource\Pages;
-use App\Filament\Resources\PaymentResource\RelationManagers;
 use App\Filament\Resources\PaymentResource\RelationManagers\ItemsRelationManager;
 use App\Models\Payment;
 use App\Models\PaymentAccount;
@@ -19,8 +18,9 @@ use Filament\Tables\Filters\Indicator;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Storage;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
+use pxlrbt\FilamentExcel\Exports\ExcelExport;
 
 class PaymentResource extends Resource
 {
@@ -280,6 +280,14 @@ class PaymentResource extends Resource
             $filters['date']
           ])
           ->columns(1)
+      ])
+      ->headerActions([
+        ExportAction::make()->exports([
+          ExcelExport::make('table')->fromTable()
+            ->except(['index'])
+            ->withChunkSize(200)
+            ->queue(),
+        ]),
       ])
       ->actions([
         Tables\Actions\ActionGroup::make([

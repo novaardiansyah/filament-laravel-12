@@ -14,7 +14,9 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Http\Request;
 
 class ItemResource extends Resource
 {
@@ -41,30 +43,30 @@ class ItemResource extends Resource
     return $form
       ->schema([
         Forms\Components\Section::make('')
-        ->description('Informasi Produk & Layanan')
-        ->columns(1)
-        ->columnSpan(2)
-        ->schema([
-          Forms\Components\TextInput::make('name')
-            ->label('Nama Produk & Layanan')
-            ->required()
-            ->maxLength(255),
-          Forms\Components\TextInput::make('amount')
-            ->label('Harga (*satuan)')
-            ->required()
-            ->numeric()
-            ->minValue(0)
-            ->live(onBlur: true)
-            ->hint(fn (?string $state) => toIndonesianCurrency($state ?? 0)),
-          Forms\Components\Select::make('type.id')
-            ->label('Jenis')
-            ->required()
-            ->native(false)
-            ->searchable()
-            ->preload()
-            ->default(1)
-            ->relationship('type', 'name'),
-        ]),
+          ->description('Informasi Produk & Layanan')
+          ->columns(1)
+          ->columnSpan(2)
+          ->schema([
+            Forms\Components\TextInput::make('name')
+              ->label('Nama Produk & Layanan')
+              ->required()
+              ->maxLength(255),
+            Forms\Components\TextInput::make('amount')
+              ->label('Harga (*satuan)')
+              ->required()
+              ->numeric()
+              ->minValue(0)
+              ->live(onBlur: true)
+              ->hint(fn(?string $state) => toIndonesianCurrency($state ?? 0)),
+            Forms\Components\Select::make('type.id')
+              ->label('Jenis')
+              ->required()
+              ->native(false)
+              ->searchable()
+              ->preload()
+              ->default(1)
+              ->relationship('type', 'name'),
+          ]),
       ])->columns(3);
   }
 
@@ -89,8 +91,8 @@ class ItemResource extends Resource
         Tables\Columns\TextColumn::make('type.name')
           ->label('Jenis')
           ->badge()
-          ->color(fn ($state) => match ($state) {
-            'Produk'  => 'primary',
+          ->color(fn($state) => match ($state) {
+            'Produk' => 'primary',
             'Layanan' => 'info',
             default => 'secondary',
           })
@@ -119,32 +121,61 @@ class ItemResource extends Resource
       ->actions([
         Tables\Actions\ActionGroup::make([
           Tables\Actions\EditAction::make()
-            ->color('primary'),
+            ->color('primary')
+            ->hidden(fn($livewire) => $livewire->activeTab == 'Deleted'),
 
           Tables\Actions\DeleteAction::make()
-            // ->before(function($record, Tables\Actions\DeleteAction $actions): void {
-            //   if ($record->payments->isNotEmpty()) {
-            //     // ? Jika sudah digunakan transaksi
-            //     Notification::make()
-            //       ->title('Tidak dapat dihapus')
-            //       ->body('Barang ini sudah digunakan dalam transaksi sebelumnya')
-            //       ->danger()
-            //       ->send();
-            //     $actions->halt();
-            //   }
-            // })
             ->color('danger'),
 
-            Tables\Actions\ForceDeleteAction::make(),
-            Tables\Actions\RestoreAction::make(),
+          Tables\Actions\ForceDeleteAction::make()
+            ->before(function ($record, Tables\Actions\DeleteAction $actions): void {
+              if ($record->payments->isNotEmpty()) {
+                Notification::make()
+                  ->title('Tidak dapat dihapus')
+                  ->body(self::$label . ' ini sudah digunakan dalam transaksi keuangan.')
+                  ->danger()
+                  ->send();
+                $actions->cancel();
+              }
+            }),
+
+          Tables\Actions\RestoreAction::make(),
         ]),
       ])
       ->bulkActions([
         Tables\Actions\BulkActionGroup::make([
-          Tables\Actions\DeleteBulkAction::make(),
-          Tables\Actions\ForceDeleteBulkAction::make(),
-          Tables\Actions\RestoreBulkAction::make(),
-        ]),
+          Tables\Actions\DeleteBulkAction::make()
+            ->deselectRecordsAfterCompletion()
+            ->hidden(fn($livewire) => $livewire->activeTab == 'Deleted'),
+
+          Tables\Actions\ForceDeleteBulkAction::make()
+            ->deselectRecordsAfterCompletion()
+            ->hidden(fn($livewire) => $livewire->activeTab !== 'Deleted')
+            ->action(function (Collection $records) {
+              $hasPayments = false;
+
+              foreach ($records as $record) {
+                if ($record->payments->isNotEmpty()) {
+                  $hasPayments = true;
+                  continue;
+                }
+
+                $record->forceDelete();
+              }
+
+              if ($hasPayments) {
+                Notification::make()
+                  ->title('Tidak dapat dihapus')
+                  ->body('Beberapa ' . self::$label . ' ini sudah digunakan dalam transaksi keuangan.')
+                  ->warning()
+                  ->send();
+              }
+            }),
+
+          Tables\Actions\RestoreBulkAction::make()
+            ->deselectRecordsAfterCompletion()
+            ->hidden(fn($livewire) => $livewire->activeTab !== 'Deleted'),
+        ])
       ]);
   }
 

@@ -21,13 +21,13 @@ class ListItems extends ListRecords
   public function getTabs(): array
   {
     return [
+      'All' => Tab::make(),
       'Produk' => Tab::make()
         ->modifyQueryUsing(fn ($query) => $query->where('type_id', 1)),
       'Layanan' => Tab::make()
         ->modifyQueryUsing(fn ($query) => $query->where('type_id', 2)),
       'Deleted' => Tab::make()
         ->modifyQueryUsing(fn ($query) => $query->onlyTrashed()),
-      'All' => Tab::make(),
     ]; 
   }
 }

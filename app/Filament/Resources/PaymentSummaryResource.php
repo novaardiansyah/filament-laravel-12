@@ -254,7 +254,7 @@ class PaymentSummaryResource extends Resource
     if (!$month || !$year) return;
 
     if ((int) $month < 9) $month = "0{$month}";
-    $sync = PaymentSummary::setSync("{$month}{$year}");
+    $sync = PaymentSummary::getSync($month, $year);
 
     $set('initial_balance', $sync['initial_balance'] ?? 0);
     $set('total_income', $sync['total_income'] ?? 0);

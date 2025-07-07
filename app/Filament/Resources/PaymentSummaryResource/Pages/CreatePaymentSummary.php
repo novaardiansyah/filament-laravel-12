@@ -12,6 +12,12 @@ class CreatePaymentSummary extends CreateRecord
 {
   protected static string $resource = PaymentSummaryResource::class;
 
+  protected function getRedirectUrl(): string
+  {
+    $resource = static::getResource();
+    return $resource::getUrl('index');
+  }
+
   protected function mutateFormDataBeforeCreate(array $data): array
   {
     $year  = $data['year'];

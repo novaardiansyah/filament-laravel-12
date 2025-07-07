@@ -34,28 +34,14 @@ class PaymentSummary extends Model
   {
     $record = self::where('period', $period)->first();
 
-    $month = (int) substr($period, 0, 2);
+    $month = substr($period, 0, 2);
     $year  = (int) substr($period, 2, 4);
     $sync  = self::getSync($month, $year);
     
     if (!$sync) return $sync;
+    if (!$record) return $sync;
 
-    $save = [
-      'initial_balance' => $sync['initial_balance'],
-      'total_income'    => $sync['total_income'],
-      'total_expense'   => $sync['total_expense'],
-      'current_balance' => $sync['current_balance'],
-    ];
-
-    if (!$record) {
-      $record = self::create(array_merge($save, [
-        'period'          => $period,
-        'code'            => getCode(10),
-      ]));
-      return $record->toArray();
-    }
-
-    $record->update($save);
+    $record->update($sync);
     $record->refresh();
 
     return $record->toArray();

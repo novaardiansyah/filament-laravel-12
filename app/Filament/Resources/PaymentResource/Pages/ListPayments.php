@@ -21,6 +21,7 @@ class ListPayments extends ListRecords
   public function getTabs(): array
   {
     return [
+      'All' => Tab::make(),
       'Pengeluaran' => Tab::make()
         ->modifyQueryUsing(fn ($query) => $query->where('type_id', 1)),
       'Pemasukan' => Tab::make()
@@ -29,7 +30,6 @@ class ListPayments extends ListRecords
         ->modifyQueryUsing(fn ($query) => $query->where('type_id', 3)),
       'Tarik Tunai' => Tab::make()
         ->modifyQueryUsing(fn ($query) => $query->where('type_id', 4)),
-      'All' => Tab::make(),
     ]; 
   }
 }

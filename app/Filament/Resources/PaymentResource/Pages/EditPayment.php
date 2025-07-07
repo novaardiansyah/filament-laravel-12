@@ -20,13 +20,6 @@ class EditPayment extends EditRecord
     parent::refreshFormData(array_keys($this->record->toArray()));
   }
 
-  protected function getHeaderActions(): array
-  {
-    return [
-      Actions\DeleteAction::make(),
-    ];
-  }
-
   protected function getRedirectUrl(): string
   {
     $resource = static::getResource();

@@ -3,7 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\PaymentAccountResource\Pages;
-use App\Filament\Resources\PaymentAccountResource\RelationManagers;
+use App\Models\Payment;
 use App\Models\PaymentAccount;
 use App\Models\Setting;
 use Filament\Forms;
@@ -13,8 +13,6 @@ use Filament\Resources\Resource;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Storage;
 
 class PaymentAccountResource extends Resource
@@ -102,6 +100,7 @@ class PaymentAccountResource extends Resource
       ->filters([
         //
       ])
+      ->defaultSort('updated_at', 'desc')
       ->actions([
         Tables\Actions\ActionGroup::make([
           Tables\Actions\ViewAction::make()
@@ -144,35 +143,35 @@ class PaymentAccountResource extends Resource
                 ])
             ])
             ->action(function(PaymentAccount $record, array $data): void {
-              // $deposit = (int) $record->deposit;
-              // $deposit_to = (int) $data['deposit_to'];
+              $deposit = (int) $record->deposit;
+              $deposit_to = (int) $data['deposit_to'];
 
-              // $isDecrease = $deposit_to < $deposit;
-              // $selisih = $isDecrease ? $deposit - $deposit_to : $deposit_to - $deposit;
+              $isDecrease = $deposit_to < $deposit;
+              $selisih = $isDecrease ? $deposit - $deposit_to : $deposit_to - $deposit;
 
-              // Payment::create([
-              //   'code'               => getCode(1),
-              //   'name'               => "Audit akun kas {$record->name}",
-              //   'type_id'            => $isDecrease ? 1 : 2,
-              //   'user_id'            => auth()->id(),
-              //   'payment_account_id' => $record->id,
-              //   'amount'             => $selisih,
-              //   'income'             => $isDecrease ? null : $selisih,
-              //   'expense'            => $isDecrease ? $selisih : null,
-              //   'has_items'          => false,
-              //   'attachments'        => [],
-              //   'date'               => now()->format('Y-m-d'),
-              // ]);
+              Payment::create([
+                'code'               => getCode(1),
+                'name'               => "Audit akun kas {$record->name}",
+                'type_id'            => $isDecrease ? 1 : 2,
+                'user_id'            => auth()->id(),
+                'payment_account_id' => $record->id,
+                'amount'             => $selisih,
+                'income'             => $isDecrease ? null : $selisih,
+                'expense'            => $isDecrease ? $selisih : null,
+                'has_items'          => false,
+                'attachments'        => [],
+                'date'               => now()->format('Y-m-d'),
+              ]);
 
-              // $record->update([
-              //   'deposit' => $deposit_to,
-              // ]);
+              $record->update([
+                'deposit' => $deposit_to,
+              ]);
 
-              // Notification::make()
-              //   ->title('Audit keuangan akun kas')
-              //   ->body('Audit akun kas berhasil diproses.')
-              //   ->success()
-              //   ->send();
+              Notification::make()
+                ->title('Audit keuangan akun kas')
+                ->body('Audit akun kas berhasil diproses.')
+                ->success()
+                ->send();
             }),
 
           Tables\Actions\RestoreAction::make(),

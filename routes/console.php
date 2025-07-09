@@ -1,6 +1,6 @@
 <?php
 
-use App\Jobs\Payment\ScheduledPaymentJob;
+use App\Jobs\PaymentResource\ScheduledPaymentJob;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;

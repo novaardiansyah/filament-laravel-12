@@ -51,24 +51,32 @@ class PaymentResource extends Resource
             ->description('Detail pencatatan saldo keuangan.')
             ->columns(2)
             ->schema([
-              Forms\Components\Toggle::make('has_items')
-                ->label('Punya Barang?')
-                ->disabledOn('edit')
-                ->live(onBlur: true)
-                ->afterStateUpdated(function (Forms\Set $set, string $state): void {
-                  if ($state) {
-                    $set('amount', 0);
-                    $set('type_id', 1);
-                    $set('has_charge', false);
-                  }
-                }),
-              Forms\Components\Toggle::make('has_charge')
-                ->label('Tanpa Tagihan?')
-                ->disabled(function (callable $get, callable $set, string $operation) {
-                  if ($operation === 'edit')
-                    return true;
-                  return $get('has_items');
-                }),
+              Forms\Components\Group::make([
+                Forms\Components\Toggle::make('has_items')
+                  ->label('Produk/Layanan')
+                  ->disabledOn('edit')
+                  ->live(onBlur: true)
+                  ->afterStateUpdated(function (Forms\Set $set, string $state): void {
+                    if ($state) {
+                      $set('amount', 0);
+                      $set('type_id', 1);
+                      $set('has_charge', false);
+                    }
+                  }),
+                Forms\Components\Toggle::make('has_charge')
+                  ->label('Tanpa Tagihan')
+                  ->disabled(function (callable $get, callable $set, string $operation) {
+                    if ($operation === 'edit')
+                      return true;
+                    return $get('has_items');
+                  }),
+                Forms\Components\Toggle::make('is_scheduled')
+                  ->label('Jadwalkan Tagihan')
+                  ->disabledOn('edit'),
+              ])
+              ->columnSpanFull()
+              ->columns(3),
+
               Forms\Components\TextInput::make('amount')
                 ->label('Nominal')
                 ->required()
@@ -311,16 +319,20 @@ class PaymentResource extends Resource
                 }
               }
 
-              // ? pengeluaran
-              if ($record->type_id == 1) {
-                $record->payment_account->update([
-                  'deposit' => $record->payment_account->deposit + $record->amount
-                ]);
-              } else {
-                // ? Pemasukan
-                $record->payment_account->update([
-                  'deposit' => $record->payment_account->deposit - $record->amount
-                ]);
+              $is_scheduled = $record->is_scheduled;
+
+              if (!$is_scheduled) {
+                // ? pengeluaran
+                if ($record->type_id == 1) {
+                  $record->payment_account->update([
+                    'deposit' => $record->payment_account->deposit + $record->amount
+                  ]);
+                } else {
+                  // ? Pemasukan
+                  $record->payment_account->update([
+                    'deposit' => $record->payment_account->deposit - $record->amount
+                  ]);
+                }
               }
             }),
         ]),

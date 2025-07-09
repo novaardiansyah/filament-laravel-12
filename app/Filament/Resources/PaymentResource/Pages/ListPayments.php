@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\PaymentResource\Pages;
 
 use App\Filament\Resources\PaymentResource;
+use App\Filament\Resources\PaymentResource\Widgets\PaymentStatsOverview;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Resources\Components\Tab;
@@ -10,6 +11,13 @@ use Filament\Resources\Components\Tab;
 class ListPayments extends ListRecords
 {
   protected static string $resource = PaymentResource::class;
+
+  protected function getFooterWidgets(): array
+  {
+    return [
+      PaymentStatsOverview::class,
+    ];
+  }
 
   protected function getHeaderActions(): array
   {

@@ -1,6 +1,8 @@
 <?php
 
 return [
+  'author_name' => env('APP_AUTHOR_NAME', 'Your Name'),
+  'author_email' => env('APP_AUTHOR_EMAIL', 'your-email@example.com'),
 
     /*
     |--------------------------------------------------------------------------

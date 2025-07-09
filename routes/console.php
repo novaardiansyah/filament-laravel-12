@@ -1,5 +1,6 @@
 <?php
 
+use App\Jobs\PaymentAccountResource\DailyReportJob;
 use App\Jobs\PaymentResource\ScheduledPaymentJob;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
@@ -10,6 +11,7 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::job(new ScheduledPaymentJob())
-  ->dailyAt('00:05')
-  ->onFailure(fn () => \Log::error('ScheduledPaymentJob failed'))
-  ->onSuccess(fn () => \Log::info('ScheduledPaymentJob completed successfully'));
+  ->dailyAt('00:05');
+
+Schedule::job(new DailyReportJob())
+  ->dailyAt('04:00');

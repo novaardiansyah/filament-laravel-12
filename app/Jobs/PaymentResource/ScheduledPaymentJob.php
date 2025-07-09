@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Jobs\Payment;
+namespace App\Jobs\PaymentResource;
 
 use App\Http\Controllers\PaymentController;
 use Illuminate\Contracts\Queue\ShouldQueue;

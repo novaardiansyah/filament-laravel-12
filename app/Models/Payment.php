@@ -14,8 +14,9 @@ class Payment extends Model
   protected $guarded = ['id'];
 
   protected $casts = [
-    'attachments' => 'array',
-    'has_items'   => 'boolean'
+    'attachments'  => 'array',
+    'has_items'    => 'boolean',
+    'is_scheduled' => 'boolean',
   ];
 
   public function payment_account(): BelongsTo
@@ -43,10 +44,13 @@ class Payment extends Model
     $data['user_id'] = auth()->id();
 
     $has_charge         = boolval($data['has_charge'] ?? 0);
+    $is_scheduled       = boolval($data['is_scheduled'] ?? 0);
     $type_id            = intval($data['type_id'] ?? 2);
     $amount             = intval($data['amount'] ?? 0);
     $payment_account    = PaymentAccount::find($data['payment_account_id']);
     $payment_account_to = PaymentAccount::find($data['payment_account_to_id'] ?? -1);
+
+    if ($is_scheduled) $has_charge = true;
 
     if ($type_id == 2) {
       // ? Pemasukan

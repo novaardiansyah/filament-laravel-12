@@ -34,11 +34,7 @@ class PaymentStatsOverview extends BaseWidget
     $thisWeek = $overview['thisWeek'];
 
     return [
-      Stat::make('Pengeluaran Harian', toIndonesianCurrency($payments->avg_daily_expense, showCurrency: self::showPaymentCurrency()))
-        ->description('Rata-rata pengeluaran harian')
-        ->descriptionIcon('heroicon-m-arrow-trending-down')
-        ->descriptionColor('warning'),
-      Stat::make('Pengeluaran Mingguan', toIndonesianCurrency($payments->avg_weekly_expense, showCurrency: self::showPaymentCurrency()))
+      Stat::make('Avg. Pengeluaran Mingguan', toIndonesianCurrency($payments->avg_weekly_expense, showCurrency: self::showPaymentCurrency()))
         ->description('Rata-rata pengeluaran mingguan')
         ->descriptionIcon('heroicon-m-arrow-trending-down')
         ->descriptionColor('info'),
@@ -46,6 +42,10 @@ class PaymentStatsOverview extends BaseWidget
         ->description("Pengeluaran $thisWeek")
         ->descriptionIcon('heroicon-m-arrow-trending-down')
         ->descriptionColor('success'),
+      Stat::make('Avg. Pengeluaran Harian', toIndonesianCurrency($payments->avg_daily_expense, showCurrency: self::showPaymentCurrency()))
+        ->description(toIndonesianCurrency($payments->daily_expense) . ' pengeluaran hari ini')
+        ->descriptionIcon('heroicon-m-arrow-trending-down')
+        ->descriptionColor('danger'),
     ];
   }
 }

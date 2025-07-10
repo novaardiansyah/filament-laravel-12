@@ -83,7 +83,7 @@ class PaymentResource extends Resource
                 ->disabled(fn(Forms\Get $get) => $get('has_items'))
                 ->numeric()
                 ->live(onBlur: true)
-                ->hintIcon('heroicon-m-question-mark-circle', tooltip: fn(?string $state) => toIndonesianCurrency($state ?? 0)),
+                ->hint(fn(?string $state) => toIndonesianCurrency($state ?? 0)),
               Forms\Components\DatePicker::make('date')
                 ->label('Tanggal')
                 ->required()

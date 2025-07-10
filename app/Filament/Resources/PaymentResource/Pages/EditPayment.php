@@ -20,13 +20,6 @@ class EditPayment extends EditRecord
     parent::refreshFormData(array_keys($this->record->toArray()));
   }
 
-  protected function getHeaderActions(): array
-  {
-    return [
-      Actions\DeleteAction::make(),
-    ];
-  }
-
   protected function getRedirectUrl(): string
   {
     $resource = static::getResource();
@@ -67,6 +60,7 @@ class EditPayment extends EditRecord
 
     // * Jika memiliki items, proses ini akan dilakukan di ItemsRelationManager
     if (!$record->has_items) {
+      $is_scheduled = $record->is_scheduled ?? false;
       $amount = intval($data['amount']);
 
       if ($record->type_id == 1 || $record->type_id == 2) {
@@ -82,10 +76,12 @@ class EditPayment extends EditRecord
           $amount = -$amount;
         }
         $depositChange = $depositChange + $amount;
-
-        $record->payment_account->update([
-          'deposit' => $depositChange
-        ]);
+        
+        if (!$is_scheduled) {
+          $record->payment_account->update([
+            'deposit' => $depositChange
+          ]);
+        }
       } else if ($record->type_id == 3 || $record->type_id == 4) {
         // ? Transfer / Tarik tunai
 
@@ -97,13 +93,15 @@ class EditPayment extends EditRecord
           $this->_error('Saldo akun kas tidak mencukupi!');
         }
 
-        $record->payment_account->update([
-          'deposit' => $saldo_asal - $amount
-        ]);
+        if (!$is_scheduled) {
+          $record->payment_account->update([
+            'deposit' => $saldo_asal - $amount
+          ]);
 
-        $record->payment_account_to->update([
-          'deposit' => $saldo_tujuan
-        ]);
+          $record->payment_account_to->update([
+            'deposit' => $saldo_tujuan
+          ]);
+        }
       } else {
         // ! NO ACTION
         $this->_error('Tipe transaksi tidak valid.');

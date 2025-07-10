@@ -23,6 +23,10 @@ class GenerateSeeder extends Seeder
       ['name' => 'Payment Item Code', 'prefix' => 'PI-', ...$default],
       ['name' => 'Note Code', 'prefix' => 'NT-', ...$default],
       ['name' => 'Email Template Code', 'prefix' => 'ET-', ...$default],
+      ['name' => 'Budgets', 'prefix' => 'B-', ...$default],
+      ['name' => 'Budget Accounts', 'prefix' => 'BA-', ...$default],
+      ['name' => 'Backup Files', 'prefix' => 'BAK-', ...$default],
+      ['name' => 'Payment Summaries', 'prefix' => 'PS-', ...$default],
     ];
 
     Generate::insert($result);

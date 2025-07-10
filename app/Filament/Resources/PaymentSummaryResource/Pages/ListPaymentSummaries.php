@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Filament\Resources\ItemResource\Pages;
+namespace App\Filament\Resources\PaymentSummaryResource\Pages;
 
-use App\Filament\Resources\ItemResource;
+use App\Filament\Resources\PaymentSummaryResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Resources\Components\Tab;
 
-class ListItems extends ListRecords
+class ListPaymentSummaries extends ListRecords
 {
-  protected static string $resource = ItemResource::class;
+  protected static string $resource = PaymentSummaryResource::class;
 
   protected function getHeaderActions(): array
   {
@@ -22,10 +22,6 @@ class ListItems extends ListRecords
   {
     return [
       'All' => Tab::make(),
-      'Produk' => Tab::make()
-        ->modifyQueryUsing(fn ($query) => $query->where('type_id', 1)),
-      'Layanan' => Tab::make()
-        ->modifyQueryUsing(fn ($query) => $query->where('type_id', 2)),
       'Deleted' => Tab::make()
         ->modifyQueryUsing(fn ($query) => $query->onlyTrashed()),
     ]; 

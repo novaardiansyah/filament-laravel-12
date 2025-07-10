@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Widgets\ActivityLogTable;
+use App\Filament\Widgets\PaymentStatsOverview;
 use App\Filament\Widgets\UserStatsOverview;
 use App\Models\Setting;
 use CharrafiMed\GlobalSearchModal\GlobalSearchModalPlugin;
@@ -61,8 +62,9 @@ class AdminPanelProvider extends PanelProvider
       ->sidebarCollapsibleOnDesktop()
       // ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
       ->widgets([
-        UserStatsOverview::class,
+        PaymentStatsOverview::class,
         ActivityLogTable::class,
+        UserStatsOverview::class,
       ])
       ->middleware([
         EncryptCookies::class,

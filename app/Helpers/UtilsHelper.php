@@ -105,3 +105,38 @@ function getCode(int $id, bool $isNotPreview = true)
 
   return $queue;
 }
+
+function getOptionMonths($short = false): array
+{
+  if ($short) {
+    return [
+      '01' => 'Jan',
+      '02' => 'Feb',
+      '03' => 'Mar',
+      '04' => 'Apr',
+      '05' => 'Mei',
+      '06' => 'Jun',
+      '07' => 'Jul',
+      '08' => 'Agu',
+      '09' => 'Sep',
+      '10' => 'Okt',
+      '11' => 'Nov',
+      '12' => 'Des',
+    ];
+  }
+
+  return [
+    '1'  => 'Januari',
+    '2'  => 'Februari',
+    '3'  => 'Maret',
+    '4'  => 'April',
+    '5'  => 'Mei',
+    '6'  => 'Juni',
+    '7'  => 'Juli',
+    '8'  => 'Agustus',
+    '9'  => 'September',
+    '10' => 'Oktober',
+    '11' => 'November',
+    '12' => 'Desember',
+  ];
+}

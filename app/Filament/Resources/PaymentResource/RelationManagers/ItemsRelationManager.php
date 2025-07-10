@@ -148,8 +148,12 @@ class ItemsRelationManager extends RelationManager
              // * Hitung perubahan deposit
             $adjustedDeposit = $owner->payment_account->deposit + $owner->amount - $expense;
 
-             // * Update deposit akun kas
-            $owner->payment_account->update(['deposit' => $adjustedDeposit]);
+            $is_scheduled = $owner->is_scheduled ?? false;
+
+            if (!$is_scheduled) {
+              // * Update deposit akun kas
+              $owner->payment_account->update(['deposit' => $adjustedDeposit]);
+            }
 
             // * Tambah ke catatan otomatis
             $note = trim(($owner->name ?? '') . ', ' . "{$record->name} (x{$data['quantity']})", ', ');
@@ -204,7 +208,7 @@ class ItemsRelationManager extends RelationManager
                   ->afterStateUpdated(function($state, $set, $get): void {
                     $get('quantity') && $set('total', $state * $get('quantity'));
                   })
-                  ->hintIcon('heroicon-m-question-mark-circle', tooltip: fn (?string $state) => toIndonesianCurrency($state ?? 0)),
+                  ->hint(fn (?string $state) => toIndonesianCurrency($state ?? 0)),
                 Forms\Components\TextInput::make('quantity')
                   ->label('Kuantitas')
                   ->required()
@@ -215,7 +219,7 @@ class ItemsRelationManager extends RelationManager
                   ->afterStateUpdated(function($state, $set, $get): void {
                     $get('amount') && $set('total', $state * $get('amount'));
                   })
-                  ->hintIcon('heroicon-m-question-mark-circle', tooltip: fn (?string $state) => number_format($state ?? 0, 0, ',', '.')),
+                  ->hint(fn (?string $state) => number_format($state ?? 0, 0, ',', '.')),
                 Forms\Components\TextInput::make('total')
                   ->label('Total Harga')
                   ->required()
@@ -223,7 +227,7 @@ class ItemsRelationManager extends RelationManager
                   ->minValue(0)
                   ->live(onBlur: true)
                   ->readOnly()
-                  ->hintIcon('heroicon-m-question-mark-circle', tooltip: fn (?string $state) => toIndonesianCurrency($state ?? 0)),
+                  ->hint(fn (?string $state) => toIndonesianCurrency($state ?? 0)),
               ])
           ])
           ->mutateFormDataUsing(function (array $data): array {
@@ -243,8 +247,12 @@ class ItemsRelationManager extends RelationManager
             // * Hitung perubahan deposit
             $adjustedDeposit = $owner->payment_account->deposit + $owner->amount - $expense;
 
-            // * Update deposit akun kas
-            $owner->payment_account->update(['deposit' => $adjustedDeposit]);
+            $is_scheduled = $owner->is_scheduled ?? false;
+
+            if (!$is_scheduled) {
+              // * Update deposit akun kas
+              $owner->payment_account->update(['deposit' => $adjustedDeposit]);
+            }
 
             // * Tambah ke catatan otomatis
             $note = trim(($owner->name ?? '') . ', ' . "{$record->name} (x{$data['quantity']})", ', ');
@@ -284,8 +292,12 @@ class ItemsRelationManager extends RelationManager
               $adjustedDeposit = $owner->payment_account->deposit + $adjustedPivot;
               $expense = $owner->amount + (-$adjustedPivot);
 
-              // * Update deposit akun kas
-              $owner->payment_account->update(['deposit' => $adjustedDeposit]);
+              $is_scheduled = $owner->is_scheduled ?? false;
+
+              if (!$is_scheduled) {
+                // * Update deposit akun kas
+                $owner->payment_account->update(['deposit' => $adjustedDeposit]);
+              }
               
               // * Tambah ke catatan otomatis
               $itemName = "{$record->name} (x{$record->quantity})";
@@ -311,8 +323,12 @@ class ItemsRelationManager extends RelationManager
               // * Hitung perubahan deposit
               $adjustedDeposit = $owner->payment_account->deposit + $owner->amount - $expense;
 
-              // * Update deposit akun kas
-              $owner->payment_account->update(['deposit' => $adjustedDeposit]);
+              $is_scheduled = $owner->is_scheduled ?? false;
+
+              if (!$is_scheduled) {
+                // * Update deposit akun kas
+                $owner->payment_account->update(['deposit' => $adjustedDeposit]);
+              }
 
               $itemName = $record->name . ' (x' . $record->quantity . ')';
               $note = trim(implode(', ', array_diff(explode(', ', $owner->name ?? ''), [$itemName])));
@@ -354,8 +370,12 @@ class ItemsRelationManager extends RelationManager
               // * Hitung perubahan deposit
               $adjustedDeposit = $owner->payment_account->deposit + $owner->amount - $expense;
 
-              // * Update deposit akun kas
-              $owner->payment_account->update(['deposit' => $adjustedDeposit]);
+              $is_scheduled = $owner->is_scheduled ?? false;
+
+              if (!$is_scheduled) {
+                // * Update deposit akun kas
+                $owner->payment_account->update(['deposit' => $adjustedDeposit]);
+              }
 
               // * Update pengeluaran dan jumlah pada owner
               $owner->update(['expense' => $expense, 'amount' => $expense]);

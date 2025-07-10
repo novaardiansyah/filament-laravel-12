@@ -97,6 +97,7 @@ class Payment extends Model
     // Mengambil tanggal awal dan akhir bulan ini
     $startDate = Carbon::now()->startOfMonth()->format('Y-m-d');
     $endDate   = Carbon::now()->format('Y-m-d');
+    $endMonth  = Carbon::now()->endOfMonth()->format('Y-m-d');
 
     // Mengambil tanggal hari ini
     $today = Carbon::now()->format('Y-m-d');
@@ -135,7 +136,8 @@ class Payment extends Model
       SUM(CASE WHEN type_id = 2 AND date = ? THEN income ELSE 0 END) AS daily_income,
       SUM(CASE WHEN type_id = 1 AND date BETWEEN ? AND ? THEN expense ELSE 0 END) / ? AS avg_daily_expense,
       SUM(CASE WHEN type_id = 1 AND date BETWEEN ? AND ? THEN expense ELSE 0 END) / ? AS avg_weekly_expense,
-      SUM(CASE WHEN type_id = 1 AND date BETWEEN ? AND ? THEN expense ELSE 0 END) AS weekly_expense
+      SUM(CASE WHEN type_id = 1 AND date BETWEEN ? AND ? THEN expense ELSE 0 END) AS weekly_expense,
+      SUM(CASE WHEN type_id = 1 AND is_scheduled = 1 AND date BETWEEN ? AND ? THEN expense ELSE 0 END) AS scheduled_expense
     ', [
       $startDate, $endDate, // All expense range
       $startDate, $endDate, // All income range
@@ -143,8 +145,14 @@ class Payment extends Model
       $today,               // Daily income
       $startDate, $endDate, $daysElapsed,  // Avg daily expense
       $startDate, $endDate, $weeksInMonth, // Avg weekly expense
-      $startOfWeek, $endOfWeek // Weekly expense
+      $startOfWeek, $endOfWeek, // Weekly expense
+      $startDate, $endMonth // Scheduled expense
     ])->first();
+    \Log::info(__METHOD__.':'.__LINE__, [
+      'startDate'         => $startDate,
+      'endDate'           => $endMonth,
+      'scheduled_expense' => $payments->scheduled_expense,
+    ]);
     
     $total_saldo = PaymentAccount::sum('deposit');
 

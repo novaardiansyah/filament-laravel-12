@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Filament\Widgets;
+namespace App\Filament\Resources\PaymentAccountResource\Widgets;
 
 use App\Models\Payment;
 use App\Models\Setting;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
-class PaymentStatsOverview extends BaseWidget
+class PaymentAccountStatsOverview extends BaseWidget
 {
   protected function getColumns(): int
   {

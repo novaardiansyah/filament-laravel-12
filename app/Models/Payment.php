@@ -148,11 +148,6 @@ class Payment extends Model
       $startOfWeek, $endOfWeek, // Weekly expense
       $startDate, $endMonth // Scheduled expense
     ])->first();
-    \Log::info(__METHOD__.':'.__LINE__, [
-      'startDate'         => $startDate,
-      'endDate'           => $endMonth,
-      'scheduled_expense' => $payments->scheduled_expense,
-    ]);
     
     $total_saldo = PaymentAccount::sum('deposit');
 

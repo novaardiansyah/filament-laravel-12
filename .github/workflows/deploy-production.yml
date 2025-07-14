@@ -18,7 +18,7 @@ jobs:
           host: ${{ secrets.GH_SERVER_HOST_1 }}
           username: ${{ secrets.GH_SERVER_USER }}
           key: ${{ secrets.GH_SERVER_SSH_KEY }}
-          port: ${{ secrets.GH_SERVER_PORT }}
+          port: ${{ secrets.GH_SERVER_PORT_1 }}
           script: |
             cd ${{ secrets.GH_SERVER_PATH_1 }}
             git fetch origin

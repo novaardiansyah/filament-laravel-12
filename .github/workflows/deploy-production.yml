@@ -38,5 +38,5 @@ jobs:
             cp ./deploy/supervisor/${{ secrets.GH_SERVER_SUPERVISOR_PREFIX_1 }}-schedule.conf /etc/supervisor/conf.d/
             sudo supervisorctl reread
             sudo supervisorctl update
-            sudo supervisorctl start ${{ secrets.GH_SERVER_SUPERVISOR_PREFIX_1 }}-queue  || sudo supervisorctl restart ${{ secrets.GH_SERVER_SUPERVISOR_PREFIX_1 }}-queue 
-            sudo supervisorctl start ${{ secrets.GH_SERVER_SUPERVISOR_PREFIX_1 }}-schedule || sudo supervisorctl restart ${{ secrets.GH_SERVER_SUPERVISOR_PREFIX_1 }}-schedule
+            sudo supervisorctl restart ${{ secrets.GH_SERVER_SUPERVISOR_PREFIX_1 }}-queue
+            sudo supervisorctl restart ${{ secrets.GH_SERVER_SUPERVISOR_PREFIX_1 }}-schedule

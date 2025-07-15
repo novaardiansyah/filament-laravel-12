@@ -6,6 +6,7 @@ use App\Filament\Resources\PaymentAccountResource\Pages;
 use App\Models\Payment;
 use App\Models\PaymentAccount;
 use App\Models\Setting;
+use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
@@ -15,16 +16,20 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Storage;
 
-class PaymentAccountResource extends Resource
+class PaymentAccountResource extends Resource implements HasShieldPermissions
 {
   protected static ?string $model = PaymentAccount::class;
 
   protected static ?string $navigationIcon = 'heroicon-o-credit-card';
   protected static ?string $navigationGroup = 'Keuangan';
-  // protected static ?string $navigationParentItem = 'Keuangan';
   protected static ?int $navigationSort = 20;
   protected static ?string $label = 'Akun Kas';
   protected static ?string $recordTitleAttribute = 'name';
+
+  public static function getPermissionPrefixes(): array
+  {
+    return ['view', 'view_any', 'create', 'update', 'restore', 'restore_any', 'replicate', 'reorder', 'delete', 'delete_any', 'force_delete', 'audit'];
+  }
 
   protected static function showPaymentCurrency(): bool
   {
@@ -32,6 +37,17 @@ class PaymentAccountResource extends Resource
 
     if ($condition === null) {
       $condition = Setting::showPaymentCurrency();
+    }
+
+    return $condition;
+  }
+
+  public static function canAudit(): bool
+  {
+    static $condition;
+
+    if ($condition === null) {
+      $condition = auth()->user() && auth()->user()->can('audit_payment::account');
     }
 
     return $condition;
@@ -118,6 +134,7 @@ class PaymentAccountResource extends Resource
             }),
 
           Tables\Actions\Action::make('Audit')
+            ->authorize(fn (): bool => self::canAudit())
             ->color('danger')
             ->icon('heroicon-o-scale')
             ->modalWidth(MaxWidth::Medium)

@@ -71,7 +71,7 @@ class PaymentAccountPolicy
      */
     public function forceDeleteAny(User $user): bool
     {
-        return $user->can('force_delete_any_payment::account');
+        return $user->can('{{ ForceDeleteAny }}');
     }
 
     /**

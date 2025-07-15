@@ -31,6 +31,8 @@ class PaymentResource extends Resource
   protected static ?int $navigationSort = 20;
   protected static ?string $label = 'Keuangan';
 
+  protected static ?string $recordTitleAttribute = 'name';
+
   protected static function showPaymentCurrency(): bool
   {
     static $condition;
@@ -195,20 +197,19 @@ class PaymentResource extends Resource
           ->toggleable(),
         Tables\Columns\TextColumn::make('payment_account.name')
           ->label('Akun Kas')
-          ->sortable()
           ->toggleable(),
         Tables\Columns\TextColumn::make('payment_account_to.name')
           ->label('Akun Kas Tujuan')
-          ->sortable()
           ->toggleable(isToggledHiddenByDefault: true),
         Tables\Columns\TextColumn::make('payment_type.name')
           ->label('Tipe Transaksi')
           ->badge()
           ->color(fn(string $state): string => match (strtolower($state)) {
-            'pemasukan' => 'success',
+            'pemasukan'   => 'success',
             'tarik tunai' => 'info',
-            'transfer' => 'info',
+            'transfer'    => 'info',
             'pengeluaran' => 'danger',
+            default => 'primary',
           })
           ->toggleable(),
         Tables\Columns\TextColumn::make('date')
@@ -216,6 +217,12 @@ class PaymentResource extends Resource
           ->date('d M Y')
           ->sortable()
           ->toggleable(),
+        Tables\Columns\TextColumn::make('is_scheduled')
+          ->label('Terjadwal')
+          ->badge()
+          ->color(fn(string $state): string => $state ? 'primary' : 'primary')
+          ->formatStateUsing(fn (bool $state): string => $state ? 'Ya' : '-')
+          ->toggleable(isToggledHiddenByDefault: true),
         Tables\Columns\TextColumn::make('name')
           ->label('Catatan')
           ->searchable()

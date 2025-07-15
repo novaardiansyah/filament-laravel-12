@@ -39,7 +39,7 @@ class PaymentStatsOverview extends BaseWidget
 
     return [
       Stat::make('Pemasukan (' . $month_str . ')', toIndonesianCurrency($payments->all_income, showCurrency: self::showPaymentCurrency()))
-        ->description(toIndonesianCurrency($payments->daily_income) . ' hari ini')
+        ->description(toIndonesianCurrency($payments->daily_income, showCurrency: self::showPaymentCurrency()) . ' hari ini')
         ->descriptionIcon('heroicon-m-arrow-trending-up')
         ->descriptionColor('success'),
       Stat::make('Pengeluaran (' . $month_str . ')', toIndonesianCurrency($payments->all_expense, showCurrency: self::showPaymentCurrency()))

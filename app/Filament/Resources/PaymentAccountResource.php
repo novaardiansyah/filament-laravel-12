@@ -118,61 +118,11 @@ class PaymentAccountResource extends Resource
             }),
 
           Tables\Actions\Action::make('Audit')
-            ->visible(false)
             ->color('danger')
             ->icon('heroicon-o-scale')
             ->modalWidth(MaxWidth::Medium)
-            ->form([
-              Forms\Components\Section::make('')
-                ->description('Audit keuangan akun kas')
-                ->schema([
-                  Forms\Components\TextInput::make('deposit')
-                    ->label('Saldo Awal')
-                    ->numeric()
-                    ->disabled()
-                    ->default(function (PaymentAccount $record) {
-                      return $record->deposit;
-                    })
-                    ->hintIcon('heroicon-m-question-mark-circle', tooltip: fn (?string $state) => toIndonesianCurrency($state ?? 0)),
-                  Forms\Components\TextInput::make('deposit_to')
-                    ->label('Saldo Akhir')
-                    ->numeric()
-                    ->required()
-                    ->live(onBlur: true)
-                    ->hintIcon('heroicon-m-question-mark-circle', tooltip: fn (?string $state) => toIndonesianCurrency($state ?? 0)),
-                ])
-            ])
-            ->action(function(PaymentAccount $record, array $data): void {
-              $deposit = (int) $record->deposit;
-              $deposit_to = (int) $data['deposit_to'];
-
-              $isDecrease = $deposit_to < $deposit;
-              $selisih = $isDecrease ? $deposit - $deposit_to : $deposit_to - $deposit;
-
-              Payment::create([
-                'code'               => getCode(1),
-                'name'               => "Audit akun kas {$record->name}",
-                'type_id'            => $isDecrease ? 1 : 2,
-                'user_id'            => auth()->id(),
-                'payment_account_id' => $record->id,
-                'amount'             => $selisih,
-                'income'             => $isDecrease ? null : $selisih,
-                'expense'            => $isDecrease ? $selisih : null,
-                'has_items'          => false,
-                'attachments'        => [],
-                'date'               => now()->format('Y-m-d'),
-              ]);
-
-              $record->update([
-                'deposit' => $deposit_to,
-              ]);
-
-              Notification::make()
-                ->title('Audit keuangan akun kas')
-                ->body('Audit akun kas berhasil diproses.')
-                ->success()
-                ->send();
-            }),
+            ->form(self::getAuditFormSchema())
+            ->action(fn (PaymentAccount $record, array $data) => self::handleAuditAction($record, $data)),
 
           Tables\Actions\RestoreAction::make(),
         ])
@@ -182,6 +132,61 @@ class PaymentAccountResource extends Resource
           Tables\Actions\RestoreBulkAction::make(),
         ]),
       ]);
+  }
+
+  protected static function getAuditFormSchema(): array
+  {
+    return [
+      Forms\Components\Section::make('')
+        ->description('Audit keuangan akun kas')
+        ->schema([
+          Forms\Components\TextInput::make('deposit')
+            ->label('Saldo Awal')
+            ->numeric()
+            ->disabled()
+            ->default(fn (PaymentAccount $record): int => $record->deposit)
+            ->hint(fn (?string $state) => toIndonesianCurrency($state ?? 0, showCurrency: self::showPaymentCurrency())),
+          Forms\Components\TextInput::make('deposit_to')
+            ->label('Saldo Akhir')
+            ->numeric()
+            ->required()
+            ->live(onBlur: true)
+            ->hint(fn (?string $state) => toIndonesianCurrency($state ?? 0, showCurrency: self::showPaymentCurrency())),
+        ])
+    ];
+  }
+
+  protected static function handleAuditAction(PaymentAccount $record, array $data): void 
+  {
+    $deposit = (int) $record->deposit;
+    $deposit_to = (int) $data['deposit_to'];
+
+    $isDecrease = $deposit_to < $deposit;
+    $selisih = $isDecrease ? $deposit - $deposit_to : $deposit_to - $deposit;
+
+    Payment::create([
+      'code'               => getCode(1),
+      'name'               => "Audit akun kas {$record->name}",
+      'type_id'            => $isDecrease ? 1 : 2,
+      'user_id'            => auth()->id(),
+      'payment_account_id' => $record->id,
+      'amount'             => $selisih,
+      'income'             => $isDecrease ? null : $selisih,
+      'expense'            => $isDecrease ? $selisih : null,
+      'has_items'          => false,
+      'attachments'        => [],
+      'date'               => now()->format('Y-m-d'),
+    ]);
+
+    $record->update([
+      'deposit' => $deposit_to,
+    ]);
+
+    Notification::make()
+      ->title('Audit keuangan akun kas')
+      ->body('Audit akun kas berhasil diproses.')
+      ->success()
+      ->send();
   }
 
   public static function getRelations(): array

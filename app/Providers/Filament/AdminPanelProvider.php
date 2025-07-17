@@ -123,6 +123,7 @@ class AdminPanelProvider extends PanelProvider
         'Pengguna',
         'Keuangan',
         'Master Data',
+        'Berkas',
         'Pengaturan',
       ])
       ->navigationItems([

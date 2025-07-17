@@ -15,28 +15,28 @@ jobs:
       - name: SSH Deploy Application
         uses: appleboy/ssh-action@v1
         with:
-          host: ${{ secrets.GH_SERVER_HOST_1 }}
-          username: ${{ secrets.GH_SERVER_USER }}
-          key: ${{ secrets.GH_SERVER_SSH_KEY }}
-          port: ${{ secrets.GH_SERVER_PORT_1 }}
+          host: ${{ secrets.PRODUCTION_HOST }}
+          username: ${{ secrets.PRODUCTION_USER }}
+          key: ${{ secrets.PRODUCTION_SSH_KEY }}
+          port: ${{ secrets.PRODUCTION_PORT }}
           script: |
-            cd ${{ secrets.GH_SERVER_PATH_1 }}
+            cd ${{ secrets.PRODUCTION_PATH }}
             git fetch origin
             git checkout production
             git pull origin production
-            php artisan optimize:clear
             composer install --no-interaction --prefer-dist --optimize-autoloader
-            php artisan migrate --force
             chmod +x ./deploy/expect/shield-generate.sh
             ./deploy/expect/shield-generate.sh
+            php artisan optimize:clear
+            php artisan migrate --force
             php artisan filament:optimize
             php artisan config:cache
             php artisan route:cache
             php artisan view:cache
             php artisan event:cache
-            cp ./deploy/supervisor/${{ secrets.GH_SERVER_SUPERVISOR_PREFIX_1 }}-queue.conf /etc/supervisor/conf.d/
-            cp ./deploy/supervisor/${{ secrets.GH_SERVER_SUPERVISOR_PREFIX_1 }}-schedule.conf /etc/supervisor/conf.d/
+            cp ./deploy/supervisor/${{ secrets.PRODUCTION_SUPERVISOR_PREFIX }}-queue.conf /etc/supervisor/conf.d/
+            cp ./deploy/supervisor/${{ secrets.PRODUCTION_SUPERVISOR_PREFIX }}-schedule.conf /etc/supervisor/conf.d/
             sudo supervisorctl reread
             sudo supervisorctl update
-            sudo supervisorctl restart ${{ secrets.GH_SERVER_SUPERVISOR_PREFIX_1 }}-queue
-            sudo supervisorctl restart ${{ secrets.GH_SERVER_SUPERVISOR_PREFIX_1 }}-schedule
+            sudo supervisorctl restart ${{ secrets.PRODUCTION_SUPERVISOR_PREFIX }}-queue
+            sudo supervisorctl restart ${{ secrets.PRODUCTION_SUPERVISOR_PREFIX }}-schedule

@@ -13,5 +13,7 @@ Artisan::command('inspire', function () {
 Schedule::job(new ScheduledPaymentJob())
   ->dailyAt('00:05');
 
-Schedule::job(new DailyReportJob())
-  ->dailyAt('04:00');
+if (config('app.env') === 'production') {
+  Schedule::job(new DailyReportJob())
+    ->dailyAt('04:00');
+}

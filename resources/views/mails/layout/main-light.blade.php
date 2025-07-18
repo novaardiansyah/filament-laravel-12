@@ -67,11 +67,16 @@
       border-bottom-right-radius: 8px;
     }
 
-    .footer {
+    .footer, .footer a {
       text-align: center;
       font-size: 13px;
-      color: #999999;
+      color: #999;
       margin-top: 40px;
+      text-decoration: none;
+    }
+
+    .footer a:hover {
+      color: #3366FF;
     }
   </style>
   
@@ -84,11 +89,15 @@
     </div>
     <div class="content">
       @yield('content')
-      <p>Kind regards,</p>
+
+      <p style="margin-bottom: 26px">Terima kasih atas perhatian Anda.</p>
+
+      <p>Salam Hangat,</p>
+      <p>{{ explode(' ', config('app.author_name'))[0] }}</p>
     </div>
 
     <div class="footer">
-      &copy; {{ date('Y') }} {{ config('app.author') }}. All rights reserved.
+      &copy; {{ date('Y') }} <a href="https://novaardiansyah.my.id">{{ config('app.author_name') }}</a>. All rights reserved.
     </div>
   </div>
 </body>

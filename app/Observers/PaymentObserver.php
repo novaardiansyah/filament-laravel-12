@@ -59,7 +59,7 @@ class PaymentObserver
     }
 
     $todayTotal = Payment::where('type_id', 1)
-      ->whereDate('created_at', now()->toDateString())
+      ->whereDate('date', now()->toDateString())
       ->sum('amount');
     
     $limit = Setting::where('key', 'daily_spending_notification')->first()?->value ?? 0;

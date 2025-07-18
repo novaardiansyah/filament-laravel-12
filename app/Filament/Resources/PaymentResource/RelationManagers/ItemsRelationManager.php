@@ -49,34 +49,47 @@ class ItemsRelationManager extends RelationManager
               ->label('Nama Barang')
               ->required()
               ->maxLength(255),
-            Forms\Components\TextInput::make('amount')
-              ->label('Harga')
+            Forms\Components\Select::make('type.id')
+              ->label('Jenis')
               ->required()
-              ->numeric()
-              ->minValue(0)
-              ->live(onBlur: true)
-              ->afterStateUpdated(function($state, $set, $get): void {
-                $get('quantity') && $set('total', $state * $get('quantity'));
-              })
-              ->hintIcon('heroicon-m-question-mark-circle', tooltip: fn (?string $state) => toIndonesianCurrency($state ?? 0)),
-            Forms\Components\TextInput::make('quantity')
-              ->label('Kuantitas')
-              ->required()
-              ->numeric()
+              ->native(false)
+              ->searchable()
+              ->preload()
               ->default(1)
-              ->minValue(0)
-              ->live(onBlur: true)
-              ->afterStateUpdated(function($state, $set, $get): void {
-                $get('amount') && $set('total', $state * $get('amount'));
-              })
-              ->hintIcon('heroicon-m-question-mark-circle', tooltip: fn (?string $state) => number_format($state ?? 0, 0, ',', '.')),
-            Forms\Components\TextInput::make('total')
-              ->label('Total Harga')
-              ->numeric()
-              ->minValue(0)
-              ->live(onBlur: true)
-              ->readOnly()
-              ->hintIcon('heroicon-m-question-mark-circle', tooltip: fn (?string $state) => toIndonesianCurrency($state ?? 0)),
+              ->relationship('type', 'name'),
+              
+            Forms\Components\Group::make([
+              Forms\Components\TextInput::make('amount')
+                ->label('Harga')
+                ->required()
+                ->numeric()
+                ->minValue(0)
+                ->live(onBlur: true)
+                ->afterStateUpdated(function($state, $set, $get): void {
+                  $get('quantity') && $set('total', $state * $get('quantity'));
+                })
+                ->hint(fn (?string $state) => toIndonesianCurrency($state ?? 0)),
+              Forms\Components\TextInput::make('quantity')
+                ->label('Kuantitas')
+                ->required()
+                ->numeric()
+                ->default(1)
+                ->minValue(0)
+                ->live(onBlur: true)
+                ->afterStateUpdated(function($state, $set, $get): void {
+                  $get('amount') && $set('total', $state * $get('amount'));
+                })
+                ->hint( fn (?string $state) => number_format($state ?? 0, 0, ',', '.')),
+              Forms\Components\TextInput::make('total')
+                ->label('Total Harga')
+                ->numeric()
+                ->minValue(0)
+                ->live(onBlur: true)
+                ->readOnly()
+                ->hint(fn (?string $state) => toIndonesianCurrency($state ?? 0)),
+            ])
+            ->columns(3)
+            ->columnSpanFull(),
           ]),
       ]);
   }
@@ -132,7 +145,7 @@ class ItemsRelationManager extends RelationManager
       ->defaultSort('pivot_updated_at', 'desc')
       ->headerActions([
         Tables\Actions\CreateAction::make()
-          ->modalWidth(MaxWidth::ThreeExtraLarge)
+          ->modalWidth(MaxWidth::FourExtraLarge)
           ->mutateFormDataUsing(function (array $data): array {
             $data['code'] = getCode(3);
             $data['item_code'] = getCode(4);

@@ -2,6 +2,7 @@
 
 use App\Models\ActivityLog;
 use App\Models\Generate;
+use App\Models\ScheduledFileDeletion;
 use Carbon\Carbon;
 use Ramsey\Uuid\Uuid;
 use Illuminate\Support\Facades\URL;
@@ -40,9 +41,11 @@ function makePdf(\Mpdf\Mpdf $mpdf, string $name, Model $user): bool
 
   $mpdf->Output(storage_path("app/{$filepath}"), 'F');
 
+  $expiration = now()->addHours(24);
+
   $fileUrl = URL::temporarySignedRoute(
     'download',
-    now()->addHours(24),
+    $expiration,
     ['path' => $filenameWithoutExtension, 'extension' => $extension, 'directory' => $directory]
   );
 
@@ -61,6 +64,14 @@ function makePdf(\Mpdf\Mpdf $mpdf, string $name, Model $user): bool
     ])
     ->sendToDatabase($user);
 
+  ScheduledFileDeletion::create([
+    'user_id'                 => $user->id,
+    'file_name'               => $filename,
+    'file_path'               => $filepath,
+    'download_url'            => $fileUrl,
+    'scheduled_deletion_time' => $expiration,
+  ]);
+
   ActivityLog::create([
     'log_name'    => 'Export',
     'description' => "{$user->name} Export {$name}.{$extension}",
@@ -68,6 +79,7 @@ function makePdf(\Mpdf\Mpdf $mpdf, string $name, Model $user): bool
     'causer_type' => 'App\Models\User',
     'causer_id'   => $user->id,
     'properties'  => [
+      'filename'   => $filename,
       'filepath'   => $filepath,
       'signed_url' => $fileUrl,
     ]

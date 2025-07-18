@@ -39,6 +39,9 @@ function makePdf(\Mpdf\Mpdf $mpdf, string $name, Model $user): bool
   $filename                 = "{$filenameWithoutExtension}.{$extension}";
   $filepath                 = "{$directory}/{$filename}";
 
+  $mpdf->WriteHTML(view('layout.end-body')->render());
+  $mpdf->SetHTMLFooter(view('layout.footer')->render());
+  
   $mpdf->Output(storage_path("app/{$filepath}"), 'F');
 
   $expiration = now()->addHours(24);

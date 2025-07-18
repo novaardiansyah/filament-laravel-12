@@ -42,8 +42,7 @@ class MakePdfJob implements ShouldQueue
         $mpdf->WriteHTML($view);
       }
     });
-
-    $mpdf->WriteHTML(view('user-resource.make-pdf.footer')->render());
+    
     $result = makePdf($mpdf, 'User', $this->user);
 
     return $result;

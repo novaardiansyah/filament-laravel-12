@@ -30,7 +30,7 @@ return [
   'notifications' => [
     'enabled' => true,
     'logger' => \Z3d0X\FilamentLogger\Loggers\NotificationLogger::class,
-    'color' => null,
+    'color' => 'primary',
     'log_name' => 'Notification',
   ],
 

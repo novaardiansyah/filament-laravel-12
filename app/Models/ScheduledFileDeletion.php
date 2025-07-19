@@ -33,10 +33,10 @@ class ScheduledFileDeletion extends Model
     return $condition;
   }
 
-  public function deleteFile(): void
+  public function deleteFile(): array
   {
     if (empty($this->file_path)) {
-      return;
+      return [];
     }
 
     foreach (['app', 'local', 'public'] as $disk) {
@@ -45,8 +45,13 @@ class ScheduledFileDeletion extends Model
       }
     }
 
-    $this->scheduled_deletion_time = null;
-    $this->has_been_deleted = true;
-    $this->save();
+    $update = [
+      'scheduled_deletion_time' => null,
+      'has_been_deleted' => true,
+    ];
+
+    $this->update($update);
+
+    return $update;
   }
 };

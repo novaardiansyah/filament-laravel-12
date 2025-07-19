@@ -45,9 +45,9 @@ return [
   ],
 
   'custom' => [
-    // [
-    //     'log_name' => 'Custom',
-    //     'color' => 'primary',
-    // ]
+    [
+      'log_name' => 'Schedule',
+      'color'    => 'info',
+    ]
   ],
 ];

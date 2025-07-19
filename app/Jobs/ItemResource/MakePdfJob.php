@@ -21,7 +21,7 @@ class MakePdfJob implements ShouldQueue
   /**
    * Execute the job.
    */
-  public function handle(): bool
+  public function handle(): void
   {
     $now = now()->translatedFormat('d/m/Y H:i');
     
@@ -43,8 +43,6 @@ class MakePdfJob implements ShouldQueue
       }
     });
 
-    $result = makePdf($mpdf, 'Item', $this->user);
-
-    return $result;
+    makePdf($mpdf, 'Item', $this->user);
   }
 }

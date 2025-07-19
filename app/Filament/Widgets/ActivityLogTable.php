@@ -12,6 +12,15 @@ class ActivityLogTable extends BaseWidget
   protected static ?string $heading = 'Log Aktivitas Terakhir';
   protected int|string|array $columnSpan = 'full';
 
+  protected array $customColors = [];
+
+  public function __construct()
+  {
+    $this->customColors = collect(config('filament-logger.custom', []))
+      ->mapWithKeys(fn ($item) => [$item['log_name'] => $item['color']])
+      ->toArray();
+  }
+
   public static function canView(): bool
   {
     return auth()->user()?->can('widget_ActivityLogTable');
@@ -32,11 +41,11 @@ class ActivityLogTable extends BaseWidget
           ->label('Jenis')
           ->badge()
           ->color(fn(string $state): string => match ($state) {
-            'Resource'     => 'success',
-            'Access'       => 'danger',
-            'Notification' => 'primary',
-            'Model'        => 'warning',
-            default        => 'primary',
+            'Resource'     => config('filament-logger.resources.color'),
+            'Access'       => config('filament-logger.access.color'),
+            'Notification' => config('filament-logger.notifications.color'),
+            'Model'        => config('filament-logger.models.color'),
+            default        => $this->customColors[$state] ?? 'primary',
           })
           ->sortable(),
         Tables\Columns\TextColumn::make('event')

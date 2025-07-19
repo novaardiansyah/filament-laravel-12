@@ -8,11 +8,11 @@ return [
     |--------------------------------------------------------------------------
     */
 
-    'nav.group' => 'Pengaturan',
-    'nav.log.label' => 'Audit Log',
+    'nav.group' => 'Audit Logs',
+    'nav.log.label' => 'Aktivitas Log',
     'nav.log.icon' => 'heroicon-o-clipboard-document-list',
-    'resource.label.log' => 'Audit log',
-    'resource.label.logs' => 'Audit log',
+    'resource.label.log' => 'Aktivitas Log',
+    'resource.label.logs' => 'Aktivitas Log',
     'resource.label.user' => 'Pengguna',
     'resource.label.subject' => 'Subjek',
     'resource.label.subject_type' => 'Tipe Subjek',

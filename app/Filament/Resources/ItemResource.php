@@ -28,6 +28,7 @@ class ItemResource extends Resource
   protected static ?string $navigationGroup = 'Master Data';
   protected static ?int $navigationSort = 10;
   protected static ?string $label = 'Produk & Layanan';
+  protected static ?string $recordTitleAttribute = 'name';
 
   protected static function showPaymentCurrency(): bool
   {

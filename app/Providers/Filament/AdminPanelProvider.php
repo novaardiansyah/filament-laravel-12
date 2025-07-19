@@ -125,6 +125,7 @@ class AdminPanelProvider extends PanelProvider
         'Master Data',
         'Berkas',
         'Pengaturan',
+        'Audit Logs',
       ])
       ->navigationItems([
         NavigationItem::make('Profil Saya')

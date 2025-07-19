@@ -169,3 +169,18 @@ function getOptionMonths($short = false): array
     '12' => 'Desember',
   ];
 }
+
+function textCapitalize($text)
+{
+  return ucwords(strtolower($text));
+}
+
+function textUpper($text)
+{
+  return strtoupper($text);
+}
+
+function textLower($text)
+{
+  return strtolower($text);
+}

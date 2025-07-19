@@ -5,7 +5,7 @@ return [
 
   'activity_resource' => \Z3d0X\FilamentLogger\Resources\ActivityResource::class,
   'scoped_to_tenant' => true,
-  'navigation_sort' => 20,
+  'navigation_sort' => 10,
 
   'resources' => [
     'enabled' => true,
@@ -17,7 +17,7 @@ return [
       //App\Filament\Resources\UserResource::class,
     ],
     'cluster' => null,
-    'navigation_group' => 'Pengaturan',
+    'navigation_group' => 'Audit Logs',
   ],
 
   'access' => [

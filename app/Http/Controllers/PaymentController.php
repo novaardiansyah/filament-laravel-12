@@ -27,7 +27,7 @@ class PaymentController extends Controller
         $payment->payment_account->deposit -= $payment->amount;
       } else if ($payment->type_id === 2) {
         // ! Pemasukan
-        $payment->payment_account_to->deposit += $payment->amount;
+        $payment->payment_account->deposit += $payment->amount;
       }
 
       if ($payment->payment_account_to && ($payment->type_id === 3 || $payment->type_id === 4)) {

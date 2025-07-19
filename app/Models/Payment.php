@@ -140,7 +140,8 @@ class Payment extends Model
       SUM(CASE WHEN type_id = 1 AND date BETWEEN ? AND ? THEN expense ELSE 0 END) / ? AS avg_daily_expense,
       SUM(CASE WHEN type_id = 1 AND date BETWEEN ? AND ? THEN expense ELSE 0 END) / ? AS avg_weekly_expense,
       SUM(CASE WHEN type_id = 1 AND date BETWEEN ? AND ? THEN expense ELSE 0 END) AS weekly_expense,
-      SUM(CASE WHEN type_id = 1 AND is_scheduled = 1 AND date BETWEEN ? AND ? THEN expense ELSE 0 END) AS scheduled_expense
+      SUM(CASE WHEN type_id = 1 AND is_scheduled = 1 AND date BETWEEN ? AND ? THEN expense ELSE 0 END) AS scheduled_expense,
+      SUM(CASE WHEN type_id = 2 AND is_scheduled = 1 AND date BETWEEN ? AND ? THEN income ELSE 0 END) AS scheduled_income
     ', [
       $startDate, $endDate, // All expense range
       $startDate, $endDate, // All income range
@@ -149,7 +150,8 @@ class Payment extends Model
       $startDate, $endDate, $daysElapsed,  // Avg daily expense
       $startDate, $endDate, $weeksInMonth, // Avg weekly expense
       $startOfWeek, $endOfWeek, // Weekly expense
-      $startDate, $endMonth // Scheduled expense
+      $startDate, $endMonth, // Scheduled expense
+      $startDate, $endMonth // Scheduled income
     ])->first();
     
     $total_saldo = PaymentAccount::sum('deposit');

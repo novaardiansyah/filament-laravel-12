@@ -3,6 +3,7 @@
 use App\Models\ActivityLog;
 use App\Models\Generate;
 use App\Models\ScheduledFileDeletion;
+use App\Models\User;
 use Carbon\Carbon;
 use Ramsey\Uuid\Uuid;
 use Illuminate\Support\Facades\URL;
@@ -31,8 +32,10 @@ function toIndonesianCurrency(float $number = 0, int $precision = 0, string $cur
   return $replace;
 }
 
-function makePdf(\Mpdf\Mpdf $mpdf, string $name, Model $user): bool
+function makePdf(\Mpdf\Mpdf $mpdf, string $name, ?Model $user = null, $preview = false): bool
 {
+  $user ??= User::find(1); // ! Default user if not provided
+
   $extension                = 'pdf';
   $directory                = 'filament-pdf';
   $filenameWithoutExtension = Uuid::uuid4() . "-{$name}";
@@ -42,6 +45,11 @@ function makePdf(\Mpdf\Mpdf $mpdf, string $name, Model $user): bool
   $mpdf->WriteHTML(view('layout.end-body')->render());
   $mpdf->SetHTMLFooter(view('layout.footer')->render());
   
+  if ($preview) {
+    $mpdf->Output('', 'I'); // ! Output to browser for preview
+    return true;
+  }
+
   $mpdf->Output(storage_path("app/{$filepath}"), 'F');
 
   $expiration = now()->addHours(24);

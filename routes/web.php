@@ -6,9 +6,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::get("/", fn() => redirect("/admin"));
 
-// Route::get('testing', [TestingController::class,'index'])->name('testing');
-// Route::post('testing/upload', [TestingController::class, 'upload'])
-//   ->name('testing.upload');
+// Route::get('testing', [TestingController::class,'index'])
+//   ->middleware('auth')
+//   ->name('testing');
 
 Route::get('download/{path}/{extension}', [DownloadController::class, 'index'])
   ->name('download')

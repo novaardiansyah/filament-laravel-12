@@ -32,7 +32,7 @@ function toIndonesianCurrency(float $number = 0, int $precision = 0, string $cur
   return $replace;
 }
 
-function makePdf(\Mpdf\Mpdf $mpdf, string $name, ?Model $user = null, $preview = false): bool
+function makePdf(\Mpdf\Mpdf $mpdf, string $name, ?Model $user = null, $preview = false): array
 {
   $user ??= User::find(1); // ! Default user if not provided
 
@@ -47,7 +47,11 @@ function makePdf(\Mpdf\Mpdf $mpdf, string $name, ?Model $user = null, $preview =
   
   if ($preview) {
     $mpdf->Output('', 'I'); // ! Output to browser for preview
-    return true;
+    return [
+      'filename'   => $filename,
+      'filepath'   => $filepath,
+      'signed_url' => null, // No signed URL for preview
+    ];
   }
 
   $mpdf->Output(storage_path("app/{$filepath}"), 'F');
@@ -83,20 +87,22 @@ function makePdf(\Mpdf\Mpdf $mpdf, string $name, ?Model $user = null, $preview =
     'scheduled_deletion_time' => $expiration,
   ]);
 
+  $properties = [
+    'filename'   => $filename,
+    'filepath'   => $filepath,
+    'signed_url' => $fileUrl,
+  ];
+
   ActivityLog::create([
     'log_name'    => 'Export',
     'description' => "{$user->name} Export {$name}.{$extension}",
     'event'       => 'Export PDF',
     'causer_type' => 'App\Models\User',
     'causer_id'   => $user->id,
-    'properties'  => [
-      'filename'   => $filename,
-      'filepath'   => $filepath,
-      'signed_url' => $fileUrl,
-    ]
+    'properties'  => $properties
   ]);
 
-  return true;
+  return $properties;
 }
 
 function getCode(int $id, bool $isNotPreview = true)

@@ -11,9 +11,9 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::job(new ScheduledPaymentJob())
-  ->dailyAt('00:05');
+  ->dailyAt('23:00');
 
-if (config('app.env') === 'production') {
+if (config('app.env') != 'staging') {
   Schedule::job(new DailyReportJob())
-    ->dailyAt('04:00');
+    ->dailyAt('23:45');
 }

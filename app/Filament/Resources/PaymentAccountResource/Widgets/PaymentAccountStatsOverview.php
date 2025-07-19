@@ -35,15 +35,17 @@ class PaymentAccountStatsOverview extends BaseWidget
     $total_saldo = $overview['total_saldo'];
 
     $scheduled_expense = $payments->scheduled_expense ?? 0;
-    $totalAfterScheduledExpense = $total_saldo - $scheduled_expense;
+    $scheduled_income = $payments->scheduled_income ?? 0;
 
+    $totalAfterScheduledExpense = $total_saldo + $scheduled_income - $scheduled_expense;
+    
     return [
       Stat::make('Pemasukan (' . $month_str . ')', toIndonesianCurrency($payments->all_income, showCurrency: self::showPaymentCurrency()))
         ->description(toIndonesianCurrency($payments->daily_income) . ' hari ini')
         ->descriptionIcon('heroicon-m-arrow-trending-up')
         ->descriptionColor('success'),
       Stat::make('Pengeluaran (' . $month_str . ')', toIndonesianCurrency($payments->all_expense, showCurrency: self::showPaymentCurrency()))
-        ->description(toIndonesianCurrency($scheduled_expense, showCurrency: self::showPaymentCurrency()) . ' pengeluaran terjadwal')
+        ->description(toIndonesianCurrency($payments->daily_expense) . ' hari ini')
         ->descriptionIcon('heroicon-m-arrow-trending-down')
         ->descriptionColor('danger'),
       Stat::make('Total Saldo Tersisa (' . $month_str . ')', toIndonesianCurrency($total_saldo, showCurrency: self::showPaymentCurrency()))

@@ -1,0 +1,53 @@
+@extends('mails.layout.main-light')
+
+@section('title')
+  {{ $data['subject'] }}
+@endsection
+
+@section('header')
+  Hai {{ explode(' ', config('app.author_name'))[0] }},
+@endsection
+
+@section('content')
+  <p>Kami ingin menginformasikan bahwa ada pesan baru yang masuk melalui formulir kontak pada situs web Anda.</p>
+
+  <div class="card">
+    <div class="group">
+      <h4>Detail Pesan</h4>
+      <ul class="list-flush">
+        <li>
+          <strong>Nama</strong>: {{ $data['name'] ?? '-' }}
+        </li>
+        <li>
+          <strong>Email</strong>: {{ $data['email'] ?? '-' }}
+        </li>
+        <li>
+          <strong>Subjek</strong>: {{ $data['subject_contact'] ?? '-' }}
+        </li>
+        <li>
+          <strong>Pesan</strong>: {{ $data['message'] ?? '-' }}
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top: 20px;">
+    <div class="group">
+      <h4>Detail Pengirim</h4>
+      <ul class="list-flush">
+        <li>
+          <strong>Alamat IP</strong>: {{ $data['ip_address'] ?? '-' }}
+        </li>
+        <li>
+          <strong>Perangkat</strong>: {{ $data['user_agent'] ?? '-' }}
+        </li>
+        <li>
+          <strong>Waktu Pengiriman</strong>: {{ $data['created_at'] ?? '-' }}
+        </li>
+        <li>
+          <strong>Referer</strong>: {{ $data['url'] ?? '-' }}
+        </li>
+      </ul>
+    </div>
+  </div>
+@endsection

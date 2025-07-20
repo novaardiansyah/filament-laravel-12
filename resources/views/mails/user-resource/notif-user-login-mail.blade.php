@@ -34,10 +34,10 @@
           <strong>Perangkat</strong>: {{ $data['user_agent'] ?? '-' }}
         </li>
         <li>
-          <strong>Waktu Login</strong>: {{ $data['date'] ? carbonTranslatedFormat($data['date'], 'd F Y H:i') : '-' }}
+          <strong>Waktu Login</strong>: {{ $data['created_at'] ? carbonTranslatedFormat($data['created_at'], 'd F Y H:i') : '-' }}
         </li>
         <li>
-          <strong>Referer</strong>: <a href="{{ $data['url'] ?? '#' }}" target="_blank">{{ $data['url'] ?? '-' }}</a>
+          <strong>Referer</strong>: <a href="{{ $data['referer'] ?? '#' }}" target="_blank">{{ $data['referer'] ?? '-' }}</a>
         </li>
       </ul>
     </div>

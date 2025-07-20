@@ -62,7 +62,7 @@ class NotifUserLoginMail extends Mailable implements ShouldQueue
     $createdAt = $this->data['created_at'];
     $logName   = $this->data['log_name'];
 
-    $response = 'Daily Spending Notification has been successfully sent.';
+    $response = 'User login notification has been successfully sent.';
 
     $update = EmailLog::where('created_at', $createdAt)
       ->where('name', $logName)
@@ -82,7 +82,7 @@ class NotifUserLoginMail extends Mailable implements ShouldQueue
     $logName   = $this->data['log_name'];
     $email     = $this->data['email'];
 
-    $response = 'Failed to send Daily Spending Notification to ' . $email;
+    $response = 'Failed to send User login notification to ' . $email;
 
     $update = EmailLog::where('created_at', $createdAt)
       ->where('name', $logName)

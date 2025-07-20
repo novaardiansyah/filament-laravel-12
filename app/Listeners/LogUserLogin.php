@@ -4,6 +4,7 @@ namespace App\Listeners;
 
 use App\Mail\UserResource\NotifUserLoginMail;
 use App\Models\EmailLog;
+use App\Models\UserLog;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
@@ -34,34 +35,60 @@ class LogUserLogin
     $alreadyLogged = true;
     
     $ip_address = request()->ip();
-    $ip_info    = Http::get("https://ipinfo.io/{$ip_address}/json?token=" . config(key: 'services.ipinfo.token'))->json();
 
-    $country = $ip_info['country'] ?? '-';
-    $city    = $ip_info['city'] ?? '-';
-    $region  = $ip_info['region'] ?? '-';
-    $postal  = $ip_info['postal'] ?? '-';
+    // ! Cek di UserLog dengan IP, jika dalam 30 menit sudah ada, tidak perlu kirim email lagi
+    $existingLog = UserLog::where('ip_address', $ip_address)
+      ->where('created_at', '>=', now()->subMinutes(30))
+      ->first();
+    
+    if ($existingLog) {
+      return;
+    }
 
-    $address = "{$city}, {$region}, {$country}, {$postal}";
-    $address = trim(str_replace('-,', '', $address));
+    $ip_info = Http::get("https://ipinfo.io/{$ip_address}/json?token=" . config(key: 'services.ipinfo.token'))->json();
 
-    $geolocation = $ip_info['loc'] ?? '-';
-    $timezone    = $ip_info['timezone'] ?? '-';
+    $country = $ip_info['country'] ?? null;
+    $city    = $ip_info['city'] ?? null;
+    $region  = $ip_info['region'] ?? null;
+    $postal  = $ip_info['postal'] ?? null;
+    $address = null;
+
+    if ($country) $address .= $country;
+    if ($city) $address .= ', ' . $city;
+    if ($region) $address .= ', ' . $region;
+    if ($postal) $address .= ', ' . $postal;
+
+    $geolocation = $ip_info['loc'] ?? null;
+    $timezone    = $ip_info['timezone'] ?? null;
     $now         = now();
 
-    $data = [
-      'log_name'    => 'notif_user_login',
-      'email'       => config('app.author_email'),
-      'subject'     => 'Notifikasi: Login pengguna dari situs web',
-      'email_user'  => $event->user->email,
-      'ip_address'  => $ip_address,
-      'user_agent'  => request()->userAgent(),
-      'address'     => $address,
-      'geolocation' => $geolocation,
-      'timezone'    => $timezone,
-      'url'         => url('admin/login'),
-      'date'        => $now,
-      'created_at'  => $now,
-    ];
+    $saveLog = UserLog::create([
+      'user_id'    => $event->user->id,
+      'email'      => $event->user->email,
+      'ip_address' => $ip_address,
+      'country'    => $country,
+      'city'       => $city,
+      'region'     => $region,
+      'postal'     => $postal,
+      'geolocation'=> $geolocation,
+      'timezone'   => $timezone,
+      'user_agent' => request()->headers->get('user-agent'),
+      'referer'    => request()->headers->get('referer'),
+      'created_at' => $now,
+      'updated_at' => $now,
+    ]);
+
+    $data = array_merge(
+      $saveLog->toArray(),
+        [
+        'log_name'   => 'notif_user_login',
+        'email_user' => $saveLog->email,
+        'email'      => config('app.author_email'),
+        'subject'    => 'Notifikasi: Login pengguna dari situs web',
+        'address'    => $address,
+        'created_at' => $now,
+      ]
+    );
 
     $mailObj = new NotifUserLoginMail($data);
     $message = $mailObj->render();

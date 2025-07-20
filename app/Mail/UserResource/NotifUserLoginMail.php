@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Mail\ContactMessageResource;
+namespace App\Mail\UserResource;
 
 use App\Models\EmailLog;
 use Illuminate\Bus\Queueable;
@@ -11,14 +11,14 @@ use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Mail\Mailables\Address;
 
-class NotifContactMail extends Mailable implements ShouldQueue
+class NotifUserLoginMail extends Mailable implements ShouldQueue
 {
   use Queueable, SerializesModels;
 
   /**
    * Create a new message instance.
    */
-  public function __construct(public array $data = [])
+  public function __construct(public array $data)
   {
     $this->updateToSuccess();
   }
@@ -41,9 +41,9 @@ class NotifContactMail extends Mailable implements ShouldQueue
    */
   public function content(): Content
   {
-    // * view('mails.contact-message-resource.notify-contact-mail');
+    // * view('mails.user-resource.notif-user-login-mail');
     return new Content(
-      view: 'mails.contact-message-resource.notify-contact-mail',
+      view: 'mails.user-resource.notif-user-login-mail',
     );
   }
 

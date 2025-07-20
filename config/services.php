@@ -41,4 +41,8 @@ return [
       'secret_key' => env('CF_CAPTCHA_SECRET', '-'),
     ],
   ],
+
+  'ipinfo' => [
+    'token' => env('IPINFO_TOKEN', ''),
+  ],
 ];

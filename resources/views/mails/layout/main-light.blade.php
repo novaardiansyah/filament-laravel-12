@@ -67,6 +67,15 @@
       border-bottom-right-radius: 8px;
     }
 
+    a {
+      color: #3366FF;
+      text-decoration: none;
+    }
+    
+    a:hover {
+      opacity: .9;
+    }
+
     .footer, .footer a {
       text-align: center;
       font-size: 13px;

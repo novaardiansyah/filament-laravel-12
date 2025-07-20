@@ -10,6 +10,14 @@ Route::get("/", fn() => redirect("/admin"));
 //   ->middleware('auth')
 //   ->name('testing');
 
+Route::group(['middleware' => 'auth', 'prefix' => 'testing', 'as' => 'testing.'], function () {
+  Route::get('/', [TestingController::class, 'index'])
+    ->name('index');
+
+  Route::get('/email-preview', [TestingController::class, 'email_preview'])
+    ->name('email_preview');
+});
+
 Route::get('download/{path}/{extension}', [DownloadController::class, 'index'])
   ->name('download')
   ->middleware('signed');

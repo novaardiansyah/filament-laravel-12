@@ -1,0 +1,47 @@
+@extends('mails.layout.main-light')
+
+@section('title')
+  {{ $data['subject'] }}
+@endsection
+
+@section('header')
+  Hai {{ explode(' ', config('app.author_name'))[0] }},
+@endsection
+
+@section('content')
+  <p>Kami ingin menginformasikan bahwa ada pengguna yang baru saja login ke situs web Anda. Berikut adalah detail login pengguna tersebut:</p>
+
+  <div class="card" style="margin-top: 20px;">
+    <div class="group">
+      <h4>Detail Pengguna</h4>
+      <ul class="list-flush">
+        <li>
+          <strong>Alamat Email</strong>: {{ $data['email_user'] ? textLower($data['email_user']) : '-' }}
+        </li>
+        <li>
+          <strong>Alamat IP</strong>: {{ $data['ip_address'] ?? '-' }}
+        </li>
+        <li>
+          <strong>Lokasi</strong>: {{ $data['address'] ?? '-' }}
+        </li>
+        <li>
+          <strong>Geolokasi</strong>: {{ $data['geolocation'] ?? '-' }}
+        </li>
+        <li>
+          <strong>Zona Waktu</strong>: {{ $data['timezone'] ?? '-' }}
+        </li>
+        <li>
+          <strong>Perangkat</strong>: {{ $data['user_agent'] ?? '-' }}
+        </li>
+        <li>
+          <strong>Waktu Login</strong>: {{ $data['date'] ? carbonTranslatedFormat($data['date'], 'd F Y H:i') : '-' }}
+        </li>
+        <li>
+          <strong>Referer</strong>: <a href="{{ $data['url'] ?? '#' }}" target="_blank">{{ $data['url'] ?? '-' }}</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <p>Jika ini bukan aktivitas yang Anda kenali, sebagai tindakan pencegahan, kami sarankan Anda untuk segera memeriksa aktivitas pengguna tersebut dan melakukan tindakan yang diperlukan.</p>
+@endsection

@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Listeners\LogUserLogin;
+use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use App\Listeners\AssignDemoRoleToUser;
@@ -16,6 +18,9 @@ class EventServiceProvider extends ServiceProvider
   protected $listen = [
     Verified::class => [
       AssignDemoRoleToUser::class,
+    ],
+    Login::class => [
+      LogUserLogin::class,
     ],
   ];
 

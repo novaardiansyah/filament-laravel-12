@@ -13,7 +13,7 @@ class TestingController extends Controller
   public function __construct()
   {
     $env = config('app.env');
-    if ($env === 'production') {
+    if ($env != 'local') {
       abort(404, 'Not Found');
     }
   }

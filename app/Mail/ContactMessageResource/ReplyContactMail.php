@@ -2,6 +2,7 @@
 
 namespace App\Mail\ContactMessageResource;
 
+use App\Models\EmailLog;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -19,7 +20,7 @@ class ReplyContactMail extends Mailable implements ShouldQueue
    */
   public function __construct(public array $data = [])
   {
-    //
+    $this->updateToSuccess();
   }
 
   /**
@@ -54,5 +55,44 @@ class ReplyContactMail extends Mailable implements ShouldQueue
   public function attachments(): array
   {
     return [];
+  }
+
+  public function updateToSuccess()
+  {
+    $createdAt = $this->data['created_at'];
+    $logName   = $this->data['log_name'];
+
+    $response = 'Daily Spending Notification has been successfully sent.';
+
+    $update = EmailLog::where('created_at', $createdAt)
+      ->where('name', $logName)
+      ->update([
+        'status_id' => 3,
+        'response'  => $response
+      ]);
+      
+    if ($update) {
+      \Log::info($response);
+    }
+  }
+
+  public function failed(\Exception $exception)
+  {
+    $createdAt = $this->data['created_at'];
+    $logName   = $this->data['log_name'];
+    $email     = $this->data['email'];
+
+    $response = 'Failed to send Daily Spending Notification to ' . $email;
+
+    $update = EmailLog::where('created_at', $createdAt)
+      ->where('name', $logName)
+      ->update([
+        'status_id' => 4,
+        'response'  => substr($response . ': {' . $exception->getMessage() . '}', 0, 3000)
+      ]);
+
+    if ($update) {
+      \Log::info($response);
+    }
   }
 }

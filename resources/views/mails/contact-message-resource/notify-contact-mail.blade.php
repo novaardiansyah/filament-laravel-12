@@ -19,7 +19,7 @@
           <strong>Nama</strong>: {{ $data['name'] ?? '-' }}
         </li>
         <li>
-          <strong>Email</strong>: {{ $data['email'] ?? '-' }}
+          <strong>Email</strong>: {{ $data['email_contact'] ?? '-' }}
         </li>
         <li>
           <strong>Subjek</strong>: {{ $data['subject_contact'] ?? '-' }}
@@ -42,7 +42,7 @@
           <strong>Perangkat</strong>: {{ $data['user_agent'] ?? '-' }}
         </li>
         <li>
-          <strong>Waktu Pengiriman</strong>: {{ $data['created_at'] ?? '-' }}
+          <strong>Waktu Pengiriman</strong>: {{ $data['created_at'] ? carbonTranslatedFormat($data['created_at'], 'd F Y H:i') : '-' }}
         </li>
         <li>
           <strong>Referer</strong>: {{ $data['url'] ?? '-' }}

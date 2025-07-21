@@ -10,7 +10,7 @@
 
 @section('content')
   <p>
-    Kami ingin menginformasikan bahwa berikut adalah laporan keuangan mingguan Anda untuk periode {{ $data['periode'] ?? '-' }}, sebagai berikut:
+    Kami ingin memberitahukan bahwa berikut adalah laporan keuangan mingguan Anda untuk periode {{ $data['periode'] ?? '-' }}:
   </p>
 
   <div class="card">

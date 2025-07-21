@@ -6,6 +6,7 @@ use App\Mail\ContactMessageResource\NotifContactMail;
 use App\Mail\PaymentAccountResource\WeeklyReportMail;
 use App\Models\Payment;
 use App\Models\PaymentAccount;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
@@ -42,7 +43,60 @@ class TestingController extends Controller
     $preview = (bool) $request->input('preview', 0);
 
     $startDate = now()->startOfWeek();
-    $endDate = now()->endOfWeek();
+    $endDate   = now()->endOfWeek();
+    $now       = now()->toDateTimeString();
+
+    $start_date = carbonTranslatedFormat($startDate, 'd');
+    $end_date   = carbonTranslatedFormat($endDate, 'd F Y');
+
+    if (carbonTranslatedFormat($startDate, 'F Y') != carbonTranslatedFormat($endDate, 'F Y')) {
+      $start_date = carbonTranslatedFormat($startDate, 'd F Y');
+      $end_date   = carbonTranslatedFormat($endDate, 'd F Y');
+    }
+
+    $periode = "{$start_date} - {$end_date}";
+
+    // ! Setup pdf attachment
+    $mpdf         = new \Mpdf\Mpdf();
+    $rowIndex     = 1;
+    $totalExpense = 0;
+    $totalIncome  = 0;
+    $user         = auth()->user() ?? User::find(1);  // ! Default user if not authenticated
+
+    $mpdf->WriteHTML(view('payment-resource.make-pdf.header', [
+      'title'   => 'Laporan keuangan mingguan',
+      'now'     => carbonTranslatedFormat($now, 'd/m/Y H:i'),
+      'periode' => $periode,
+      'user'    => $user,
+    ])->render());
+    
+    Payment::whereBetween('date', [$startDate, $endDate])
+      ->chunk(200, function ($list) use ($mpdf, &$rowIndex, &$totalExpense, &$totalIncome) {
+        foreach ($list as $record) {
+          $view = view('payment-resource.make-pdf.body', [
+            'record'    => $record,
+            'loopIndex' => $rowIndex++,
+          ])->render();
+
+          $mpdf->WriteHTML($view);
+
+          if ($record->type_id == 1) {
+            $totalExpense += $record->amount;
+          } elseif ($record->type_id == 2) {
+            $totalIncome += $record->amount;
+          }
+        }
+    });
+
+    $mpdf->WriteHTML('
+      <tr>
+        <td colspan="4" style="text-align: center; font-weight: bold;">Total Transaksi</td>
+        <td style="font-weight: bold;">'. ($totalIncome > 0 ? toIndonesianCurrency($totalIncome) : '') .'</td>
+        <td style="font-weight: bold;">'. ($totalExpense > 0 ? toIndonesianCurrency($totalExpense) : '') .'</td>
+      </tr>
+    ');
+
+    $result = makePdf($mpdf, 'weekly-payment-report', $user, notification: false);
 
     $payment = Payment::selectRaw('
       SUM(CASE WHEN type_id = 1 THEN amount ELSE 0 END) as total_expense,
@@ -57,16 +111,6 @@ class TestingController extends Controller
 
     $sisa_saldo = PaymentAccount::sum('deposit');
 
-    $start_date = carbonTranslatedFormat($startDate, 'd');
-    $end_date = carbonTranslatedFormat($endDate, 'd F Y');
-
-    if (carbonTranslatedFormat($startDate, 'F Y') != carbonTranslatedFormat($endDate, 'F Y')) {
-      $start_date = carbonTranslatedFormat($startDate, 'd F Y');
-      $end_date = carbonTranslatedFormat($endDate, 'd F Y');
-    }
-
-    $periode = "{$start_date} - {$end_date}";
-
     $data = [
       'log_name'      => 'weekly_payment_notification',
       'email'         => config('app.author_email'),
@@ -79,7 +123,10 @@ class TestingController extends Controller
       'count_income'  => (int) $payment->count_income ?? 0,
       'sisa_saldo'    => (int) $sisa_saldo,
       'periode'       => $periode,
-      'created_at'    => now()->toDateTimeString(),
+      'created_at'    => $now,
+      'attachments' => [
+        storage_path('app/' . $result['filepath']),
+      ],
     ];
 
     if (!$preview) {

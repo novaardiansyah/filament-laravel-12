@@ -43,9 +43,11 @@ class WeeklyReportJob implements ShouldQueue
     $periode = "{$start_date} - {$end_date}";
 
     // ! Setup pdf attachment
-    $mpdf     = new \Mpdf\Mpdf();
-    $rowIndex = 1;
-    $user     = auth()->user() ?? User::find(1); // ! Default user if not authenticated
+    $mpdf         = new \Mpdf\Mpdf();
+    $rowIndex     = 1;
+    $totalExpense = 0;
+    $totalIncome  = 0;
+    $user         = auth()->user() ?? User::find(1);  // ! Default user if not authenticated
 
     $mpdf->WriteHTML(view('payment-resource.make-pdf.header', [
       'title'   => 'Laporan keuangan mingguan',
@@ -55,7 +57,7 @@ class WeeklyReportJob implements ShouldQueue
     ])->render());
     
     Payment::whereBetween('date', [$startDate, $endDate])
-      ->chunk(200, function ($list) use ($mpdf, &$rowIndex) {
+      ->chunk(200, function ($list) use ($mpdf, &$rowIndex, &$totalExpense, &$totalIncome) {
         foreach ($list as $record) {
           $view = view('payment-resource.make-pdf.body', [
             'record'    => $record,
@@ -63,8 +65,22 @@ class WeeklyReportJob implements ShouldQueue
           ])->render();
 
           $mpdf->WriteHTML($view);
+
+          if ($record->type_id == 1) {
+            $totalExpense += $record->amount;
+          } elseif ($record->type_id == 2) {
+            $totalIncome += $record->amount;
+          }
         }
     });
+
+    $mpdf->WriteHTML('
+      <tr>
+        <td colspan="4" style="text-align: center; font-weight: bold;">Total Transaksi</td>
+        <td style="font-weight: bold;">'. ($totalIncome > 0 ? toIndonesianCurrency($totalIncome) : '') .'</td>
+        <td style="font-weight: bold;">'. ($totalExpense > 0 ? toIndonesianCurrency($totalExpense) : '') .'</td>
+      </tr>
+    ');
 
     $result = makePdf($mpdf, 'weekly-payment-report', $user, notification: false);
 

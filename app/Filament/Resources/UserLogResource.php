@@ -5,12 +5,12 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\UserLogResource\Pages;
 use App\Models\UserLog;
 use Filament\Forms\Form;
+use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Infolists\Infolist;
-use Filament\Infolists;
+use Dotswan\MapPicker\Fields\Map;
 
 class UserLogResource extends Resource
 {
@@ -27,8 +27,68 @@ class UserLogResource extends Resource
   {
     return $form
       ->schema([
-        //
-      ]);
+        Forms\Components\Section::make()
+          ->columns(3)
+          ->schema([
+            Forms\Components\TextInput::make('email')
+              ->label('Email'),
+            Forms\Components\TextInput::make('ip_address')
+              ->label('Alamat IP'),
+            Forms\Components\TextInput::make('timezone')
+              ->label('Zona Waktu'),
+            Forms\Components\TextInput::make('country')
+              ->label('Negara'),
+            Forms\Components\TextInput::make('city')
+              ->label('Kota/Kabupaten'),
+            Forms\Components\TextInput::make('region')
+              ->label('Wilayah/Provinsi'),
+            Forms\Components\TextInput::make('postal')
+              ->label('Kode Pos'),
+            Forms\Components\TextInput::make('geolocation')
+              ->label('Geolokasi')
+              ->afterStateHydrated(function ($state, Forms\Set $set): void {
+                $geolocation = $state ?? null;
+                if ($geolocation) {
+                  $geolocationParts = explode(',', $geolocation);
+                  $set('location', [
+                    'lat' => $geolocationParts[0] ?? null,
+                    'lng' => $geolocationParts[1] ?? null,
+                  ]);
+                }
+              }),
+            Forms\Components\Textarea::make('user_agent')
+              ->label('Perangkat')
+              ->rows(3)
+              ->columnSpanFull(),
+          ]),
+
+        Map::make('location')
+          ->label('Peta Lokasi Pengguna')
+          ->defaultLocation(latitude: -6.2886, longitude: 106.7179)
+          ->draggable(false)
+          ->clickable(false)
+          ->zoom(10)
+          ->minZoom(0)
+          ->maxZoom(28)
+          ->tilesUrl("https://tile.openstreetmap.de/{z}/{x}/{y}.png")
+          ->detectRetina(true)
+          ->extraStyles([
+            'border-radius: 12px',
+            'min-height: 400px',
+          ])
+          ->columnSpanFull(),
+        
+        Forms\Components\Section::make()
+          ->columns(3)
+          ->schema([
+            Forms\Components\DateTimePicker::make('created_at')
+              ->label('Dibuat pada')
+              ->displayFormat('d/m/Y H:i'),
+            Forms\Components\DateTimePicker::make('updated_at')
+              ->label('Diubah pada')
+              ->displayFormat('d/m/Y H:i'),
+          ]),
+      ])->columns(3);
   }
 
   public static function table(Table $table): Table
@@ -114,53 +174,6 @@ class UserLogResource extends Resource
       // 'create' => Pages\CreateUserLog::route('/create'),
       // 'edit' => Pages\EditUserLog::route('/{record}/edit'),
     ];
-  }
-
-  public static function infolist(Infolist $infolist): Infolist
-  {
-    return $infolist
-      ->schema([
-        Infolists\Components\Section::make()
-          ->columns(3)
-          ->schema([
-            Infolists\Components\TextEntry::make('email')
-              ->label('Email')
-              ->formatStateUsing(fn(string $state): string => textLower($state))
-              ->copyable(),
-            Infolists\Components\TextEntry::make('ip_address')
-              ->label('Alamat IP')
-              ->limit(15)
-              ->copyable(),
-            Infolists\Components\TextEntry::make('city')
-              ->label('Lokasi')
-              ->formatStateUsing(fn (UserLog $record): string => self::getFullAddress($record))
-              ->copyable()
-              ->copyableState(fn (UserLog $record): string => self::getFullAddress($record)),
-            Infolists\Components\TextEntry::make('timezone')
-              ->label('Zona Waktu')
-              ->copyable(),
-            Infolists\Components\TextEntry::make('geolocation')
-              ->label('Geolokasi')
-              ->formatStateUsing(fn(string $state): string => str_replace(',', ', ', $state))
-              ->copyable()
-              ->copyableState(fn(string $state): string => str_replace(',', ', ', $state)),
-            Infolists\Components\TextEntry::make('user_agent')
-              ->label('Perangkat')
-              ->columnSpanFull()
-              ->copyable(),
-          ]),
-
-        Infolists\Components\Section::make()
-          ->columns(3)
-          ->schema([
-            Infolists\Components\TextEntry::make('created_at')
-              ->label('Dibuat pada')
-              ->dateTime('d M Y H:i'),
-            Infolists\Components\TextEntry::make('updated_at')
-              ->label('Diubah pada')
-              ->dateTime('d M Y H:i'),
-          ]),
-      ]);
   }
 
   public static function getFullAddress(UserLog $record): string

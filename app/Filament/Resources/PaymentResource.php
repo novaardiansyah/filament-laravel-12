@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\PaymentResource\Pages;
 use App\Filament\Resources\PaymentResource\RelationManagers\ItemsRelationManager;
+use App\Jobs\PaymentResource\MakePdfJob;
 use App\Models\Payment;
 use App\Models\PaymentAccount;
 use App\Models\PaymentType;
@@ -11,6 +12,7 @@ use App\Models\Setting;
 use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Enums\FiltersLayout;
@@ -253,11 +255,13 @@ class PaymentResource extends Resource
             Forms\Components\DatePicker::make('from_created_at')
               ->label('Dari Tanggal')
               ->displayFormat('d M Y')
-              ->native(false),
+              ->native(false)
+              ->default(now()->startOfMonth()),
             Forms\Components\DatePicker::make('end_created_at')
               ->label('Sampai Tanggal')
               ->displayFormat('d M Y')
-              ->native(false),
+              ->native(false)
+              ->default(now()->endOfMonth()),
           ])
           ->indicateUsing(function (array $data): ?array {
             $indicators = [];
@@ -303,6 +307,28 @@ class PaymentResource extends Resource
             ->withChunkSize(200)
             ->queue(),
         ]),
+
+        Tables\Actions\Action::make('print_pdf')
+          ->label('Cetak PDF')
+          ->color('primary')
+          ->icon('heroicon-o-printer')
+          ->action(function (Tables\Actions\Action $action): void {
+            $livewire = $action->getLivewire();
+            $filter   = $livewire->getTableFilterState('date') ?? [];
+            
+            $params = [
+              'start_date' => $filter['from_created_at'] ?? now()->startOfMonth(),
+              'end_date'   => $filter['end_created_at'] ?? now()->endOfMonth(),
+            ];
+            
+            MakePdfJob::dispatch($params);
+
+            Notification::make()
+              ->title('Cetak PDF dalam antrian')
+              ->body('Cetak PDF telah masuk antrian. Anda akan diberitahu ketika file siap diunduh.')
+              ->success()
+              ->send();
+          })
       ])
       ->actions([
         Tables\Actions\ActionGroup::make([

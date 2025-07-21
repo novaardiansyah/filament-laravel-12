@@ -59,9 +59,9 @@ class LogUserLogin
 
     $geolocation = $ip_info['loc'] ?? null;
     $geolocation = $geolocation ? str_replace(',', ', ', $geolocation) : null;
-    
-    $timezone    = $ip_info['timezone'] ?? null;
-    $now         = now();
+
+    $timezone = $ip_info['timezone'] ?? null;
+    $now      = now();
 
     $saveLog = UserLog::create([
       'user_id'    => $event->user->id,
@@ -74,7 +74,7 @@ class LogUserLogin
       'geolocation'=> $geolocation,
       'timezone'   => $timezone,
       'user_agent' => request()->headers->get('user-agent'),
-      'referer'    => request()->headers->get('referer'),
+      'referer'    => url('admin/login'),
       'created_at' => $now,
       'updated_at' => $now,
     ]);

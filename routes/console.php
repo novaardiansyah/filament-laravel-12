@@ -21,5 +21,5 @@ if (config('app.env') != 'staging') {
     ->dailyAt('23:00');
 
   Schedule::job(new DailyFileCleanupJob())
-    ->dailyAt('23:00');
+    ->dailyAt('23:59');
 }

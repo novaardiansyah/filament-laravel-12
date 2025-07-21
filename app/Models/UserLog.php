@@ -10,7 +10,7 @@ class UserLog extends Model
 {
   use SoftDeletes;
   protected $table = 'user_logs';
-  protected  $guarded = ['id'];
+  protected $guarded = ['id'];
 
   public function user(): BelongsTo
   {

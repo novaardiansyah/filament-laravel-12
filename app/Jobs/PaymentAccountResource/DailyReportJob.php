@@ -55,7 +55,7 @@ class DailyReportJob implements ShouldQueue
       }
     });
 
-    $result = makePdf($mpdf, 'daily-payment-report', $user);
+    $result = makePdf($mpdf, 'daily-payment-report', $user, notification: false);
 
     $data = [
       'email'            => config('app.author_email'),

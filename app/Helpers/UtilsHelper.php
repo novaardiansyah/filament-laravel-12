@@ -32,7 +32,7 @@ function toIndonesianCurrency(float $number = 0, int $precision = 0, string $cur
   return $replace;
 }
 
-function makePdf(\Mpdf\Mpdf $mpdf, string $name, ?Model $user = null, $preview = false): array
+function makePdf(\Mpdf\Mpdf $mpdf, string $name, ?Model $user = null, $preview = false, $notification = true): array
 {
   $user ??= User::find(1); // ! Default user if not provided
 
@@ -64,20 +64,22 @@ function makePdf(\Mpdf\Mpdf $mpdf, string $name, ?Model $user = null, $preview =
     ['path' => $filenameWithoutExtension, 'extension' => $extension, 'directory' => $directory]
   );
 
-  Notification::make()
-    ->title('Cetak PDF Selesai')
-    ->body('File Anda siap untuk diunduh.')
-    ->icon('heroicon-o-arrow-down-tray')
-    ->iconColor('success')
-    ->actions([
-      Action::make('download')
-        ->label('Unduh')
-        ->url($fileUrl)
-        ->openUrlInNewTab()
-        ->markAsRead()
-        ->button()
-    ])
-    ->sendToDatabase($user);
+  if ($notification) {
+    Notification::make()
+      ->title('Cetak PDF Selesai')
+      ->body('File Anda siap untuk diunduh.')
+      ->icon('heroicon-o-arrow-down-tray')
+      ->iconColor('success')
+      ->actions([
+        Action::make('download')
+          ->label('Unduh')
+          ->url($fileUrl)
+          ->openUrlInNewTab()
+          ->markAsRead()
+          ->button()
+      ])
+      ->sendToDatabase($user);
+  }
 
   ScheduledFileDeletion::create([
     'user_id'                 => $user->id,

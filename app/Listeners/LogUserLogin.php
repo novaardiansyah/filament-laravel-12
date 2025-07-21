@@ -58,6 +58,8 @@ class LogUserLogin
     }
 
     $geolocation = $ip_info['loc'] ?? null;
+    $geolocation = $geolocation ? str_replace(',', ', ', $geolocation) : null;
+    
     $timezone    = $ip_info['timezone'] ?? null;
     $now         = now();
 

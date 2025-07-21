@@ -1,48 +1,34 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Jobs\PaymentAccountResource;
 
-use App\Mail\ContactMessageResource\NotifContactMail;
 use App\Mail\PaymentAccountResource\WeeklyReportMail;
+use App\Models\EmailLog;
 use App\Models\Payment;
 use App\Models\PaymentAccount;
-use Illuminate\Http\Request;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Mail;
 
-class TestingController extends Controller
+class WeeklyReportJob implements ShouldQueue
 {
+  use Queueable;
+
+  /**
+   * Create a new job instance.
+   */
   public function __construct()
   {
-    $env = config('app.env');
-    if ($env != 'local') {
-      abort(404, 'Not Found');
-    }
+    //
   }
 
-  public function index(Request $request)
+  /**
+   * Execute the job.
+   */
+  public function handle(): void
   {
-    $preview = (bool) $request->input('preview', 0);
-
-    $data = [
-      'email'   => 'novaardiansyah78@gmail.com',
-      'subject' => 'Notifikasi: Pesan masuk baru dari situs web',
-    ];
-
-    if (!$preview) {
-      Mail::to($data['email'])->queue(new NotifContactMail($data));
-      echo 'Email has been queued for sending.';
-    }
-
-    $process = new NotifContactMail($data);
-    return $process->render();
-  }
-
-  public function email_preview(Request $request)
-  {
-    $preview = (bool) $request->input('preview', 0);
-
     $startDate = now()->startOfWeek();
-    $endDate = now()->endOfWeek();
+    $endDate   = now()->endOfWeek();
 
     $payment = Payment::selectRaw('
       SUM(CASE WHEN type_id = 1 THEN amount ELSE 0 END) as total_expense,
@@ -66,6 +52,7 @@ class TestingController extends Controller
     }
 
     $periode = "{$start_date} - {$end_date}";
+    $now = now()->toDateTimeString();
 
     $data = [
       'log_name'      => 'weekly_payment_notification',
@@ -79,15 +66,22 @@ class TestingController extends Controller
       'count_income'  => (int) $payment->count_income ?? 0,
       'sisa_saldo'    => (int) $sisa_saldo,
       'periode'       => $periode,
-      'created_at'    => now()->toDateTimeString(),
+      'created_at'    => $now,
     ];
 
-    if (!$preview) {
-      Mail::to($data['email'])->queue(new WeeklyReportMail($data));
-      echo 'Email has been queued for sending.';
-    }
+    $mailObj = new WeeklyReportMail($data);
+    $message = $mailObj->render();
 
-    $process = new WeeklyReportMail($data);
-    return $process->render();
+    EmailLog::create([
+      'status_id'  => 2,
+      'name'       => $data['log_name'],
+      'email'      => $data['email'],
+      'subject'    => $data['subject'],
+      'message'    => $message,
+      'created_at' => $now,
+      'updated_at' => $now,
+    ]);
+
+    Mail::to($data['email'])->queue(new WeeklyReportMail($data));
   }
 }

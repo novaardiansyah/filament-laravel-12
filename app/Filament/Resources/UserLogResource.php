@@ -40,6 +40,7 @@ class UserLogResource extends Resource
           ->label('#'),
         Tables\Columns\TextColumn::make('ip_address')
           ->label('Alamat IP')
+          ->limit(15)
           ->searchable()
           ->toggleable(),
         Tables\Columns\TextColumn::make('email')
@@ -128,6 +129,7 @@ class UserLogResource extends Resource
               ->copyable(),
             Infolists\Components\TextEntry::make('ip_address')
               ->label('Alamat IP')
+              ->limit(15)
               ->copyable(),
             Infolists\Components\TextEntry::make('city')
               ->label('Lokasi')

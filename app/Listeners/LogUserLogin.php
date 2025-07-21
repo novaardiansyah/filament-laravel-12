@@ -51,12 +51,11 @@ class LogUserLogin
     $city    = $ip_info['city'] ?? null;
     $region  = $ip_info['region'] ?? null;
     $postal  = $ip_info['postal'] ?? null;
+    
     $address = null;
-
-    if ($country) $address .= $country;
-    if ($city) $address .= ', ' . $city;
-    if ($region) $address .= ', ' . $region;
-    if ($postal) $address .= ', ' . $postal;
+    if ($city) {
+      $address = trim("{$city}, {$region}, {$country} ({$postal})");
+    }
 
     $geolocation = $ip_info['loc'] ?? null;
     $timezone    = $ip_info['timezone'] ?? null;

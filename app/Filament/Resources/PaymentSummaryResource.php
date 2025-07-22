@@ -112,11 +112,9 @@ class PaymentSummaryResource extends Resource
         Tables\Columns\TextColumn::make('code')
           ->label('ID Summary')
           ->searchable()
-          ->sortable()
           ->copyable(),
         Tables\Columns\TextColumn::make('period')
           ->label('Periode')
-          ->sortable()
           ->toggleable()
           ->formatStateUsing(function (string $state): string {
             $month = now()->month((int) substr($state, 0, 2))->translatedFormat('F');
@@ -143,56 +141,21 @@ class PaymentSummaryResource extends Resource
           ->toggleable()
           ->sortable()
           ->formatStateUsing(fn (string $state) => toIndonesianCurrency($state, showCurrency: self::showPaymentCurrency())),
+        Tables\Columns\TextColumn::make('created_at')
+          ->label('Dibuat pada')
+          ->dateTime('d/m/Y H:i')
+          ->sortable()
+          ->toggleable(isToggledHiddenByDefault: true),
+        Tables\Columns\TextColumn::make('updated_at')
+          ->label('Diubah pada')
+          ->dateTime('d/m/Y H:i')
+          ->sortable()
+          ->toggleable(),
       ])
-      ->filters([
-        Tables\Filters\Filter::make('date')
-          ->form([
-            Forms\Components\DatePicker::make('from_created_at')
-              ->label('Dari Tanggal')
-              ->displayFormat('d M Y')
-              ->native(false),
-            Forms\Components\DatePicker::make('end_created_at')
-              ->label('Sampai Tanggal')
-              ->displayFormat('d M Y')
-              ->native(false),
-          ])
-          ->indicateUsing(function (array $data): ?array {
-            $indicators = [];
-
-            if ($data['from_created_at'] ?? null) {
-              $indicators[] = Indicator::make('Dari Tanggal ' . Carbon::parse($data['from_created_at'])->translatedFormat('d M Y'))
-                ->removeField('from_created_at');
-            }
-
-            if ($data['end_created_at'] ?? null) {
-              $indicators[] = Indicator::make('Sampai Tanggal ' . Carbon::parse($data['end_created_at'])->translatedFormat('d M Y'))
-                ->removeField('end_created_at');
-            }
-
-            return $indicators;
-          })
-          ->query(function (Builder $query, array $data): Builder {
-            return $query
-              ->when(
-                $data['from_created_at'],
-                fn(Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
-              )
-              ->when(
-                $data['end_created_at'],
-                fn(Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
-              );
-          })
-          ->columns(2)
-      ], layout: FiltersLayout::Modal)
-      ->filtersFormColumns(2)
-      ->filtersFormSchema(fn(array $filters): array => [
-        Forms\Components\Section::make('')
-          ->description('Filter data berdasarkan kriteria berikut:')
-          ->schema([
-            $filters['date']
-          ])
-          ->columns(1)
-      ])
+      ->recordAction(null)
+      ->recordUrl(null)
+      ->defaultSort('updated_at', 'desc')
+      ->filters([])
       ->headerActions([
         ExportAction::make()->exports([
           ExcelExport::make('table')->fromTable()

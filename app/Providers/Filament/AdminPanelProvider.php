@@ -122,10 +122,11 @@ class AdminPanelProvider extends PanelProvider
         GlobalSearchModalPlugin::make()
       ])
       ->navigationGroups([
-        'Pengguna',
+        'Produktivitas',
         'Keuangan',
         'Master Data',
         'Berkas',
+        'Pengguna',
         'Pengaturan',
         'Audit Logs',
       ])

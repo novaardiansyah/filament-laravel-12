@@ -45,4 +45,9 @@ return [
   'ipinfo' => [
     'token' => env('IPINFO_TOKEN', ''),
   ],
+
+  'tinyurl' => [
+    'token' => env('TINYURL_API_KEY', ''),
+    'url'   => env('TINYURL_URL', ''),
+  ]
 ];

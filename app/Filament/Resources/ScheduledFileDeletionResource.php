@@ -71,6 +71,7 @@ class ScheduledFileDeletionResource extends Resource
       ])
       ->recordAction(null)
       ->recordUrl(null)
+      ->defaultSort('updated_at', 'desc')
       ->filters([
         //
       ])

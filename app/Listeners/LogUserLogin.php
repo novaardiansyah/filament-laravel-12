@@ -36,9 +36,9 @@ class LogUserLogin
     
     $ip_address = request()->ip();
 
-    // ! Cek di UserLog dengan IP, jika dalam 30 menit sudah ada, tidak perlu kirim email lagi
+    // ! Cek di UserLog dengan IP, jika dalam 6 jam sudah ada, tidak perlu kirim email lagi
     $existingLog = UserLog::where('ip_address', $ip_address)
-      ->where('created_at', '>=', now()->subMinutes(30))
+      ->where('created_at', '>=', now()->subHours(6))
       ->first();
     
     if ($existingLog) {

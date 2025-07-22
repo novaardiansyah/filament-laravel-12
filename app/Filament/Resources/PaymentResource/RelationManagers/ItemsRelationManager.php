@@ -180,10 +180,6 @@ class ItemsRelationManager extends RelationManager
 
             if (!$syncSummary) return;
 
-            $owner->update([
-              'last_balance' => $syncSummary['current_balance'] ?? 0,
-            ]);
-
             // * refresh parent form
             $action->getLivewire()->dispatch('refreshForm');
           }),
@@ -279,10 +275,6 @@ class ItemsRelationManager extends RelationManager
 
             if (!$syncSummary) return;
 
-            $owner->update([
-              'last_balance' => $syncSummary['current_balance'] ?? 0,
-            ]);
-
             // * refresh parent form
             $action->getLivewire()->dispatch('refreshForm');
           }),
@@ -355,10 +347,6 @@ class ItemsRelationManager extends RelationManager
 
               if (!$syncSummary) return;
 
-              $owner->update([
-                'last_balance' => $syncSummary['current_balance'] ?? 0,
-              ]);
-
               // * refresh parent form
               $action->getLivewire()->dispatch('refreshForm');
             }),
@@ -398,10 +386,6 @@ class ItemsRelationManager extends RelationManager
               $syncSummary = PaymentSummary::setSync($period);
 
               if (!$syncSummary) return;
-
-              $owner->update([
-                'last_balance' => $syncSummary['current_balance'] ?? 0,
-              ]);
 
               // * Lakukan detach pada setiap record
               foreach ($records as $record) {

@@ -18,6 +18,7 @@
       <th scope="col">ID Transaksi</th>
       <th scope="col">Tanggal</th>
       <th scope="col">Catatan</th>
+      <th scope="col">Transfer</th>
       <th scope="col">Pemasukan</th>
       <th scope="col">Pengeluaran</th>
     </tr>

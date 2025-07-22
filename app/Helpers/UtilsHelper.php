@@ -32,7 +32,7 @@ function toIndonesianCurrency(float $number = 0, int $precision = 0, string $cur
   return $replace;
 }
 
-function makePdf(\Mpdf\Mpdf $mpdf, string $name, ?Model $user = null, $preview = false, $notification = true): array
+function makePdf(\Mpdf\Mpdf $mpdf, string $name, ?Model $user = null, $preview = false, $notification = true, $auto_close_tbody = true): array
 {
   $user ??= User::find(1); // ! Default user if not provided
 
@@ -42,7 +42,14 @@ function makePdf(\Mpdf\Mpdf $mpdf, string $name, ?Model $user = null, $preview =
   $filename                 = "{$filenameWithoutExtension}.{$extension}";
   $filepath                 = "{$directory}/{$filename}";
 
-  $mpdf->WriteHTML(view('layout.end-body')->render());
+  $end_tbody = $auto_close_tbody ? '</tbody><tfoot><tr></tr></tfoot>' : '';
+
+  $mpdf->WriteHTML($end_tbody . '
+        </table>
+      </body>
+    </html>
+  ');
+  
   $mpdf->SetHTMLFooter(view('layout.footer')->render());
   
   if ($preview) {

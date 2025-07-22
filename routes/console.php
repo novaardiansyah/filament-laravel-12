@@ -15,7 +15,7 @@ Artisan::command('inspire', function () {
 if (config('app.env') != 'staging') {
   // ! Notifikasi: Laporan Keuangan Harian
   Schedule::job(new DailyReportJob())
-    ->dailyAt('23:45');
+    ->cron('45 23,12,18 * * *'); // ! Setiap hari pada pukul 23:45, 12:45, dan 18:45
 
   // ! Notifikasi: Ringkasan Laporan Keuangan Mingguan
   Schedule::job(new WeeklyReportJob())

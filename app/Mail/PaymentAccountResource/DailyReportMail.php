@@ -57,7 +57,7 @@ class DailyReportMail extends Mailable implements ShouldQueue
     $createdAt = $this->data['created_at'];
     $logName   = $this->data['log_name'];
 
-    $response = 'Daily Spending Notification has been successfully sent.';
+    $response = 'Daily Report Email Notification has been successfully sent.';
 
     $update = EmailLog::where('created_at', $createdAt)
       ->where('name', $logName)
@@ -67,7 +67,7 @@ class DailyReportMail extends Mailable implements ShouldQueue
       ]);
       
     if ($update) {
-      \Log::info($response);
+      \Log::info('['. __METHOD__.':'.__LINE__ .']: ' . $response);
     }
   }
 
@@ -77,7 +77,7 @@ class DailyReportMail extends Mailable implements ShouldQueue
     $logName   = $this->data['log_name'];
     $email     = $this->data['email'];
 
-    $response = 'Failed to send Daily Spending Notification to ' . $email;
+    $response = 'Failed to send Daily Report Email Notification to ' . $email;
 
     $update = EmailLog::where('created_at', $createdAt)
       ->where('name', $logName)
@@ -87,7 +87,7 @@ class DailyReportMail extends Mailable implements ShouldQueue
       ]);
 
     if ($update) {
-      \Log::info($response);
+      \Log::info('['. __METHOD__.':'.__LINE__ .']: ' . $response);
     }
   }
 }

@@ -7,6 +7,7 @@ use App\Models\EmailLog;
 use App\Models\Payment;
 use App\Models\PaymentAccount;
 use App\Models\User;
+use App\Services\PaymentService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Mail;
@@ -28,40 +29,27 @@ class DailyReportJob implements ShouldQueue
    */
   public function handle(): void
   {
-    $now = now();
-    
-    $mpdf     = new \Mpdf\Mpdf();
-    $rowIndex = 1;
-    $periode  = $now->toDateString();
-    $user     = auth()->user() ?? User::find(1); // ! Default user if not authenticated
+    \Log::info('['. __METHOD__.':'.__LINE__ .']: Daily Report Job process started');
 
-    $mpdf->WriteHTML(view('payment-resource.make-pdf.header', [
-      'title'   => 'Laporan keuangan harian',
-      'now'     => carbonTranslatedFormat($now, 'd/m/Y H:i'),
-      'periode' => carbonTranslatedFormat($periode, 'l, d F Y'),
-      'user'    => $user,
-    ])->render());
-    
-    Payment::where([
-      'date' => $periode,
-    ])->chunk(200, function ($list) use ($mpdf, &$rowIndex) {
-      foreach ($list as $record) {
-        $view = view('payment-resource.make-pdf.body', [
-          'record'    => $record,
-          'loopIndex' => $rowIndex++,
-        ])->render();
+    $startDate = now()->startOfWeek();
+    $endDate   = now()->endOfWeek();
+    $now       = now()->toDateTimeString();
 
-        $mpdf->WriteHTML($view);
-      }
-    });
+    $send = [
+      'filename'   => 'daily-payment-report',
+      'title'      => 'Laporan keuangan harian',
+      'start_date' => $startDate,
+      'end_date'   => $endDate,
+      'now'        => $now,
+    ];
 
-    $result = makePdf($mpdf, 'daily-payment-report', $user, notification: false);
+    $result = PaymentService::make_pdf($send);
 
     $data = [
       'email'            => config('app.author_email'),
       'subject'          => 'Notifikasi: Ringkasan Laporan Keuangan Harian',
       'payment_accounts' => PaymentAccount::orderBy('deposit', 'desc')->get()->toArray(),
-      'date'             => carbonTranslatedFormat($periode, 'd F Y'),
+      'date'             => carbonTranslatedFormat($now, 'd F Y'),
       'log_name'         => 'daily_payment_notification',
       'created_at'       => $now,
       'attachments' => [
@@ -83,5 +71,7 @@ class DailyReportJob implements ShouldQueue
     ]);
 
     Mail::to($data['email'])->queue(new DailyReportMail($data));
+
+    \Log::info('['. __METHOD__.':'.__LINE__ .']: Daily Report Job executed successfully');
   }
 }

@@ -7,6 +7,7 @@ use App\Models\EmailLog;
 use App\Models\Payment;
 use App\Models\PaymentAccount;
 use App\Models\User;
+use App\Services\PaymentService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Mail;
@@ -28,6 +29,8 @@ class WeeklyReportJob implements ShouldQueue
    */
   public function handle(): void
   {
+     \Log::info('['. __METHOD__.':'.__LINE__ .']: Weekly Report Job process started');
+
     $startDate = now()->startOfWeek();
     $endDate   = now()->endOfWeek();
     $now       = now()->toDateTimeString();
@@ -42,47 +45,15 @@ class WeeklyReportJob implements ShouldQueue
 
     $periode = "{$start_date} - {$end_date}";
 
-    // ! Setup pdf attachment
-    $mpdf         = new \Mpdf\Mpdf();
-    $rowIndex     = 1;
-    $totalExpense = 0;
-    $totalIncome  = 0;
-    $user         = auth()->user() ?? User::find(1);  // ! Default user if not authenticated
+    $send = [
+      'filename'   => 'weekly-payment-report',
+      'title'      => 'Laporan keuangan mingguan',
+      'start_date' => $startDate,
+      'end_date'   => $endDate,
+      'now'        => $now,
+    ];
 
-    $mpdf->WriteHTML(view('payment-resource.make-pdf.header', [
-      'title'   => 'Laporan keuangan mingguan',
-      'now'     => carbonTranslatedFormat($now, 'd/m/Y H:i'),
-      'periode' => $periode,
-      'user'    => $user,
-    ])->render());
-    
-    Payment::whereBetween('date', [$startDate, $endDate])
-      ->chunk(200, function ($list) use ($mpdf, &$rowIndex, &$totalExpense, &$totalIncome) {
-        foreach ($list as $record) {
-          $view = view('payment-resource.make-pdf.body', [
-            'record'    => $record,
-            'loopIndex' => $rowIndex++,
-          ])->render();
-
-          $mpdf->WriteHTML($view);
-
-          if ($record->type_id == 1) {
-            $totalExpense += $record->amount;
-          } elseif ($record->type_id == 2) {
-            $totalIncome += $record->amount;
-          }
-        }
-    });
-
-    $mpdf->WriteHTML('
-      <tr>
-        <td colspan="4" style="text-align: center; font-weight: bold;">Total Transaksi</td>
-        <td style="font-weight: bold;">'. ($totalIncome > 0 ? toIndonesianCurrency($totalIncome) : '') .'</td>
-        <td style="font-weight: bold;">'. ($totalExpense > 0 ? toIndonesianCurrency($totalExpense) : '') .'</td>
-      </tr>
-    ');
-
-    $result = makePdf($mpdf, 'weekly-payment-report', $user, notification: false);
+    $result = PaymentService::make_pdf($send);
 
     $payment = Payment::selectRaw('
       SUM(CASE WHEN type_id = 1 THEN amount ELSE 0 END) as total_expense,
@@ -129,5 +100,7 @@ class WeeklyReportJob implements ShouldQueue
     ]);
 
     Mail::to($data['email'])->queue(new WeeklyReportMail($data));
+
+    \Log::info('['. __METHOD__.':'.__LINE__ .']: Weekly Report Job executed successfully');
   }
 }

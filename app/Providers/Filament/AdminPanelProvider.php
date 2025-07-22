@@ -17,6 +17,7 @@ use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\Support\Enums\MaxWidth;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -44,6 +45,7 @@ class AdminPanelProvider extends PanelProvider
         Setting::where('key', 'site_password_reset')->first()?->value === 'Ya',
         fn($panel) => $panel->passwordReset()
       )
+      ->maxContentWidth(MaxWidth::Full)
       ->emailVerification()
       ->profile()
       ->favicon(asset('favicon.ico'))

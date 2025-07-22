@@ -41,9 +41,9 @@ class ReplyContactMail extends Mailable implements ShouldQueue
    */
   public function content(): Content
   {
-    // * view('mails.contact-message-resource.reply-contact-mail')
+    // * view('contact-message-resource.mails.reply-contact-mail')
     return new Content(
-      view: 'mails.contact-message-resource.reply-contact-mail',
+      view: 'contact-message-resource.mails.reply-contact-mail',
     );
   }
 

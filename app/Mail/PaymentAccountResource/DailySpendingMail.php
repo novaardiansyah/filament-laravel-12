@@ -36,9 +36,9 @@ class DailySpendingMail extends Mailable implements ShouldQueue
    */
   public function content(): Content
   {
-    // view('mails.payment-account-resource.daily-spending-mail')
+    // * view('payment-account-resource.mails.daily-spending-mail')
     return new Content(
-      view: 'mails.payment-account-resource.daily-spending-mail',
+      view: 'payment-account-resource.mails.daily-spending-mail',
     );
   }
 

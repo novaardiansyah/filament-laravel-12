@@ -1,4 +1,4 @@
-@extends('mails.layout.main-light')
+@extends('layout.mails.main-light')
 
 @section('title')
   {{ $data['subject'] }}

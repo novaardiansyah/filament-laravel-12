@@ -41,9 +41,9 @@ class NotifUserLoginMail extends Mailable implements ShouldQueue
    */
   public function content(): Content
   {
-    // * view('mails.user-resource.notif-user-login-mail');
+    // * view('user-resource.mails.notif-user-login-mail');
     return new Content(
-      view: 'mails.user-resource.notif-user-login-mail',
+      view: 'user-resource.mails.notif-user-login-mail',
     );
   }
 

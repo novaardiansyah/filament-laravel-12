@@ -42,9 +42,9 @@ class WeeklyReportMail extends Mailable implements ShouldQueue
    */
   public function content(): Content
   {
-    // * view('mails.payment-account-resource.weekly-report-mail')
+    // * view('payment-account-resource.mails.weekly-report-mail')
     return new Content(
-      view: 'mails.payment-account-resource.weekly-report-mail',
+      view: 'payment-account-resource.mails.weekly-report-mail',
     );
   }
 

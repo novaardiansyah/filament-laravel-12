@@ -36,9 +36,9 @@ class DailyReportMail extends Mailable implements ShouldQueue
    */
   public function content(): Content
   {
-    // view('mails.payment-account-resource.daily-report-mail')
+    // * view('payment-account-resource.mails.daily-report-mail')
     return new Content(
-      view: 'mails.payment-account-resource.daily-report-mail',
+      view: 'payment-account-resource.mails.daily-report-mail',
     );
   }
 

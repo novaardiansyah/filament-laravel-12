@@ -1,4 +1,4 @@
-@extends('mails.layout.main-light')
+@extends('layout.mails.main-light')
 
 @section('title')
   {{ $data['subject'] }}
@@ -24,6 +24,6 @@
       </ul>
     </div>
   </div>
-  
+
   <p>Mohon perhatikan agar transaksi berikutnya dapat disesuaikan dengan kebijakan limit harian Anda. Jika Anda membutuhkan penyesuaian terhadap limit pengeluaran, silakan hubungi admin atau lakukan pengaturan di aplikasi.</p>
 @endsection

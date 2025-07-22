@@ -41,9 +41,9 @@ class NotifContactMail extends Mailable implements ShouldQueue
    */
   public function content(): Content
   {
-    // * view('mails.contact-message-resource.notify-contact-mail');
+    // * view('contact-message-resource.mails.notify-contact-mail');
     return new Content(
-      view: 'mails.contact-message-resource.notify-contact-mail',
+      view: 'contact-message-resource.mails.notify-contact-mail',
     );
   }
 

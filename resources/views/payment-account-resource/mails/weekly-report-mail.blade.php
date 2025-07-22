@@ -1,4 +1,4 @@
-@extends('mails.layout.main-light')
+@extends('layout.mails.main-light')
 
 @section('title')
   {{ $data['subject'] }}
@@ -35,7 +35,7 @@
       </ul>
     </div>
   </div>
-  
+
   <p>
     Harap diperhatikan bahwa laporan ini mencakup semua transaksi yang dilakukan selama periode tersebut. Jika Anda memiliki pertanyaan atau memerlukan klarifikasi lebih lanjut, jangan ragu untuk menghubungi kami.
   </p>

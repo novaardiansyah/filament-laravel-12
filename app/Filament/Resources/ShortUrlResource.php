@@ -88,6 +88,8 @@ class ShortUrlResource extends Resource
         Tables\Columns\TextColumn::make('clicks')
           ->label('Total Klik')
           ->sortable()
+          ->badge()
+          ->color('info')
           ->formatStateUsing(fn (int $state): string => number_format($state, 0, ',', '.')),
         Tables\Columns\TextColumn::make('created_at')
           ->label('Dibuat pada')

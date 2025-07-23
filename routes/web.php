@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DownloadController;
+use App\Http\Controllers\ShortUrlController;
 use App\Http\Controllers\TestingController;
 use Illuminate\Support\Facades\Route;
 
@@ -21,3 +22,7 @@ Route::group(['middleware' => 'auth', 'prefix' => 'testing', 'as' => 'testing.']
 Route::get('download/{path}/{extension}', [DownloadController::class, 'index'])
   ->name('download')
   ->middleware('signed');
+
+Route::get('r/{shortUrl:code}', [ShortUrlController::class, 'index'])
+  ->name('short_url')
+  ->where('code', '[a-zA-Z0-9]+');

@@ -14,6 +14,11 @@ class ShortUrl extends Model
     'clicks'    => 'integer',
   ];
 
+  public function getRouteKeyName(): string
+  {
+    return 'code';
+  }
+
   public function user(): BelongsTo
   {
     return $this->belongsTo(User::class);

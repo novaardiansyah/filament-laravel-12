@@ -34,6 +34,7 @@ class DailyReportJob implements ShouldQueue
     $startDate = now()->startOfWeek();
     $endDate   = now()->endOfWeek();
     $now       = now()->toDateTimeString();
+    $today     = now()->toDateString();
 
     $send = [
       'filename'   => 'daily-payment-report',
@@ -45,12 +46,25 @@ class DailyReportJob implements ShouldQueue
 
     $result = PaymentService::make_pdf($send);
 
+    $payment = Payment::selectRaw('
+      SUM(CASE WHEN type_id = 1 AND date = ? THEN expense ELSE 0 END) AS daily_expense,
+      SUM(CASE WHEN type_id = 2 AND date = ? THEN income ELSE 0 END) AS daily_income,
+      SUM(CASE WHEN type_id != 1 AND type_id != 2 AND date = ? THEN amount ELSE 0 END) AS daily_other,
+      COUNT(CASE WHEN type_id = 1 AND date = ? THEN id END) AS daily_expense_count,
+      COUNT(CASE WHEN type_id = 2 AND date = ? THEN id END) AS daily_income_count,
+      COUNT(CASE WHEN type_id != 1 AND type_id != 2 AND date = ? THEN id END) AS daily_other_count
+    ', [
+      $today, $today, $today, 
+      $today, $today, $today
+    ])->first();
+
     $data = [
+      'log_name'         => 'daily_payment_notification',
       'email'            => config('app.author_email'),
       'subject'          => 'Notifikasi: Ringkasan Laporan Keuangan Harian',
       'payment_accounts' => PaymentAccount::orderBy('deposit', 'desc')->get()->toArray(),
+      'payment'          => $payment->toArray(),
       'date'             => carbonTranslatedFormat($now, 'd F Y'),
-      'log_name'         => 'daily_payment_notification',
       'created_at'       => $now,
       'attachments' => [
         storage_path('app/' . $result['filepath']),

@@ -10,6 +10,41 @@
 
 @section('content')
   <p>Berikut adalah ringkasan laporan pada akun keuangan Anda untuk periode {{ $data['date'] }}.</p>
+  
+  @php
+    $income  = $data['payment']['daily_income'] ?? 0;
+    $expense = $data['payment']['daily_expense'] ?? 0;
+    $other   = $data['payment']['daily_other'] ?? 0;
+  @endphp
+
+  <div class="card mb-2">
+    <div class="group">
+      <h4>Informasi Keuangan</h4>
+      <ul class="list-flush">
+        <li>
+          <strong>Transfer</strong>: 
+          {{ toIndonesianCurrency($other) }} 
+          @if ($other > 0)
+            ({{ $data['payment']['daily_other_count'] ?? 0 }}x Trx)
+          @endif
+        </li>
+        <li>
+          <strong>Pendapatan</strong>: 
+          {{ toIndonesianCurrency($income) }} 
+          @if ($income > 0)
+            ({{ $data['payment']['daily_income_count'] ?? 0 }}x Trx)
+          @endif
+        </li>
+        <li>
+          <strong>Pengeluaran</strong>: 
+          {{ toIndonesianCurrency($expense) }}
+          @if ($expense > 0)
+            ({{ $data['payment']['daily_expense_count'] ?? 0 }}x Trx)
+          @endif
+        </li>
+      </ul>
+    </div>
+  </div>
 
   <div class="card">
     <div class="group">

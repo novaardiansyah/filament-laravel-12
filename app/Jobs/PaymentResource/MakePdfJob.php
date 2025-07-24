@@ -26,8 +26,9 @@ class MakePdfJob implements ShouldQueue
     \Log::info('['. __METHOD__.':'.__LINE__ .']: Make PDF Job process started');
     
     $send = array_merge([
-      'filename' => 'payment-report',
-      'title'    => 'Laporan keuangan',
+      'filename'     => 'payment-report',
+      'title'        => 'Laporan keuangan',
+      'notification' => true,
     ], $this->data);
 
     PaymentService::make_pdf($send);

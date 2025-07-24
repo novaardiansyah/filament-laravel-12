@@ -11,6 +11,9 @@ class PaymentService
   {
     \Log::info('['. __METHOD__.':'.__LINE__ .']: Generate PDF report process started');
 
+    $notification = $data['notification'] ?? false;
+    $auto_close_tbody = $data['auto_close_tbody'] ?? false;
+    
     $startDate = $data['start_date'] ?? now()->startOfMonth();
     $endDate   = $data['end_date'] ?? now()->endOfMonth();
     $now       = $data['now'] ?? now()->toDateTimeString();
@@ -73,7 +76,7 @@ class PaymentService
       </tfoot>
     ');
 
-    $result = makePdf($mpdf, $data['filename'] ?? 'payment-report', $user, auto_close_tbody: false);
+    $result = makePdf($mpdf, $data['filename'] ?? 'payment-report', $user, notification: $notification, auto_close_tbody: $auto_close_tbody);
 
     \Log::info('['. __METHOD__.':'.__LINE__ .']: Generate PDF report executed successfully');
 

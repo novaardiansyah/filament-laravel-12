@@ -87,6 +87,10 @@
     .footer a:hover {
       color: #3366FF;
     }
+
+    .mb-2 {
+      margin-bottom: 18px;
+    }
   </style>
   
   <title>@yield('title')</title>

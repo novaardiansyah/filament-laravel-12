@@ -22,7 +22,7 @@ class CreateShortUrl extends CreateRecord
   protected function mutateFormDataBeforeCreate(array $data): array
   {
     $data['code'] = Str::random(7);
-    $data['short_url'] = url('/r/' . $data['code']);
+    $data['short_url'] = config('services.tinyurl.alias_domain') . '/r/' . $data['code'];
 
     $exist = ShortUrl::where('code', $data['code'])->exists();
 

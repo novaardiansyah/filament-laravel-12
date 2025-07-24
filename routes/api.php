@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ContactMessageController;
 use App\Http\Controllers\PaymentAccountController;
+use App\Http\Controllers\ShortUrlController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'auth'], function () {
@@ -14,7 +15,7 @@ Route::group(['prefix' => 'auth'], function () {
   // Route::group(['middleware' => 'auth:sanctum'], function () {
   //   // ! From external application (sanctum required)
   //   Route::post('send-otp-register', [AuthController::class, 'sendRegisterOtp']);
-    
+
   //   Route::post('logout', [AuthController::class, 'logout']);
   //   Route::get('me', [AuthController::class, 'me']);
   // });
@@ -27,4 +28,8 @@ Route::apiResource('payment-accounts', PaymentAccountController::class)
 
 Route::apiResource('contact-messages', ContactMessageController::class)
     ->only(['store'])
+    ->middleware(['auth:sanctum']);
+
+Route::get('short-urls/{shortUrl:code}', [ShortUrlController::class, 'show'])
+    ->name('short-urls.show')
     ->middleware(['auth:sanctum']);

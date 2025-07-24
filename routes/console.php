@@ -23,7 +23,7 @@ if (config('app.env') != 'staging') {
 
   // ! Proses: Pembayaran Terjadwal
   Schedule::job(new ScheduledPaymentJob())
-    ->dailyAt('23:00');
+    ->dailyAt('23:45');
 
   // ! Proses: Pembersihan File Harian
   Schedule::job(new DailyFileCleanupJob())

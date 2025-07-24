@@ -23,7 +23,8 @@ class ScheduledPaymentJob implements ShouldQueue
    */
   public function handle(): void
   {
+    \Log::info('['. __METHOD__.':'.__LINE__ .']: Scheduled Payment Job process started');
     $result = PaymentController::scheduledPayment();
-    \Log::info($result['message'] ?? 'No message returned');
+    \Log::info('['. __METHOD__.':'.__LINE__ .']: Scheduled Payment Job executed successfully', $result);
   }
 }

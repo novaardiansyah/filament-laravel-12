@@ -9,9 +9,10 @@ class PaymentController extends Controller
   public static function scheduledPayment(): array
   {
     $today = now()->format('Y-m-d');
+    $tomorrow = now()->addDay()->format('Y-m-d');
 
     $scheduledPayments = Payment::with(['payment_account:id,name,deposit', 'payment_account_to:id,name,deposit'])->where('is_scheduled', true)
-      ->whereDate('date', $today)
+      ->whereBetween('date', [$today, $tomorrow])
       ->get();
 
     if ($scheduledPayments->isEmpty()) {

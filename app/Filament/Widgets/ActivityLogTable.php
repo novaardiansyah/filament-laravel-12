@@ -53,7 +53,8 @@ class ActivityLogTable extends BaseWidget
           ->sortable(),
         Tables\Columns\TextColumn::make('description')
           ->label('Deskripsi')
-          ->limit(100)
+          ->wrap()
+          ->limit(80)
           ->sortable()
           ->searchable()
           ->toggleable(),

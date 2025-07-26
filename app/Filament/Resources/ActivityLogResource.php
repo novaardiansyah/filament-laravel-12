@@ -162,18 +162,27 @@ class ActivityLogResource extends Resource
           Forms\Components\TextInput::make('postal')
             ->label('Kode Pos'),
           Forms\Components\TextInput::make(name: 'geolocation')
-            ->label('Geolokasi'),
+            ->label('Geolokasi')
+            ->afterStateHydrated(function ($state, Forms\Set $set): void {
+              $state = $state ? explode(',', $state) : null;
+              if ($state) {
+                $set('location', [
+                  'lat' => $state[0] ?? null,
+                  'lng' => $state[1] ?? null,
+                ]);
+              }
+            }),
           Forms\Components\Textarea::make('user_agent')
             ->label('Perangkat')
             ->rows(3)
             ->columnSpanFull(),
           Map::make('location')
-            ->visible(fn(?Model $record) => filled($record?->geolacation))
+            ->visible(fn($get) => $get('geolocation'))
             ->label('Peta Lokasi Pengguna')
             ->defaultLocation(latitude: -6.2886, longitude: 106.7179)
             ->draggable(true)
             ->clickable(true)
-            ->zoom(18)
+            ->zoom(15)
             ->minZoom(0)
             ->maxZoom(28)
             ->tilesUrl("https://tile.openstreetmap.de/{z}/{x}/{y}.png")

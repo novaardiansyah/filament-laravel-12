@@ -1,9 +1,12 @@
 <?php
+
+use App\Filament\Resources\ActivityLogResource;
+
 return [
-  'datetime_format' => 'd/m/Y H:i:s',
+  'datetime_format' => 'd/m/Y H:i',
   'date_format' => 'd/m/Y',
 
-  'activity_resource' => \Z3d0X\FilamentLogger\Resources\ActivityResource::class,
+  'activity_resource' => ActivityLogResource::class,
   'scoped_to_tenant' => true,
   'navigation_sort' => 10,
 

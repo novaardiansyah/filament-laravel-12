@@ -192,7 +192,7 @@ class ActivityLogResource extends Resource
             ])
             ->columnSpanFull(),
         ])
-        ->hidden(fn (?Model $record) => !$record->ip_address)
+        ->hidden(fn (?Model $record) => !$record?->ip_address)
         ->columns(3)
         ->description('Infomasi Perangkat')
       ])

@@ -68,7 +68,7 @@ class ActivityLogTable extends BaseWidget
       ->recordAction(null)
       ->recordUrl(function ($record) {
         if (auth()->user()?->can('view_activity')) {
-          return url("/admin/activity-logs/{$record->id}");
+          return url("/admin/activity-logs?tableFilters[id][id]={$record->id}");
         }
         return null;
       })

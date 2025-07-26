@@ -11,6 +11,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Tables;
+use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -206,6 +207,9 @@ class ActivityLogResource extends Resource
         Tables\Columns\TextColumn::make('index')
           ->rowIndex()
           ->label('#'),
+        Tables\Columns\TextColumn::make('id')
+          ->label('ID Aktivitas')
+          ->toggleable(isToggledHiddenByDefault: true),
         Tables\Columns\TextColumn::make('log_name')
           ->badge()
           ->colors(static::getLogNameColors())
@@ -245,6 +249,20 @@ class ActivityLogResource extends Resource
       ->recordUrl(null)
       ->defaultSort('created_at', 'desc')
       ->filters([
+        Filters\Filter::make('id')
+          ->form([
+            Forms\Components\TextInput::make('id')
+              ->label('ID Aktivitas')
+              ->numeric(),
+          ])
+          ->query(function (Builder $query, array $data): Builder {
+            return $query->when($data['id'], fn(Builder $query, $id) => $query->where('id', $id));
+          })
+          ->indicateUsing(function (array $data): ?string {
+            if (!$data['id']) return null;
+            return 'ID Aktivitas: ' . $data['id'];
+          }),
+
         Filters\SelectFilter::make('log_name')
           ->label(__('filament-logger::filament-logger.resource.label.type'))
           ->options(static::getLogNameList()),

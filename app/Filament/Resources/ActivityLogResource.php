@@ -3,7 +3,6 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ActivityLogResource\Pages;
-use App\Filament\Resources\ActivityLogResource\RelationManagers;
 use App\Models\ActivityLog;
 use Dotswan\MapPicker\Fields\Map;
 use Filament\Forms;
@@ -11,10 +10,8 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Tables;
-use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Spatie\Activitylog\Contracts\Activity;
 use Spatie\Activitylog\Models\Activity as ActivityModel;
 use Illuminate\Database\Eloquent\Model;
@@ -192,9 +189,9 @@ class ActivityLogResource extends Resource
             ])
             ->columnSpanFull(),
         ])
-        ->hidden(fn (?Model $record) => !$record?->ip_address)
+        ->hidden(fn (?ActivityLog $record) => !$record?->ip_address)
         ->columns(3)
-        ->description('Infomasi Perangkat')
+        ->description('Informasi Perangkat')
       ])
       ->columns(4);
   }

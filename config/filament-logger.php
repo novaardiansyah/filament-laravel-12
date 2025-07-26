@@ -3,7 +3,7 @@
 use App\Filament\Resources\ActivityLogResource;
 
 return [
-  'datetime_format' => 'd/m/Y H:i',
+  'datetime_format' => 'd/m/Y H:i:s',
   'date_format' => 'd/m/Y',
 
   'activity_resource' => ActivityLogResource::class,

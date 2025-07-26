@@ -30,8 +30,6 @@ class UserLogResource extends Resource
         Forms\Components\Section::make()
           ->columns(3)
           ->schema([
-            Forms\Components\TextInput::make('email')
-              ->label('Email'),
             Forms\Components\TextInput::make('ip_address')
               ->label('Alamat IP'),
             Forms\Components\TextInput::make('timezone')

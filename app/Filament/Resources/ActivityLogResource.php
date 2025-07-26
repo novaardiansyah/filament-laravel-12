@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ActivityLogResource\Pages;
 use App\Filament\Resources\ActivityLogResource\RelationManagers;
 use App\Models\ActivityLog;
+use Dotswan\MapPicker\Fields\Map;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -68,58 +69,53 @@ class ActivityLogResource extends Resource
   {
     return $form
       ->schema([
-        Forms\Components\Group::make([
-          Forms\Components\Section::make([
-            Forms\Components\TextInput::make('causer_id')
-              ->afterStateHydrated(function ($component, ?Model $record) {
-                /** @phpstan-ignore-next-line */
-                return $component->state($record->causer?->name);
-              })
-              ->label(__('filament-logger::filament-logger.resource.label.user')),
+        Forms\Components\Section::make([
+          Forms\Components\TextInput::make('causer_id')
+            ->afterStateHydrated(function ($component, ?Model $record) {
+              /** @phpstan-ignore-next-line */
+              return $component->state($record->causer?->name);
+            })
+            ->label(__('filament-logger::filament-logger.resource.label.user')),
 
-            Forms\Components\TextInput::make('subject_type')
-              ->afterStateHydrated(function ($component, ?Model $record, $state) {
-                /** @var Activity&ActivityModel $record */
-                return $state ? $component->state(Str::of($state)->afterLast('\\')->headline() . ' # ' . $record->subject_id) : '-';
-              })
-              ->label(__('filament-logger::filament-logger.resource.label.subject')),
+          Forms\Components\TextInput::make('subject_type')
+            ->afterStateHydrated(function ($component, ?Model $record, $state) {
+              /** @var Activity&ActivityModel $record */
+              return $state ? $component->state(Str::of($state)->afterLast('\\')->headline() . ' # ' . $record->subject_id) : '-';
+            })
+            ->label(__('filament-logger::filament-logger.resource.label.subject')),
 
-            Forms\Components\Textarea::make('description')
-              ->label(__('filament-logger::filament-logger.resource.label.description'))
-              ->rows(2)
-              ->columnSpan('full'),
-          ])
-            ->columns(2),
+          Forms\Components\TextInput::make('log_name')
+            ->afterStateHydrated(function (?Model $record): string {
+              /** @var Activity&ActivityModel $record */
+              return $record->log_name ? ucwords($record->log_name) : '-';
+            })
+            ->label(__('filament-logger::filament-logger.resource.label.type')),
+
+          Forms\Components\TextInput::make('event')
+            ->afterStateHydrated(function (?Model $record): string {
+              /** @phpstan-ignore-next-line */
+              return $record?->event ? ucwords($record?->event) : '-';
+            })
+            ->label(__('filament-logger::filament-logger.resource.label.event')),
+          
+          Forms\Components\TextInput::make('created_at')
+            ->label(__('filament-logger::filament-logger.resource.label.logged_at'))
+            // ->displayFormat(config('filament-logger.datetime_format', 'd/m/Y H:i:s')),
+            ->formatStateUsing(function ($state) {
+              return $state ? carbonTranslatedFormat($state, config('filament-logger.datetime_format', 'd/m/Y H:i:s')) : '-';
+            }),
+
+          Forms\Components\Textarea::make('description')
+            ->label(__('filament-logger::filament-logger.resource.label.description'))
+            ->rows(2)
+            ->columnSpan('full'),
         ])
-          ->columnSpan(['sm' => 3]),
+        ->description('Informasi log aktivitas')
+        ->columns(3)
+        ->columnSpan('4')
+        ->collapsible(),
 
-        Forms\Components\Group::make([
-          Forms\Components\Section::make([
-            Forms\Components\Placeholder::make('log_name')
-              ->content(function (?Model $record): string {
-                /** @var Activity&ActivityModel $record */
-                return $record->log_name ? ucwords($record->log_name) : '-';
-              })
-              ->label(__('filament-logger::filament-logger.resource.label.type')),
-
-            Forms\Components\Placeholder::make('event')
-              ->content(function (?Model $record): string {
-                /** @phpstan-ignore-next-line */
-                return $record?->event ? ucwords($record?->event) : '-';
-              })
-              ->label(__('filament-logger::filament-logger.resource.label.event')),
-
-            Forms\Components\Placeholder::make('created_at')
-              ->label(__('filament-logger::filament-logger.resource.label.logged_at'))
-              ->content(function (?Model $record): string {
-                /** @var Activity&ActivityModel $record */
-                return $record->created_at ? "{$record->created_at->format(config('filament-logger.datetime_format', 'd/m/Y H:i:s'))}" : '-';
-              }),
-          ])
-        ]),
         Forms\Components\Section::make()
-          ->columns()
-          ->visible(fn($record) => $record->properties?->count() > 0)
           ->schema(function (?Model $record) {
             /** @var Activity&ActivityModel $record */
             $properties = $record->properties->except(['attributes', 'old']);
@@ -145,9 +141,53 @@ class ActivityLogResource extends Resource
             }
 
             return $schema;
-          }),
+          })
+          ->description('Informasi perubahan properti')
+          ->visible(fn($record) => $record->properties?->count() > 0)
+          ->collapsible(),
+        
+        Forms\Components\Section::make([
+          Forms\Components\TextInput::make('email')
+            ->label('Email'),
+          Forms\Components\TextInput::make('ip_address')
+            ->label('Alamat IP'),
+          Forms\Components\TextInput::make('timezone')
+            ->label('Zona Waktu'),
+          Forms\Components\TextInput::make('country')
+            ->label('Negara'),
+          Forms\Components\TextInput::make('city')
+            ->label('Kota/Kabupaten'),
+          Forms\Components\TextInput::make('region')
+            ->label('Wilayah/Provinsi'),
+          Forms\Components\TextInput::make('postal')
+            ->label('Kode Pos'),
+          Forms\Components\TextInput::make(name: 'geolocation')
+            ->label('Geolokasi'),
+          Forms\Components\Textarea::make('user_agent')
+            ->label('Perangkat')
+            ->rows(3)
+            ->columnSpanFull(),
+          Map::make('location')
+            ->visible(fn(?Model $record) => filled($record?->geolacation))
+            ->label('Peta Lokasi Pengguna')
+            ->defaultLocation(latitude: -6.2886, longitude: 106.7179)
+            ->draggable(true)
+            ->clickable(true)
+            ->zoom(18)
+            ->minZoom(0)
+            ->maxZoom(28)
+            ->tilesUrl("https://tile.openstreetmap.de/{z}/{x}/{y}.png")
+            ->detectRetina(true)
+            ->extraStyles([
+              'border-radius: 12px',
+              'min-height: 400px',
+            ])
+            ->columnSpanFull(),
+        ])
+        ->columns(3)
+        ->description('Infomasi Perangkat')
       ])
-      ->columns(['sm' => 4, 'lg' => null]);
+      ->columns(4);
   }
 
   public static function table(Table $table): Table
@@ -263,7 +303,7 @@ class ActivityLogResource extends Resource
       ->actions([
         Tables\Actions\ActionGroup::make([
           Tables\Actions\ViewAction::make()
-            ->modalWidth(MaxWidth::Screen)
+            ->modalWidth(MaxWidth::FiveExtraLarge)
             ->slideOver()
             ->color('primary'),
         ]),

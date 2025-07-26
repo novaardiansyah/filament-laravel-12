@@ -148,8 +148,6 @@ class ActivityLogResource extends Resource
           ->collapsible(),
         
         Forms\Components\Section::make([
-          Forms\Components\TextInput::make('email')
-            ->label('Email'),
           Forms\Components\TextInput::make('ip_address')
             ->label('Alamat IP'),
           Forms\Components\TextInput::make('timezone')
@@ -194,6 +192,7 @@ class ActivityLogResource extends Resource
             ])
             ->columnSpanFull(),
         ])
+        ->hidden(fn ($record) => !$record->ip_address)
         ->columns(3)
         ->description('Infomasi Perangkat')
       ])

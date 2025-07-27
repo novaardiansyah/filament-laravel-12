@@ -8,6 +8,7 @@ use App\Models\ContactMessage;
 use App\Models\EmailLog;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Facades\Http;
 use Mail;
 
 class StoreMessageJob implements ShouldQueue
@@ -28,13 +29,36 @@ class StoreMessageJob implements ShouldQueue
   public function handle(): void
   {
     $now = now()->toDateTimeString();
-    $contactMessage = ContactMessage::create($this->data);
+
+    $ip_address = explode(',', $this->data['ip_addess'])[0] ?? null;
+    $ip_info    = Http::get("https://ipinfo.io/{$ip_address}/json?token=" . config(key: 'services.ipinfo.token'))->json();
+
+    $country = $ip_info['country'] ?? null;
+    $city    = $ip_info['city'] ?? null;
+    $region  = $ip_info['region'] ?? null;
+    $postal  = $ip_info['postal'] ?? null;
+    
+    $address = null;
+    if ($city) {
+      $address = trim("{$city}, {$region}, {$country} ({$postal})");
+    }
+
+    $geolocation = $ip_info['loc'] ?? null;
+    $geolocation = $geolocation ? str_replace(',', ', ', $geolocation) : null;
+
+    $timezone = $ip_info['timezone'] ?? null;
+
+    $data = array_merge($this->data, [
+      'ip_address' => $ip_address,
+    ]);
+
+    $contactMessage = ContactMessage::create($data);
 
     $notif_reply = [
       'log_name'   => 'reply_contact_message',
-      'email'      => $contactMessage->email,
+      'email'      => $data['email'],
       'subject'    => 'Terima Kasih Telah Menghubungi Saya',
-      'name'       => $contactMessage->name,
+      'name'       => $data['name'],
       'created_at' => $now,
     ];
 
@@ -53,12 +77,15 @@ class StoreMessageJob implements ShouldQueue
 
     Mail::to($contactMessage->email)->queue(new ReplyContactMail($notif_reply));
 
-    $notif_params = array_merge($contactMessage->toArray(), [
-      'log_name'        => 'notif_contact_message',
-      'email_contact'   => $contactMessage->email,
-      'email'           => config('app.author_email'),
-      'subject_contact' => $contactMessage->subject,
+    $notif_params = array_merge($data, [
       'subject'         => 'Notifikasi: Pesan masuk baru dari situs web',
+      'email'           => config('app.author_email'),
+      'log_name'        => 'notif_contact_message',
+      'email_contact'   => $data['email'],
+      'subject_contact' => $data['subject'],
+      'address'         => $address,
+      'timezone'        => $timezone,
+      'geolocation'     => $geolocation,
       'created_at'      => $now,
     ]);
 

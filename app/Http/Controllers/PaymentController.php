@@ -16,7 +16,7 @@ class PaymentController extends Controller
       ->get();
 
     if ($scheduledPayments->isEmpty()) {
-      return ['message' => 'No scheduled payments found for today.'];
+      return ['status' => false, 'message' => 'No scheduled payments found for today.'];
     }
 
     $scheduledPayments->each(function ($payment) {
@@ -46,6 +46,6 @@ class PaymentController extends Controller
       }
     });
 
-    return ['message' => 'Scheduled payments processed successfully.'];
+    return ['status' => true, 'message' => 'Scheduled payments processed successfully.'];
   }
 }

@@ -21,12 +21,21 @@ class PaymentService
     $start_date = carbonTranslatedFormat($startDate, 'd');
     $end_date   = carbonTranslatedFormat($endDate, 'd F Y');
 
+    // ! Check if start and end dates are in the same month or day
     if (carbonTranslatedFormat($startDate, 'F Y') != carbonTranslatedFormat($endDate, 'F Y')) {
       $start_date = carbonTranslatedFormat($startDate, 'd F Y');
       $end_date   = carbonTranslatedFormat($endDate, 'd F Y');
+    } else if (carbonTranslatedFormat($startDate, 'd') == carbonTranslatedFormat($endDate, 'd')) {
+      // ! If both dates are the same day, set end_date to null
+      $start_date = carbonTranslatedFormat($startDate, 'd F Y');
+      $end_date = null;
     }
 
-    $periode = "{$start_date} - {$end_date}";
+    $periode = "{$start_date}";
+
+    if ($end_date) {
+      $periode .= " - {$end_date}";
+    }
 
     // ! Setup pdf attachment
     $mpdf          = new \Mpdf\Mpdf();

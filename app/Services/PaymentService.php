@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Payment;
 use App\Models\User;
+use Carbon\Carbon;
 
 class PaymentService
 {
@@ -18,23 +19,15 @@ class PaymentService
     $endDate   = $data['end_date'] ?? now()->endOfMonth();
     $now       = $data['now'] ?? now()->toDateTimeString();
 
-    $start_date = carbonTranslatedFormat($startDate, 'd');
-    $end_date   = carbonTranslatedFormat($endDate, 'd F Y');
+    $carbonStartDate = Carbon::parse($startDate);
+    $carbonEndDate   = Carbon::parse($endDate);
+    $periode         = '-';
 
-    // ! Check if start and end dates are in the same month or day
-    if (carbonTranslatedFormat($startDate, 'F Y') != carbonTranslatedFormat($endDate, 'F Y')) {
-      $start_date = carbonTranslatedFormat($startDate, 'd F Y');
-      $end_date   = carbonTranslatedFormat($endDate, 'd F Y');
-    } else if (carbonTranslatedFormat($startDate, 'd') == carbonTranslatedFormat($endDate, 'd')) {
-      // ! If both dates are the same day, set end_date to null
-      $start_date = carbonTranslatedFormat($startDate, 'd F Y');
-      $end_date = null;
-    }
-
-    $periode = "{$start_date}";
-
-    if ($end_date) {
-      $periode .= " - {$end_date}";
+    if ($carbonStartDate->isSameDay($carbonEndDate)) {
+      $periode = $carbonStartDate->translatedFormat('d F Y');
+    } else {
+      $startFormat = $carbonStartDate->isSameMonth($carbonEndDate) ? 'd' : 'd F Y';
+      $periode = $carbonStartDate->translatedFormat($startFormat) . ' - ' . $carbonEndDate->translatedFormat('d F Y');
     }
 
     // ! Setup pdf attachment

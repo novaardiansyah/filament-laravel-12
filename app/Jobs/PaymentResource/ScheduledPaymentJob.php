@@ -50,18 +50,15 @@ class ScheduledPaymentJob implements ShouldQueue
     ];
 
     $pdf = PaymentService::make_pdf($send);
-
-    $payment = Payment::selectRaw('
-      SUM(CASE WHEN type_id = 1 AND date = ? THEN expense ELSE 0 END) AS daily_expense,
-      SUM(CASE WHEN type_id = 2 AND date = ? THEN income ELSE 0 END) AS daily_income,
-      SUM(CASE WHEN type_id != 1 AND type_id != 2 AND date = ? THEN amount ELSE 0 END) AS daily_other,
-      COUNT(CASE WHEN type_id = 1 AND date = ? THEN id END) AS daily_expense_count,
-      COUNT(CASE WHEN type_id = 2 AND date = ? THEN id END) AS daily_income_count,
-      COUNT(CASE WHEN type_id != 1 AND type_id != 2 AND date = ? THEN id END) AS daily_other_count
-    ', [
-      $today, $today, $today, 
-      $today, $today, $today
-    ])->first();
+    
+    $payment = Payment::selectRaw("
+      SUM(CASE WHEN type_id = 1 THEN expense ELSE 0 END) AS daily_expense,
+      SUM(CASE WHEN type_id = 2 THEN income ELSE 0 END) AS daily_income,
+      SUM(CASE WHEN type_id NOT IN (1, 2) THEN amount ELSE 0 END) AS daily_other,
+      COUNT(CASE WHEN type_id = 1 THEN id END) AS daily_expense_count,
+      COUNT(CASE WHEN type_id = 2 THEN id END) AS daily_income_count,
+      COUNT(CASE WHEN type_id NOT IN (1, 2) THEN id END) AS daily_other_count
+    ")->where('date', $today)->first();
 
     $data = [
       'log_name'         => 'scheduled_payment_notification',

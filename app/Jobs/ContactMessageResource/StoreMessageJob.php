@@ -4,6 +4,7 @@ namespace App\Jobs\ContactMessageResource;
 
 use App\Mail\ContactMessageResource\NotifContactMail;
 use App\Mail\ContactMessageResource\ReplyContactMail;
+use App\Models\ActivityLog;
 use App\Models\ContactMessage;
 use App\Models\EmailLog;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -103,5 +104,25 @@ class StoreMessageJob implements ShouldQueue
     ]);
 
     Mail::to($notif_params['email'])->queue(new NotifContactMail($notif_params));
+
+    ActivityLog::create([
+      'log_name'    => 'Resource',
+      'description' => "New contact message from {$contactMessage->name} ({$contactMessage->email})",
+      'event'       => 'New Contact Message',
+      'ip_address'  => $ip_address,
+      'country'     => $country,
+      'city'        => $city,
+      'region'      => $region,
+      'postal'      => $postal,
+      'geolocation' => $geolocation,
+      'timezone'    => $timezone,
+      'referer'     => $contactMessage->url,
+      'user_agent'  => $contactMessage->user_agent,
+      'properties' => [
+        'name'    => $contactMessage->name,
+        'email'   => $contactMessage->email,
+        'subject' => $contactMessage->subject,
+      ],
+    ]);
   }
 }

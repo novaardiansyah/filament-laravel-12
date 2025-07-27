@@ -31,7 +31,7 @@ class StoreMessageJob implements ShouldQueue
   {
     $now = now()->toDateTimeString();
 
-    $ip_address = explode(',', $this->data['ip_address'] ?? '')[0] ?? null;
+    $ip_address = explode(',', $this->data['ip_address'] ?? '')[0] ?: null;
     $ip_info    = Http::get("https://ipinfo.io/{$ip_address}/json?token=" . config(key: 'services.ipinfo.token'))->json();
 
     $country = $ip_info['country'] ?? null;
@@ -40,8 +40,11 @@ class StoreMessageJob implements ShouldQueue
     $postal  = $ip_info['postal'] ?? null;
     
     $address = null;
+
     if ($city) {
-      $address = trim("{$city}, {$region}, {$country} ({$postal})");
+      $address_parts = array_filter([$city, $region, $country]);
+      $address       = implode(', ', $address_parts);
+      if ($postal) $address .= " ({$postal})";
     }
 
     $geolocation = $ip_info['loc'] ?? null;
@@ -106,18 +109,20 @@ class StoreMessageJob implements ShouldQueue
     Mail::to($notif_params['email'])->queue(new NotifContactMail($notif_params));
 
     ActivityLog::create([
-      'log_name'    => 'Resource',
-      'description' => "New contact message from {$contactMessage->name} ({$contactMessage->email})",
-      'event'       => 'New Contact Message',
-      'ip_address'  => $ip_address,
-      'country'     => $country,
-      'city'        => $city,
-      'region'      => $region,
-      'postal'      => $postal,
-      'geolocation' => $geolocation,
-      'timezone'    => $timezone,
-      'referer'     => $contactMessage->url,
-      'user_agent'  => $contactMessage->user_agent,
+      'log_name'     => 'Resource',
+      'description'  => "New contact message from {$contactMessage->name} ({$contactMessage->email})",
+      'event'        => 'New Contact Message',
+      'subject_id'   => $contactMessage->id,
+      'subject_type' => ContactMessage::class,
+      'ip_address'   => $ip_address,
+      'country'      => $country,
+      'city'         => $city,
+      'region'       => $region,
+      'postal'       => $postal,
+      'geolocation'  => $geolocation,
+      'timezone'     => $timezone,
+      'referer'      => $contactMessage->url,
+      'user_agent'   => $contactMessage->user_agent,
       'properties' => [
         'name'    => $contactMessage->name,
         'email'   => $contactMessage->email,

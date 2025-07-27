@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ActivityLog extends Model
 {
@@ -20,8 +19,8 @@ class ActivityLog extends Model
     return $this->morphTo();
   }
 
-  public function causer(): BelongsTo
+  public function causer(): MorphTo
   {
-    return $this->belongsTo(User::class, 'causer_id');
+    return $this->morphTo();
   }
-};
+}

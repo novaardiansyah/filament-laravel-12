@@ -110,7 +110,6 @@ class ActivityLogResource extends Resource
         ])
         ->description('Informasi log aktivitas')
         ->columns(3)
-        ->columnSpan('4')
         ->collapsible(),
 
         Forms\Components\Section::make()
@@ -193,7 +192,7 @@ class ActivityLogResource extends Resource
         ->columns(3)
         ->description('Informasi Perangkat')
       ])
-      ->columns(4);
+      ->columns(1);
   }
 
   public static function table(Table $table): Table

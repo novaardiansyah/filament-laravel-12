@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\ContactMessageResource\StoreMessageJob;
 use App\Mail\ContactMessageResource\NotifContactMail;
 use App\Mail\ContactMessageResource\ReplyContactMail;
 use App\Models\ContactMessage;
 use App\Models\EmailLog;
 use Illuminate\Http\Request;
+use Illuminate\Session\Store;
 use Validator;
 use \Illuminate\Validation\Validator AS validationValidator;
 use Illuminate\Support\Facades\Http;
@@ -35,7 +37,6 @@ class ContactMessageController extends Controller
    */
   public function store(Request $request)
   {
-    $now = now();
     $validator = $this->_set_validator($request);
 
     if ($validator->fails()) {
@@ -70,55 +71,9 @@ class ContactMessageController extends Controller
       'url'      => $request->url(),
       'full_url' => $request->fullUrl(),
     ]);
-    $contactMessage = ContactMessage::create($save);
-
-    $notif_reply = [
-      'log_name'   => 'reply_contact_message',
-      'email'      => $contactMessage->email,
-      'subject'    => 'Terima Kasih Telah Menghubungi Saya',
-      'name'       => $contactMessage->name,
-      'created_at' => $now,
-    ];
-
-    $mailObj = new ReplyContactMail($notif_reply);
-    $message = $mailObj->render();
-
-    EmailLog::create([
-      'status_id'  => 2,
-      'name'       => $notif_reply['log_name'],
-      'email'      => $notif_reply['email'],
-      'subject'    => $notif_reply['subject'],
-      'message'    => $message,
-      'created_at' => $now,
-      'updated_at' => $now,
-    ]);
-
-    Mail::to($contactMessage->email)->queue(new ReplyContactMail($notif_reply));
-
-    $notif_params = array_merge($contactMessage->toArray(), [
-      'log_name'        => 'notif_contact_message',
-      'email_contact'   => $contactMessage->email,
-      'email'           => config('app.author_email'),
-      'subject_contact' => $contactMessage->subject,
-      'subject'         => 'Notifikasi: Pesan masuk baru dari situs web',
-      'created_at'      => $now,
-    ]);
-
-    $mailObj = new NotifContactMail($notif_params);
-    $message = $mailObj->render();
-
-    EmailLog::create([
-      'status_id'  => 2,
-      'name'       => $notif_params['log_name'],
-      'email'      => $notif_params['email'],
-      'subject'    => $notif_params['subject'],
-      'message'    => $message,
-      'created_at' => $now,
-      'updated_at' => $now,
-    ]);
-
-    Mail::to($notif_params['email'])->queue(new NotifContactMail($notif_params));
-
+    
+    StoreMessageJob::dispatch($save);
+    
     return response()->json(['message' => 'Thank you for your message, it has been sent. We will reply as soon as possible, thank you!'], 200);
   }
 

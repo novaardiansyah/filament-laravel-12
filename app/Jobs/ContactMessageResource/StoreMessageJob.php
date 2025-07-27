@@ -30,7 +30,7 @@ class StoreMessageJob implements ShouldQueue
   {
     $now = now()->toDateTimeString();
 
-    $ip_address = explode(',', $this->data['ip_addess'])[0] ?? null;
+    $ip_address = explode(',', $this->data['ip_address'] ?? '')[0] ?? null;
     $ip_info    = Http::get("https://ipinfo.io/{$ip_address}/json?token=" . config(key: 'services.ipinfo.token'))->json();
 
     $country = $ip_info['country'] ?? null;

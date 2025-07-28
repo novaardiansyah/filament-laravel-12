@@ -27,6 +27,7 @@ class GenerateSeeder extends Seeder
       ['name' => 'Budget Accounts', 'prefix' => 'BA-', ...$default],
       ['name' => 'Backup Files', 'prefix' => 'BAK-', ...$default],
       ['name' => 'Payment Summaries', 'prefix' => 'PS-', ...$default],
+      ['name' => 'Billing Masters ID', 'prefix' => 'BM-', ...$default],
     ];
 
     Generate::insert($result);

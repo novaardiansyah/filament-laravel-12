@@ -2,9 +2,12 @@
 
 namespace App\Models;
 
+use App\Observers\SettingObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+#[ObservedBy([SettingObserver::class])]
 class Setting extends Model
 {
   use SoftDeletes;
@@ -16,6 +19,6 @@ class Setting extends Model
 
   public static function showPaymentCurrency(): bool
   {
-    return Setting::where('key', 'show_payment_currency')->first()?->value === 'Ya';
+    return getSetting('show_payment_currency') === 'Ya';
   }
 }

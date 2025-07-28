@@ -23,13 +23,13 @@ class AppServiceProvider extends ServiceProvider
   public function boot(): void
   {
     FilamentExport::createExportUrlUsing(function ($export) {
-      $fileInfo                 = pathinfo($export['filename']);
+      $fileInfo = pathinfo($export['filename']);
       $filenameWithoutExtension = $fileInfo['filename'];
-      $extension                = $fileInfo['extension'];
+      $extension = $fileInfo['extension'];
 
       $directory = 'filament-excel';
-      $fileName  = trim(substr($filenameWithoutExtension, 37));
-      $user      = auth()->user();
+      $fileName = trim(substr($filenameWithoutExtension, 37));
+      $user = auth()->user();
 
       $fileUrl = URL::temporarySignedRoute(
         'download',
@@ -38,13 +38,13 @@ class AppServiceProvider extends ServiceProvider
       );
 
       ActivityLog::create([
-        'log_name'    => 'Export',
+        'log_name' => 'Export',
         'description' => "{$user->name} Export {$fileName}.{$extension}",
-        'event'       => 'Export Excel',
+        'event' => 'Export Excel',
         'causer_type' => 'App\Models\User',
-        'causer_id'   => $user->id,
-        'properties'  => [
-          'filepath'   => "{$directory}/{$filenameWithoutExtension}.{$extension}",
+        'causer_id' => $user->id,
+        'properties' => [
+          'filepath' => "{$directory}/{$filenameWithoutExtension}.{$extension}",
           'signed_url' => $fileUrl,
         ]
       ]);

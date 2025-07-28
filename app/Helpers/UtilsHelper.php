@@ -3,6 +3,7 @@
 use App\Models\ActivityLog;
 use App\Models\Generate;
 use App\Models\ScheduledFileDeletion;
+use App\Models\Setting;
 use App\Models\User;
 use Carbon\Carbon;
 use Ramsey\Uuid\Uuid;
@@ -10,6 +11,13 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Database\Eloquent\Model;
 use Filament\Notifications\Notification;
 use Filament\Notifications\Actions\Action;
+
+function getSetting(string $key, $default = null)
+{
+  return cache()->rememberForever("setting.{$key}", function () use ($key, $default) {
+    return Setting::where('key', $key)->first()?->value ?? $default;
+  });
+}
 
 function carbonTranslatedFormat(string $date, string $format = 'd/m/Y H:i'): string
 {
@@ -26,7 +34,8 @@ function toIndonesianCurrency(float $number = 0, int $precision = 0, string $cur
     $result = $currency . number_format($number, $precision, ',', '.');
   }
 
-  if ($showCurrency) return $result;
+  if ($showCurrency)
+    return $result;
 
   $replace = str_replace(range(0, 9), '-', $result);
   return $replace;
@@ -36,11 +45,11 @@ function makePdf(\Mpdf\Mpdf $mpdf, string $name, ?Model $user = null, $preview =
 {
   $user ??= User::find(1); // ! Default user if not provided
 
-  $extension                = 'pdf';
-  $directory                = 'filament-pdf';
+  $extension = 'pdf';
+  $directory = 'filament-pdf';
   $filenameWithoutExtension = Uuid::uuid4() . "-{$name}";
-  $filename                 = "{$filenameWithoutExtension}.{$extension}";
-  $filepath                 = "{$directory}/{$filename}";
+  $filename = "{$filenameWithoutExtension}.{$extension}";
+  $filepath = "{$directory}/{$filename}";
 
   $end_tbody = $auto_close_tbody ? '</tbody><tfoot><tr></tr></tfoot>' : '';
 
@@ -49,14 +58,14 @@ function makePdf(\Mpdf\Mpdf $mpdf, string $name, ?Model $user = null, $preview =
       </body>
     </html>
   ');
-  
+
   $mpdf->SetHTMLFooter(view('layout.footer')->render());
-  
+
   if ($preview) {
     $mpdf->Output('', 'I'); // ! Output to browser for preview
     return [
-      'filename'   => $filename,
-      'filepath'   => $filepath,
+      'filename' => $filename,
+      'filepath' => $filepath,
       'signed_url' => null, // No signed URL for preview
     ];
   }
@@ -89,26 +98,26 @@ function makePdf(\Mpdf\Mpdf $mpdf, string $name, ?Model $user = null, $preview =
   }
 
   ScheduledFileDeletion::create([
-    'user_id'                 => $user->id,
-    'file_name'               => $filename,
-    'file_path'               => $filepath,
-    'download_url'            => $fileUrl,
+    'user_id' => $user->id,
+    'file_name' => $filename,
+    'file_path' => $filepath,
+    'download_url' => $fileUrl,
     'scheduled_deletion_time' => $expiration,
   ]);
 
   $properties = [
-    'filename'   => $filename,
-    'filepath'   => $filepath,
+    'filename' => $filename,
+    'filepath' => $filepath,
     'signed_url' => $fileUrl,
   ];
 
   ActivityLog::create([
-    'log_name'    => 'Export',
+    'log_name' => 'Export',
     'description' => "{$user->name} Export {$name}.{$extension}",
-    'event'       => 'Export PDF',
+    'event' => 'Export PDF',
     'causer_type' => 'App\Models\User',
-    'causer_id'   => $user->id,
-    'properties'  => $properties
+    'causer_id' => $user->id,
+    'properties' => $properties
   ]);
 
   return $properties;
@@ -117,7 +126,8 @@ function makePdf(\Mpdf\Mpdf $mpdf, string $name, ?Model $user = null, $preview =
 function getCode(int $id, bool $isNotPreview = true)
 {
   $genn = Generate::find($id);
-  if (!$genn) return 'ER00001';
+  if (!$genn)
+    return 'ER00001';
 
   $date = now()->translatedFormat('ymd');
   $separator = Carbon::createFromFormat('ymd', $genn->separator)->translatedFormat('ymd');
@@ -129,8 +139,10 @@ function getCode(int $id, bool $isNotPreview = true)
 
   $queue = substr($date, 0, 4) . str_pad($genn->queue, 4, '0', STR_PAD_LEFT) . substr($date, 4, 2);
 
-  if ($genn->prefix) $queue = $genn->prefix . $queue;
-  if ($genn->suffix) $queue .= $genn->suffix;
+  if ($genn->prefix)
+    $queue = $genn->prefix . $queue;
+  if ($genn->suffix)
+    $queue .= $genn->suffix;
 
   if ($isNotPreview) {
     $genn->queue += 1;
@@ -164,15 +176,15 @@ function getOptionMonths($short = false): array
   }
 
   return [
-    '1'  => 'Januari',
-    '2'  => 'Februari',
-    '3'  => 'Maret',
-    '4'  => 'April',
-    '5'  => 'Mei',
-    '6'  => 'Juni',
-    '7'  => 'Juli',
-    '8'  => 'Agustus',
-    '9'  => 'September',
+    '1' => 'Januari',
+    '2' => 'Februari',
+    '3' => 'Maret',
+    '4' => 'April',
+    '5' => 'Mei',
+    '6' => 'Juni',
+    '7' => 'Juli',
+    '8' => 'Agustus',
+    '9' => 'September',
     '10' => 'Oktober',
     '11' => 'November',
     '12' => 'Desember',

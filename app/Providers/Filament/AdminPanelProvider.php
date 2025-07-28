@@ -33,16 +33,16 @@ class AdminPanelProvider extends PanelProvider
   {
     return $panel
       ->default()
-      ->brandName(fn() => Setting::where('key', 'site_name')->first()?->value ?? 'Aplikasi')
+      ->brandName(fn() => getSetting('site_name', 'Aplikasi'))
       ->id('admin')
       ->path('admin')
       ->login()
       ->when(
-        Setting::where('key', 'site_registration')->first()?->value === 'Ya',
+        getSetting('site_registration') === 'Ya',
         fn($panel) => $panel->registration()
       )
       ->when(
-        Setting::where('key', 'site_password_reset')->first()?->value === 'Ya',
+        getSetting('site_password_reset') === 'Ya',
         fn($panel) => $panel->passwordReset()
       )
       ->maxContentWidth(MaxWidth::Full)
@@ -50,7 +50,7 @@ class AdminPanelProvider extends PanelProvider
       ->profile()
       ->favicon(asset('favicon.ico'))
       ->colors(function () {
-        $color = Setting::where('key', 'site_theme')->first()?->value ?? 'Cyan';
+        $color = getSetting('site_theme', 'Cyan');
         return [
           'primary' => Color::{$color}
         ];
@@ -89,18 +89,18 @@ class AdminPanelProvider extends PanelProvider
         FilamentShieldPlugin::make()
           ->gridColumns([
             'default' => 1,
-            'sm'      => 2,
-            'lg'      => 2
+            'sm' => 2,
+            'lg' => 2
           ])
           ->sectionColumnSpan(1)
           ->checkboxListColumns([
             'default' => 1,
-            'sm'      => 2,
-            'lg'      => 4,
+            'sm' => 2,
+            'lg' => 4,
           ])
           ->resourceCheckboxListColumns([
             'default' => 1,
-            'sm'      => 2,
+            'sm' => 2,
           ]),
 
         BreezyCore::make()

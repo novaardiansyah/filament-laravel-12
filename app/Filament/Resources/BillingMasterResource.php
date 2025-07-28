@@ -3,7 +3,6 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\BillingMasterResource\Pages;
-use App\Filament\Resources\BillingMasterResource\RelationManagers;
 use App\Models\BillingMaster;
 use App\Models\Setting;
 use Filament\Forms;
@@ -12,17 +11,15 @@ use Filament\Resources\Resource;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class BillingMasterResource extends Resource
 {
   protected static ?string $model = BillingMaster::class;
 
   protected static ?string $navigationIcon = 'heroicon-o-credit-card';
-  protected static ?string $navigationGroup = 'Master Data';
+  protected static ?string $navigationGroup = 'Tagihan';
   protected static ?int $navigationSort = 20;
-  protected static ?string $label = 'Tagihan';
+  protected static ?string $label = 'Master Tagihan';
   protected static ?string $recordTitleAttribute = 'name';
 
   protected static function showPaymentCurrency(): bool

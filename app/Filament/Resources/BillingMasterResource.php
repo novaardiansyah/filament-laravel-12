@@ -20,7 +20,7 @@ class BillingMasterResource extends Resource
   protected static ?string $navigationGroup = 'Tagihan';
   protected static ?int $navigationSort = 20;
   protected static ?string $label = 'Master Tagihan';
-  protected static ?string $recordTitleAttribute = 'name';
+  protected static ?string $recordTitleAttribute = 'code';
 
   protected static function showPaymentCurrency(): bool
   {

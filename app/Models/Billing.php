@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Billing extends Model
 {
   use SoftDeletes;
-  protected $table = 'billing'; 
+  protected $table = 'billings'; 
   protected $guarded = ['id'];
   
   public function billingMaster()

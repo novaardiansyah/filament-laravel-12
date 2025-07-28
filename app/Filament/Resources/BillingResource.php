@@ -15,50 +15,59 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class BillingResource extends Resource
 {
-    protected static ?string $model = Billing::class;
+  protected static ?string $model = Billing::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+  protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    public static function form(Form $form): Form
-    {
-        return $form
-            ->schema([
-                //
-            ]);
-    }
+  public static function form(Form $form): Form
+  {
+    return $form
+      ->schema([
+        //
+      ]);
+  }
 
-    public static function table(Table $table): Table
-    {
-        return $table
-            ->columns([
-                //
-            ])
-            ->filters([
-                //
-            ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
-            ]);
-    }
+  public static function table(Table $table): Table
+  {
+    return $table
+      ->columns([
+        //
+      ])
+      ->filters([
+        //
+      ])
+      ->recordAction(null)
+      ->recordUrl(null)
+      ->defaultSort('updated_at', 'desc')
+      ->actions([
+        Tables\Actions\ActionGroup::make([
+          Tables\Actions\EditAction::make()
+            ->color('primary'),
 
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
-    }
+          Tables\Actions\DeleteAction::make()
+            ->color('danger'),
+        ]),
+      ])
+      ->bulkActions([
+        Tables\Actions\BulkActionGroup::make([
+          Tables\Actions\DeleteBulkAction::make(),
+        ]),
+      ]);
+  }
 
-    public static function getPages(): array
-    {
-        return [
-            'index' => Pages\ListBillings::route('/'),
-            'create' => Pages\CreateBilling::route('/create'),
-            'edit' => Pages\EditBilling::route('/{record}/edit'),
-        ];
-    }
+  public static function getRelations(): array
+  {
+    return [
+      //
+    ];
+  }
+
+  public static function getPages(): array
+  {
+    return [
+      'index' => Pages\ListBillings::route('/'),
+      'create' => Pages\CreateBilling::route('/create'),
+      'edit' => Pages\EditBilling::route('/{record}/edit'),
+    ];
+  }
 }

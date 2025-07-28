@@ -17,10 +17,10 @@ class BillingPeriodSeeder extends Seeder
     $default = ['created_at' => $now, 'updated_at' => $now];
 
     $result = [
-      ['name' => 'Daily', ...$default],
-      ['name' => 'Weekly', ...$default],
-      ['name' => 'Monthly', ...$default],
-      ['name' => 'Annually', ...$default],
+      ['name' => 'Daily', 'days' => 1, ...$default],
+      ['name' => 'Weekly', 'days' => 7, ...$default],
+      ['name' => 'Monthly', 'days' => 30, ...$default],
+      ['name' => 'Annually', 'days' => 365, ...$default],
     ];
 
     BillingPeriod::insert($result);

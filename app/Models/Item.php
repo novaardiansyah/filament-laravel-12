@@ -21,4 +21,9 @@ class Item extends Model
   {
     return $this->belongsToMany(Payment::class, 'payment_item')->withPivot(['item_code', 'quantity', 'price', 'total'])->withTimestamps();
   }
+
+  public function billingMasters(): BelongsToMany
+  {
+    return $this->belongsToMany(BillingMaster::class, 'billing_masters')->withTimestamps();
+  }
 }

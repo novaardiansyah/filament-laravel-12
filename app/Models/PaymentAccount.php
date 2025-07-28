@@ -9,6 +9,14 @@ class PaymentAccount extends Model
 {
   protected $guarded = ['id'];
 
+  public const PERMATA_BANK = 1;
+  public const DANA = 2;
+  public const JAGO_BANK = 3;
+  public const TUNAI = 4;
+  public const GOPAY = 5;
+  public const OVO = 6;
+  public const SEA_BANK = 7;
+
   public function user(): BelongsTo
   {
     return $this->belongsTo(User::class);

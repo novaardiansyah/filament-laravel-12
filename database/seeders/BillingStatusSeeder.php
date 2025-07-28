@@ -17,9 +17,9 @@ class BillingStatusSeeder extends Seeder
     $default = ['created_at' => $now, 'updated_at' => $now];
 
     $result = [
-      ['name' => 'pending', ...$default],
-      ['name' => 'paid', ...$default],
-      ['name' => 'failed', ...$default],
+      ['name' => 'Pending', ...$default],
+      ['name' => 'Paid', ...$default],
+      ['name' => 'Failed', ...$default],
     ];
 
     BillingStatus::insert($result);

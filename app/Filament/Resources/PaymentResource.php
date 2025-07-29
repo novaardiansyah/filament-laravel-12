@@ -185,7 +185,7 @@ class PaymentResource extends Resource
           ->label('ID Transaksi')
           ->sortable()
           ->searchable()
-          ->toggleable(),
+          ->toggleable(isToggledHiddenByDefault: true),
         Tables\Columns\TextColumn::make('amount')
           ->label('Nominal')
           ->sortable()
@@ -224,7 +224,7 @@ class PaymentResource extends Resource
           ->badge()
           ->color(fn(string $state): string => $state ? 'primary' : 'primary')
           ->formatStateUsing(fn (bool $state): string => $state ? 'Ya' : '-')
-          ->toggleable(isToggledHiddenByDefault: true),
+          ->toggleable(),
         Tables\Columns\TextColumn::make('name')
           ->label('Catatan')
           ->searchable()

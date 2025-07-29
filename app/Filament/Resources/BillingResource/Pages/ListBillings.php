@@ -18,7 +18,7 @@ class ListBillings extends ListRecords
   {
     return [
       Actions\CreateAction::make()
-        ->modalWidth(MaxWidth::ThreeExtraLarge)
+        ->modalWidth(MaxWidth::FourExtraLarge)
         ->mutateFormDataUsing(function (array $data): array {
           $billingPeriodId = BillingPeriod::BILLING_PERIODS[$data['billing_period_id']] ?? BillingPeriod::BILLING_PERIODS['Monthly'];
 

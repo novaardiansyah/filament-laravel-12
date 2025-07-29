@@ -6,6 +6,7 @@ use App\Filament\Resources\BillingResource\Pages;
 use App\Filament\Resources\BillingResource\RelationManagers;
 use App\Models\Billing;
 use App\Models\BillingMaster;
+use App\Models\BillingPeriod;
 use App\Models\BillingStatus;
 use App\Models\PaymentAccount;
 use App\Models\Setting;
@@ -13,6 +14,7 @@ use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Support\Enums\MaxWidth;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -163,7 +165,13 @@ class BillingResource extends Resource
       ->actions([
         Tables\Actions\ActionGroup::make([
           Tables\Actions\EditAction::make()
-            ->color('primary'),
+            ->modalWidth(MaxWidth::FourExtraLarge)
+            ->color('primary')
+            ->mutateRecordDataUsing(function (?Billing $record, array $data): array {
+              $billingPeriod = BillingPeriod::getName($record->billingMaster->billing_period_id) ?? 'Monthly';
+              $data['billing_period_id'] = $billingPeriod;
+              return $data;
+            }),
 
           Tables\Actions\DeleteAction::make()
             ->color('danger'),

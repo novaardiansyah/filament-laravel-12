@@ -282,11 +282,11 @@ class PaymentResource extends Resource
             return $query
               ->when(
                 $data['from_created_at'],
-                fn(Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
+                fn(Builder $query, $date): Builder => $query->whereDate('date', '>=', $date),
               )
               ->when(
                 $data['end_created_at'],
-                fn(Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
+                fn(Builder $query, $date): Builder => $query->whereDate('date', '<=', $date),
               );
           })
           ->columns(2)

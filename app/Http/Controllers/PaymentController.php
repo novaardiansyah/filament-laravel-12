@@ -13,6 +13,7 @@ class PaymentController extends Controller
 
     $scheduledPayments = Payment::with(['payment_account:id,name,deposit', 'payment_account_to:id,name,deposit'])->where('is_scheduled', true)
       ->whereBetween('date', [$today, $tomorrow])
+      ->orderBy('type_id', 'desc')
       ->get();
 
     if ($scheduledPayments->isEmpty()) {

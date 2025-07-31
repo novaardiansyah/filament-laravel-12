@@ -294,6 +294,14 @@ class BillingResource extends Resource
     $record->payment_account_id = $data['payment_account_id'];
     $record->save();
 
+    // ! Duplikat $record menjadi data baru dengan billing_date dan due_date yang baru
+    $newRecord = $record->replicate();
+
+    $newRecord->billing_date = $record->due_date;
+    $newRecord->due_date = Carbon::parse($record->due_date)->addMonth();
+    $newRecord->billing_status_id = BillingStatus::PENDING;
+    $newRecord->save();
+
     Notification::make()
       ->success()
       ->title('Pembayaran Berhasil')

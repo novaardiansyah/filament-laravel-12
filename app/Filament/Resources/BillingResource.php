@@ -54,15 +54,8 @@ class BillingResource extends Resource
             ->native(false)
             ->searchable()
             ->preload()
-            ->live(onBlur: true)
-            ->required()
-            ->afterStateUpdated(fn (callable $set, callable $get)  => self::setBillingPeriod($set, $get)),
+            ->required(),
           
-          Forms\Components\TextInput::make('billing_period_id')
-            ->label('Periode Tagihan')
-            ->default('Monthly')
-            ->readOnly(),
-
           Forms\Components\Select::make('payment_account_id')
             ->label('Akun Pembayaran')
             ->relationship('paymentAccount', 'name')
@@ -70,6 +63,18 @@ class BillingResource extends Resource
             ->searchable()
             ->preload()
             ->default(PaymentAccount::PERMATA_BANK)
+            ->required(),
+
+          Forms\Components\TextInput::make('billing_period_id')
+            ->label('Periode Tagihan')
+            ->default('Monthly')
+            ->readOnly(),
+
+          Forms\Components\DatePicker::make('due_date')
+            ->label('Tanggal Tagihan')
+            ->default(now())
+            ->native(false)
+            ->displayFormat('d/m/Y')
             ->required(),
 
           Forms\Components\Select::make('billing_status_id')
@@ -80,22 +85,6 @@ class BillingResource extends Resource
             ->required()
             ->default(BillingStatus::PENDING)
             ->preload(),
-
-          Forms\Components\DatePicker::make('billing_date')
-            ->label('Tanggal Tagihan')
-            ->default(now())
-            ->displayFormat('d/m/Y')
-            ->required()
-            ->native(false)
-            ->live(onBlur: true)
-            ->afterStateUpdated(fn (callable $set, callable $get)  => self::setBillingPeriod($set, $get)),
-
-          Forms\Components\DatePicker::make('due_date')
-            ->label('Tanggal Jatuh Tempo')
-            ->default(now()->addDays(30))
-            ->native(false)
-            ->displayFormat('d/m/Y')
-            ->readOnly(),
         ])
           ->description('Informasi tagihan')
           ->columns(2)
@@ -127,14 +116,9 @@ class BillingResource extends Resource
           ->sortable()
           ->toggleable()
           ->formatStateUsing(fn ($state) => toIndonesianCurrency($state, 2, showCurrency: self::showPaymentCurrency())),
-        Tables\Columns\TextColumn::make('billing_date')
-          ->label('Tanggal Tagihan')
-          ->dateTime('d/m/Y')
-          ->sortable()
-          ->toggleable(isToggledHiddenByDefault: true),
         Tables\Columns\TextColumn::make('due_date')
-          ->label('Tanggal Jatuh Tempo')
-          ->dateTime('d/m/Y')
+          ->label('Tanggal Tagihan')
+          ->dateTime('d M Y')
           ->sortable()
           ->toggleable(),
         Tables\Columns\TextColumn::make('billingStatus.name')
@@ -212,18 +196,6 @@ class BillingResource extends Resource
       });
   }
 
-  protected static function setBillingPeriod(callable $set, callable $get): void
-  {
-    $billingMasterId = $get('billing_master_id') ?? 0;
-    $billingMaster = BillingMaster::with('billingPeriod')->find($billingMasterId);
-
-    $billing_date = $get('billing_date') ?? now();
-    $due_date = Carbon::parse($billing_date)->addDays($billingMaster->billingPeriod->days ?? 30);
-
-    $set('billing_period_id', $billingMaster->billingPeriod->name ?? 'Monthly');
-    $set('due_date', $due_date->format('Y-m-d'));
-  }
-
   public static function getAlreadyPaidForm(): array
   {
     return [
@@ -294,11 +266,11 @@ class BillingResource extends Resource
     $record->payment_account_id = $data['payment_account_id'];
     $record->save();
 
-    // ! Duplikat $record menjadi data baru dengan billing_date dan due_date yang baru
+    // ! Duplikat $record menjadi data baru dengan due_date yang baru
     $newRecord = $record->replicate();
 
-    $newRecord->billing_date = $record->due_date;
-    $newRecord->due_date = Carbon::parse($record->due_date)->addMonth();
+    $periodDays = $record->billingMaster->billingPeriod->days ?? 7;
+    $newRecord->due_date = Carbon::parse($record->due_date)->addDays($periodDays);
     $newRecord->billing_status_id = BillingStatus::PENDING;
     $newRecord->save();
 

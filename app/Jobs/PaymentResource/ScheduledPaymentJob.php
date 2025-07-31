@@ -38,8 +38,8 @@ class ScheduledPaymentJob implements ShouldQueue
       return;
     }
 
-    $now    = now()->toDateTimeString();
-    $today  = now()->toDateString();
+    $now   = now()->toDateTimeString();
+    $today = now()->toDateString();
 
     $send = [
       'filename'   => 'scheduled-payment-report',

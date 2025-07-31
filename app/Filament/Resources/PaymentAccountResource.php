@@ -182,7 +182,7 @@ class PaymentAccountResource extends Resource implements HasShieldPermissions
     $selisih = $isDecrease ? $deposit - $deposit_to : $deposit_to - $deposit;
 
     Payment::create([
-      'code'               => getCode(1),
+      'code'               => getCode('payment'),
       'name'               => "Audit akun kas {$record->name}",
       'type_id'            => $isDecrease ? 1 : 2,
       'user_id'            => auth()->id(),

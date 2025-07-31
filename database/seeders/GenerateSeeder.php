@@ -17,17 +17,18 @@ class GenerateSeeder extends Seeder
     $default = ['created_at' => $now, 'updated_at' => $now];
 
     $result = [
-      ['name' => 'Payment Code', 'prefix' => 'TR-', ...$default],
-      ['name' => 'Complaint Code', 'prefix' => 'KP-', ...$default],
-      ['name' => 'Item SKU', 'prefix' => 'SKU-', ...$default],
-      ['name' => 'Payment Item Code', 'prefix' => 'PI-', ...$default],
-      ['name' => 'Note Code', 'prefix' => 'NT-', ...$default],
-      ['name' => 'Email Template Code', 'prefix' => 'ET-', ...$default],
-      ['name' => 'Budgets', 'prefix' => 'B-', ...$default],
-      ['name' => 'Budget Accounts', 'prefix' => 'BA-', ...$default],
-      ['name' => 'Backup Files', 'prefix' => 'BAK-', ...$default],
-      ['name' => 'Payment Summaries', 'prefix' => 'PS-', ...$default],
-      ['name' => 'Billing Masters ID', 'prefix' => 'BM-', ...$default],
+      ['name' => 'Payment Code', 'alias' => 'payment', 'prefix' => 'TR-', ...$default],
+      ['name' => 'Complaint Code', 'alias' => 'complaint', 'prefix' => 'KP-', ...$default],
+      ['name' => 'Item SKU', 'alias' => 'item', 'prefix' => 'SKU-', ...$default],
+      ['name' => 'Payment Item Code', 'alias' => 'payment_item', 'prefix' => 'PI-', ...$default],
+      ['name' => 'Note Code', 'alias' => 'note', 'prefix' => 'NT-', ...$default],
+      ['name' => 'Email Template Code', 'alias' => 'email_template', 'prefix' => 'ET-', ...$default],
+      ['name' => 'Budgets', 'alias' => 'budget', 'prefix' => 'B-', ...$default],
+      ['name' => 'Budget Accounts', 'alias' => 'budget_account', 'prefix' => 'BA-', ...$default],
+      ['name' => 'Backup Files', 'alias' => 'backup_file', 'prefix' => 'BAK-', ...$default],
+      ['name' => 'Payment Summaries', 'alias' => 'payment_summary', 'prefix' => 'PS-', ...$default],
+      ['name' => 'Billing Masters ID', 'alias' => 'billing_master', 'prefix' => 'BM-', ...$default],
+      ['name' => 'Billing ID', 'alias' => 'billing', 'prefix' => 'BI-', ...$default],
     ];
 
     Generate::insert($result);

@@ -38,7 +38,7 @@ class CreatePaymentSummary extends CreateRecord
       $this->halt;
     }
 
-    $data['code'] = getCode(10);
+    $data['code'] = getCode('payment_summary');
     $data['period'] = $period;
 
     return $data;

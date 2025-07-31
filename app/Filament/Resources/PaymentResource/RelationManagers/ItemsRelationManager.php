@@ -147,8 +147,8 @@ class ItemsRelationManager extends RelationManager
         Tables\Actions\CreateAction::make()
           ->modalWidth(MaxWidth::FourExtraLarge)
           ->mutateFormDataUsing(function (array $data): array {
-            $data['code'] = getCode(3);
-            $data['item_code'] = getCode(4);
+            $data['code'] = getCode('item');
+            $data['item_code'] = getCode('payment_item');
             $data['price'] = $data['amount'];
             return $data;
           })
@@ -241,7 +241,7 @@ class ItemsRelationManager extends RelationManager
           ])
           ->mutateFormDataUsing(function (array $data): array {
             $data['price'] = $data['amount'];
-            $data['item_code'] = getCode(4);
+            $data['item_code'] = getCode('payment_item');
             return $data;
           })
           ->after(function (array $data, ?Item $record, RelationManager $livewire, Tables\Actions\AttachAction $action) {

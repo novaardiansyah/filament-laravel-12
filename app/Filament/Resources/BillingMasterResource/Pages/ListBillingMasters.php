@@ -35,7 +35,7 @@ class ListBillingMasters extends ListRecords
             $this->halt();
           }
 
-          $data['code'] = getCode(11);
+          $data['code'] = getCode('billing_master');
           return $data;
         }),
     ];

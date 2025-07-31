@@ -90,7 +90,7 @@ class Payment extends Model
       }
     }
 
-    $data['code'] = getCode(1);
+    $data['code'] = getCode('payment');
 
     return ['status' => true, 'message' => 'Data berhasil di mutasi.', 'data' => $data];
   }

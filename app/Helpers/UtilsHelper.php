@@ -123,11 +123,12 @@ function makePdf(\Mpdf\Mpdf $mpdf, string $name, ?Model $user = null, $preview =
   return $properties;
 }
 
-function getCode(int $id, bool $isNotPreview = true)
+function getCode(string $alias, bool $isNotPreview = true)
 {
-  $genn = Generate::find($id);
+  $genn = Generate::where('alias', $alias)->first();
+  
   if (!$genn)
-    return 'ER00001';
+    return 'ER-' . random_int(10000, 99999);
 
   $date = now()->translatedFormat('ymd');
   $separator = Carbon::createFromFormat('ymd', $genn->separator)->translatedFormat('ymd');

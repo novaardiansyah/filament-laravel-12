@@ -8,11 +8,13 @@ use App\Models\Billing;
 use App\Models\BillingMaster;
 use App\Models\BillingPeriod;
 use App\Models\BillingStatus;
+use App\Models\Payment;
 use App\Models\PaymentAccount;
 use App\Models\Setting;
 use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Tables;
@@ -173,6 +175,16 @@ class BillingResource extends Resource
               return $data;
             }),
 
+          Tables\Actions\Action::make('already_paid')
+            ->label('Sudah Dibayar')
+            ->icon('heroicon-o-check-circle')
+            ->color('info')
+            ->visible(fn (Billing $record) => $record->billing_status_id != BillingStatus::PAID)
+            ->modalWidth(MaxWidth::Medium)
+            ->form(self::getAlreadyPaidForm())
+            ->fillForm(fn (Billing $record, array $data) => self::getAlreadyPaidFillForm($record))
+            ->action(fn (Billing $record, Tables\Actions\Action $action, array $data) => self::getAlreadyPaidAction($record, $action, $data)),
+
           Tables\Actions\DeleteAction::make()
             ->color('danger'),
         ]),
@@ -210,6 +222,91 @@ class BillingResource extends Resource
 
     $set('billing_period_id', $billingMaster->billingPeriod->name ?? 'Monthly');
     $set('due_date', $due_date->format('Y-m-d'));
+  }
+
+  public static function getAlreadyPaidForm(): array
+  {
+    return [
+      Forms\Components\Section::make('')
+        ->description('Informasi pembayaran')
+        ->schema([
+          Forms\Components\Toggle::make('has_charge')
+            ->label('Tanpa Tagihan?'),
+          Forms\Components\Select::make('payment_account_id')
+            ->label('Akun Kas')
+            ->relationship('paymentAccount', titleAttribute: 'name')
+            ->native(false)
+            ->required()
+            ->live()
+            ->default(function (?Billing $record) {
+              return $record->payment_account_id;
+            })
+            ->afterStateUpdated(function (Forms\Set $set, ?string $state) {
+              $set('payment_account_to_id', null);
+
+              if (!$state) return $set('payment_account_deposit', 'Rp0');
+
+              $paymentAccount = PaymentAccount::find($state);
+
+              $set('payment_account_deposit', toIndonesianCurrency($paymentAccount->deposit));
+            }),
+          Forms\Components\TextInput::make('payment_account_deposit')
+            ->label('Saldo Akun Kas')
+            ->disabled()
+            ->default('Rp0'),
+          Forms\Components\TextInput::make('amount')
+            ->label('Nominal')
+            ->readOnly()
+            ->hint(fn (string $state) => toIndonesianCurrency($state ?? 0, 2)),
+        ])
+      ];
+  }
+
+  public static function getAlreadyPaidAction(Billing $record, Tables\Actions\Action $action, array $data): void
+  {
+    $item_name = $record->billingMaster->item->name;
+
+    $data = array_merge($data, [
+      'has_items'   => false,
+      'date'        => now()->translatedFormat('Y-m-d'),
+      'name'        => $item_name . ' (' . $record->billingMaster->code . ')',
+      'attachments' => [],
+      'type_id'     => PaymentAccount::PENGELUARAN,
+    ]);
+
+    $payment = new Payment();
+    $mutate  = $payment::mutateDataPayment($data);
+    $data    = $mutate['data'];
+
+    if ($mutate['status'] == false) {
+      Notification::make()
+        ->danger()
+        ->title('Proses gagal!')
+        ->body($mutate['message'])
+        ->send();
+
+      $action->halt();
+    }
+
+    $payment->create($data);
+
+    $record->billing_status_id = BillingStatus::PAID;
+    $record->payment_account_id = $data['payment_account_id'];
+    $record->save();
+
+    Notification::make()
+      ->success()
+      ->title('Pembayaran Berhasil')
+      ->body("Tagihan {$item_name} telah dibayar.")
+      ->send();
+  }
+
+  public static function getAlreadyPaidFillForm(Billing $record): array
+  {
+    return [
+      'amount'                  => $record->billingMaster->amount,
+      'payment_account_deposit' => toIndonesianCurrency($record->paymentAccount->deposit),
+    ];
   }
 
   public static function getPages(): array

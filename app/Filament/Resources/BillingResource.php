@@ -52,6 +52,7 @@ class BillingResource extends Resource
             ->searchable()
             ->required()
             ->live(onBlur: true)
+            ->disabledOn('edit')
             ->afterStateUpdated(function (Forms\Set $set, ?string $state) {
               if ($state) {
                 $item = \App\Models\Item::find($state);
@@ -101,7 +102,8 @@ class BillingResource extends Resource
             ->searchable()
             ->required()
             ->default(BillingStatus::PENDING)
-            ->preload(),
+            ->preload()
+            ->disabledOn('edit'),
         ])
           ->description('Informasi tagihan')
           ->columns(2)

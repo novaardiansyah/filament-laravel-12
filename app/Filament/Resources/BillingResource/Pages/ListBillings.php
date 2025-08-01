@@ -3,9 +3,10 @@
 namespace App\Filament\Resources\BillingResource\Pages;
 
 use App\Filament\Resources\BillingResource;
-use App\Models\BillingPeriod;
+use App\Models\Billing;
 use App\Models\BillingStatus;
 use Filament\Actions;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Resources\Components\Tab;
@@ -20,11 +21,24 @@ class ListBillings extends ListRecords
       Actions\CreateAction::make()
         ->modalWidth(MaxWidth::FourExtraLarge)
         ->mutateFormDataUsing(function (array $data): array {
-          $billingPeriodId = BillingPeriod::BILLING_PERIODS[$data['billing_period_id']] ?? BillingPeriod::BILLING_PERIODS['Monthly'];
+          $exist = Billing::where('item_id', $data['item_id'])
+            ->whereIn('billing_status_id', [
+              BillingStatus::PENDING,
+              BillingStatus::FAILED,
+            ])
+            ->exists();
 
-          $data['billing_period_id'] = $billingPeriodId;
-          $data['billing_master_id'] = (int) $data['billing_master_id'];
-          
+          if ($exist) {
+            Notification::make()
+              ->title('Gagal membuat tagihan')
+              ->body('Tagihan untuk produk & layanan ini sudah ada, dan belum dibayar.')
+              ->danger()
+              ->send();
+
+            $this->halt();
+          }
+
+          $data['code'] = getCode('billing');
           return $data;
         }),
     ];

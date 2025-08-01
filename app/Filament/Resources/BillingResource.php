@@ -48,13 +48,30 @@ class BillingResource extends Resource
     return $form
       ->schema([
         Forms\Components\Section::make([
-          Forms\Components\Select::make('billing_master_id')
-            ->label('Master Tagihan')
-            ->options(self::getBillingMasterOptions())
+          Forms\Components\Select::make('item_id')
+            ->label('Produk & Layanan')
+            ->relationship('item', 'name')
             ->native(false)
+            ->preload(false)
             ->searchable()
-            ->preload()
-            ->required(),
+            ->required()
+            ->live(onBlur: true)
+            ->afterStateUpdated(function (Forms\Set $set, ?string $state) {
+              if ($state) {
+                $item = \App\Models\Item::find($state);
+                $set('amount', $item->amount ?? 0);
+              } else {
+                $set('amount', 0);
+              }
+            }),
+
+          Forms\Components\TextInput::make('amount')
+            ->label('Nominal Tagihan')
+            ->numeric()
+            ->minValue(0)
+            ->live(onBlur: true)
+            ->required()
+            ->hint(fn(?string $state) => toIndonesianCurrency($state ?? 0)),
           
           Forms\Components\Select::make('payment_account_id')
             ->label('Akun Pembayaran')
@@ -65,10 +82,14 @@ class BillingResource extends Resource
             ->default(PaymentAccount::PERMATA_BANK)
             ->required(),
 
-          Forms\Components\TextInput::make('billing_period_id')
+          Forms\Components\Select::make('billing_period_id')
             ->label('Periode Tagihan')
-            ->default('Monthly')
-            ->readOnly(),
+            ->relationship('billingPeriod', 'name')
+            ->native(false)
+            ->preload(true)
+            ->searchable()
+            ->required()
+            ->default(BillingPeriod::BILLING_PERIODS['Monthly']),
 
           Forms\Components\DatePicker::make('due_date')
             ->label('Tanggal Tagihan')
@@ -79,7 +100,7 @@ class BillingResource extends Resource
 
           Forms\Components\Select::make('billing_status_id')
             ->label('Status Tagihan')
-            ->relationship('billingStatus', 'name')
+            ->relationship('billingStatus', 'name', fn ($query) => $query->whereNotIn('id', [BillingStatus::PAID]))
             ->native(false)
             ->searchable()
             ->required()
@@ -98,24 +119,24 @@ class BillingResource extends Resource
         Tables\Columns\TextColumn::make('index')
           ->rowIndex()
           ->label('#'),
-        Tables\Columns\TextColumn::make('billingMaster.item.name')
+        Tables\Columns\TextColumn::make('code')
+          ->label('ID Tagihan')
+          ->searchable()
+          ->toggleable()
+          ->copyable(),
+        Tables\Columns\TextColumn::make('item.name')
           ->label('Tagihan')
           ->searchable()
           ->toggleable(),
-        Tables\Columns\TextColumn::make('billingMaster.code')
-          ->label('ID Tagihan')
-          ->searchable()
-          ->toggleable(isToggledHiddenByDefault: true)
-          ->copyable(),
         Tables\Columns\TextColumn::make('paymentAccount.name')
           ->label('Akun Pembayaran')
           ->searchable()
           ->toggleable(),
-        Tables\Columns\TextColumn::make('billingMaster.amount')
+        Tables\Columns\TextColumn::make('amount')
           ->label('Jumlah Tagihan')
           ->sortable()
           ->toggleable()
-          ->formatStateUsing(fn ($state) => toIndonesianCurrency($state, 2, showCurrency: self::showPaymentCurrency())),
+          ->formatStateUsing(fn ($state) => toIndonesianCurrency($state, showCurrency: self::showPaymentCurrency())),
         Tables\Columns\TextColumn::make('due_date')
           ->label('Tanggal Tagihan')
           ->dateTime('d M Y')
@@ -229,7 +250,7 @@ class BillingResource extends Resource
           Forms\Components\TextInput::make('amount')
             ->label('Nominal')
             ->readOnly()
-            ->hint(fn (string $state) => toIndonesianCurrency($state ?? 0, 2)),
+            ->hint(fn (string $state) => toIndonesianCurrency($state ?? 0)),
         ])
       ];
   }

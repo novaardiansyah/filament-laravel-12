@@ -125,7 +125,7 @@ function makePdf(\Mpdf\Mpdf $mpdf, string $name, ?Model $user = null, $preview =
 
 function getCode(string $alias, bool $isNotPreview = true)
 {
-  $genn = Generate::where('alias', $alias)->first();
+  $genn = Generate::withTrashed()->where('alias', $alias)->first();
   
   if (!$genn)
     return 'ER-' . random_int(10000, 99999);

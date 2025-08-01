@@ -3,8 +3,6 @@
 namespace App\Filament\Resources\PaymentResource\Pages;
 
 use App\Filament\Resources\PaymentResource;
-use App\Models\PaymentSummary;
-use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\Storage;
@@ -122,12 +120,6 @@ class EditPayment extends EditRecord
         Storage::disk('public')->delete($attachment);
       }
     }
-  }
-
-  protected function afterSave(): void
-  {
-    $period = now()->translatedFormat('mY');
-    PaymentSummary::setSync($period);
   }
 
   private function _error(string $message): void

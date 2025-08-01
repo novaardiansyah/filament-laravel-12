@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\PaymentResource\RelationManagers;
 
 use App\Models\Item;
-use App\Models\PaymentSummary;
 use App\Models\Setting;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -174,12 +173,6 @@ class ItemsRelationManager extends RelationManager
             // * Update pengeluaran dan jumlah pada owner
             $owner->update(['expense' => $expense, 'amount' => $expense, 'name' => $note]);
 
-            // * Update Summary
-            $period      = now()->translatedFormat('mY');
-            $syncSummary = PaymentSummary::setSync($period);
-
-            if (!$syncSummary) return;
-
             // * refresh parent form
             $action->getLivewire()->dispatch('refreshForm');
           }),
@@ -269,12 +262,6 @@ class ItemsRelationManager extends RelationManager
             // * Update pengeluaran dan jumlah pada owner
             $owner->update(['expense' => $expense, 'amount' => $expense, 'name' => $note]);
             
-            // * Update Summary
-            $period      = now()->translatedFormat('mY');
-            $syncSummary = PaymentSummary::setSync($period);
-
-            if (!$syncSummary) return;
-
             // * refresh parent form
             $action->getLivewire()->dispatch('refreshForm');
           }),
@@ -341,12 +328,6 @@ class ItemsRelationManager extends RelationManager
               // * Update pengeluaran dan jumlah pada owner
               $owner->update(['expense' => $expense, 'amount' => $expense, 'name' => $note]);
 
-              // * Update Summary
-              $period      = now()->translatedFormat('mY');
-              $syncSummary = PaymentSummary::setSync($period);
-
-              if (!$syncSummary) return;
-
               // * refresh parent form
               $action->getLivewire()->dispatch('refreshForm');
             }),
@@ -380,12 +361,6 @@ class ItemsRelationManager extends RelationManager
 
               // * Update pengeluaran dan jumlah pada owner
               $owner->update(['expense' => $expense, 'amount' => $expense]);
-
-              // * Update Summary
-              $period      = now()->translatedFormat('mY');
-              $syncSummary = PaymentSummary::setSync($period);
-
-              if (!$syncSummary) return;
 
               // * Lakukan detach pada setiap record
               foreach ($records as $record) {

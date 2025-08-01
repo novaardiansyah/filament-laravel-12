@@ -24,7 +24,7 @@ class BillingResource extends Resource
 
   protected static ?string $navigationIcon = 'heroicon-o-credit-card';
   protected static ?string $navigationGroup = 'Keuangan';
-  protected static ?int $navigationSort = 21;
+  protected static ?int $navigationSort = 30;
   protected static ?string $label = 'Tagihan';
   protected static ?string $recordTitleAttribute = 'item.name';
 

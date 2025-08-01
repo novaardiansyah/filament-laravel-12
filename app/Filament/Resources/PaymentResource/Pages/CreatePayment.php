@@ -4,7 +4,6 @@ namespace App\Filament\Resources\PaymentResource\Pages;
 
 use App\Filament\Resources\PaymentResource;
 use App\Models\Payment;
-use App\Models\PaymentSummary;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 
@@ -35,12 +34,6 @@ class CreatePayment extends CreateRecord
     }
 
     return $data;
-  }
-
-  protected function afterCreate(): void
-  {
-    $period = now()->translatedFormat('mY');
-    PaymentSummary::setSync($period);
   }
 
   private function _error(string $message): void

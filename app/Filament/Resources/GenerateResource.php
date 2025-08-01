@@ -108,16 +108,16 @@ class GenerateResource extends Resource
           ->label('Antrian')
           ->copyable()
           ->badge()
-          ->color('success')
+          ->color('info')
           ->searchable()
           ->toggleable(),
-        Tables\Columns\TextColumn::make('queue')
+        Tables\Columns\TextColumn::make('id')
           ->label('Next ID')
           ->copyable()
           ->badge()
           ->color('primary')
           ->toggleable()
-          ->formatStateUsing(function (string $state, Generate $record) {
+          ->formatStateUsing(function (Generate $record) {
             return $record->getNextId();
           }),
         Tables\Columns\TextColumn::make('created_at')

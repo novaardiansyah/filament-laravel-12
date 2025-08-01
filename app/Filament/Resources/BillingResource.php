@@ -3,9 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\BillingResource\Pages;
-use App\Filament\Resources\BillingResource\RelationManagers;
 use App\Models\Billing;
-use App\Models\BillingMaster;
 use App\Models\BillingPeriod;
 use App\Models\BillingStatus;
 use App\Models\Payment;
@@ -19,18 +17,16 @@ use Filament\Resources\Resource;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class BillingResource extends Resource
 {
   protected static ?string $model = Billing::class;
 
   protected static ?string $navigationIcon = 'heroicon-o-credit-card';
-  protected static ?string $navigationGroup = 'Tagihan';
-  protected static ?int $navigationSort = 10;
+  protected static ?string $navigationGroup = 'Keuangan';
+  protected static ?int $navigationSort = 21;
   protected static ?string $label = 'Tagihan';
-  protected static ?string $recordTitleAttribute = 'billingMaster.item.name';
+  protected static ?string $recordTitleAttribute = 'item.name';
 
   protected static function showPaymentCurrency(): bool
   {
@@ -175,7 +171,7 @@ class BillingResource extends Resource
             ->modalWidth(MaxWidth::FourExtraLarge)
             ->color('primary')
             ->mutateRecordDataUsing(function (?Billing $record, array $data): array {
-              $billingPeriod = BillingPeriod::getName($record->billingMaster->billing_period_id) ?? 'Monthly';
+              $billingPeriod = BillingPeriod::getName($record->billing_period_id) ?? 'Monthly';
               $data['billing_period_id'] = $billingPeriod;
               return $data;
             }),
@@ -206,15 +202,6 @@ class BillingResource extends Resource
     return [
       //
     ];
-  }
-
-  protected static function getBillingMasterOptions()
-  {
-    return BillingMaster::with('item')
-      ->get()
-      ->mapWithKeys(function ($bm) {
-        return [$bm->id => "{$bm->item->name} ($bm->code)"];
-      });
   }
 
   public static function getAlreadyPaidForm(): array
@@ -257,12 +244,12 @@ class BillingResource extends Resource
 
   public static function getAlreadyPaidAction(Billing $record, Tables\Actions\Action $action, array $data): void
   {
-    $item_name = $record->billingMaster->item->name;
+    $item_name = $record->item->name;
 
     $data = array_merge($data, [
       'has_items'   => false,
       'date'        => now()->translatedFormat('Y-m-d'),
-      'name'        => $item_name . ' (' . $record->billingMaster->code . ')',
+      'name'        => $item_name . ' (' . $record->code . ')',
       'attachments' => [],
       'type_id'     => PaymentAccount::PENGELUARAN,
     ]);
@@ -290,7 +277,7 @@ class BillingResource extends Resource
     // ! Duplikat $record menjadi data baru dengan due_date yang baru
     $newRecord = $record->replicate();
 
-    $periodDays = $record->billingMaster->billingPeriod->days ?? 7;
+    $periodDays = $record->billingPeriod->days ?? 7;
     $newRecord->due_date = Carbon::parse($record->due_date)->addDays($periodDays);
     $newRecord->billing_status_id = BillingStatus::PENDING;
     $newRecord->save();
@@ -305,7 +292,7 @@ class BillingResource extends Resource
   public static function getAlreadyPaidFillForm(Billing $record): array
   {
     return [
-      'amount'                  => $record->billingMaster->amount,
+      'amount'                  => $record->amount,
       'payment_account_deposit' => toIndonesianCurrency($record->paymentAccount->deposit),
     ];
   }

@@ -124,7 +124,6 @@ class AdminPanelProvider extends PanelProvider
       ->navigationGroups([
         'Produktivitas',
         'Keuangan',
-        'Tagihan',
         'Master Data',
         'Berkas',
         'Pengguna',

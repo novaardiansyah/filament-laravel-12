@@ -148,10 +148,6 @@ function getCode(string $alias, bool $isNotPreview = true)
   if ($isNotPreview) {
     $genn->queue += 1;
     $genn->save();
-  } else {
-    if ($genn->isDirty()) {
-      $genn->save();
-    }
   }
 
   return $queue;

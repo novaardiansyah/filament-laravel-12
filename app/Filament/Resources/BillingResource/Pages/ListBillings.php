@@ -50,6 +50,8 @@ class ListBillings extends ListRecords
       'All' => Tab::make(),
       BillingStatus::getName(BillingStatus::PENDING) => Tab::make()
         ->modifyQueryUsing(fn ($query) => $query->where('billing_status_id', BillingStatus::PENDING)),
+      BillingStatus::getName(BillingStatus::SCHEDULED) => Tab::make()
+        ->modifyQueryUsing(fn ($query) => $query->where('billing_status_id', BillingStatus::SCHEDULED)),
       BillingStatus::getName(BillingStatus::PAID) => Tab::make()
         ->modifyQueryUsing(fn ($query) => $query->where('billing_status_id', BillingStatus::PAID)),
       BillingStatus::getName(BillingStatus::FAILED) => Tab::make() 

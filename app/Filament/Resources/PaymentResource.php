@@ -371,7 +371,7 @@ class PaymentResource extends Resource
 
               if ($record->billing) {
                 $record->billing->afterSuccessPaid([
-                  'payment_id'        => $record->id,
+                  'payment_id'        => null,
                   'billing_status_id' => BillingStatus::PENDING
                 ]);
               }

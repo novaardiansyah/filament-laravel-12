@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\PaymentResource\Pages;
 use App\Filament\Resources\PaymentResource\RelationManagers\ItemsRelationManager;
 use App\Jobs\PaymentResource\MakePdfJob;
+use App\Models\BillingStatus;
 use App\Models\Payment;
 use App\Models\PaymentAccount;
 use App\Models\PaymentType;
@@ -366,6 +367,13 @@ class PaymentResource extends Resource
                     'deposit' => $record->payment_account->deposit - $record->amount
                   ]);
                 }
+              }
+
+              if ($record->billing) {
+                $record->billing->afterSuccessPaid([
+                  'payment_id'        => $record->id,
+                  'billing_status_id' => BillingStatus::PENDING
+                ]);
               }
             }),
         ]),

@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 
@@ -164,5 +165,10 @@ class Payment extends Model
       'payments'    => $payments,
       'total_saldo' => $total_saldo,
     ];
+  }
+
+  public function billing(): HasOne
+  {
+    return $this->hasOne(Billing::class, 'payment_id');
   }
 }

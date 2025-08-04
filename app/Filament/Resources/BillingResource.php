@@ -140,15 +140,21 @@ class BillingResource extends Resource
           ->dateTime('d M Y')
           ->sortable()
           ->toggleable(),
+        Tables\Columns\TextColumn::make('payment.date')
+          ->label('Tanggal Terjadwal')
+          ->dateTime('d M Y')
+          ->sortable()
+          ->toggleable(),
         Tables\Columns\TextColumn::make('billingStatus.name')
           ->label('Status')
           ->toggleable()
           ->sortable()
           ->badge()
           ->color(fn ($state) => match ($state) {
-            BillingStatus::getName(BillingStatus::PENDING) => 'warning',
-            BillingStatus::getName(BillingStatus::PAID)    => 'success',
-            BillingStatus::getName(BillingStatus::FAILED)  => 'danger',
+            BillingStatus::getName(BillingStatus::PENDING)   => 'warning',
+            BillingStatus::getName(BillingStatus::PAID)      => 'success',
+            BillingStatus::getName(BillingStatus::FAILED)    => 'danger',
+            BillingStatus::getName(BillingStatus::SCHEDULED) => 'info',
           }),
         Tables\Columns\TextColumn::make('created_at')
           ->label('Dibuat pada')
@@ -185,8 +191,27 @@ class BillingResource extends Resource
             ->visible(fn (Billing $record) => $record->billing_status_id != BillingStatus::PAID)
             ->modalWidth(MaxWidth::Medium)
             ->form(self::getAlreadyPaidForm())
-            ->fillForm(fn (Billing $record, array $data) => self::getAlreadyPaidFillForm($record))
+            ->fillForm(fn (Billing $record) => self::getAlreadyPaidFillForm($record))
             ->action(fn (Billing $record, Tables\Actions\Action $action, array $data) => self::getAlreadyPaidAction($record, $action, $data)),
+
+          Tables\Actions\Action::make('schedule_payment')
+            ->label('Jadwalkan Pembayaran')
+            ->icon('heroicon-o-calendar')
+            ->color('warning')
+            ->form(self::getSchedulePaymentForm())
+            ->fillForm(fn (Billing $record) => self::getSchedulePaymentFillForm($record))
+            ->modalWidth(MaxWidth::Medium)
+            ->visible(fn (Billing $record): bool => !$record->payment_id && $record->billing_status_id != BillingStatus::PAID)
+            ->modalButton('Jadwalkan Pembayaran')
+            ->action(fn (Billing $record, Tables\Actions\Action $action, array $data) => self::getSchedulePaymentAction($record, $action, $data)),
+
+          Tables\Actions\Action::make('cancel_schedule_payment')
+            ->label('Batalkan Jadwal Pembayaran')
+            ->icon('heroicon-o-x-circle')
+            ->color('danger')
+            ->visible(fn (Billing $record): bool => $record->payment_id && $record->billing_status_id == BillingStatus::SCHEDULED)
+            ->action(fn (Billing $record) => self::getCancelSchedulePaymentAction($record))
+            ->requiresConfirmation(),
 
           Tables\Actions\DeleteAction::make()
             ->color('danger'),
@@ -272,17 +297,9 @@ class BillingResource extends Resource
 
     $payment->create($data);
 
-    $record->billing_status_id = BillingStatus::PAID;
-    $record->payment_account_id = $data['payment_account_id'];
-    $record->save();
-
-    // ! Duplikat $record menjadi data baru dengan due_date yang baru
-    $newRecord = $record->replicate();
-
-    $periodDays = $record->billingPeriod->days ?? 7;
-    $newRecord->due_date = Carbon::parse($record->due_date)->addDays($periodDays);
-    $newRecord->billing_status_id = BillingStatus::PENDING;
-    $newRecord->save();
+    $record->afterSuccessPaid([
+      'payment_account_id' => $data['payment_account_id'],
+    ]);
 
     Notification::make()
       ->success()
@@ -297,6 +314,125 @@ class BillingResource extends Resource
       'amount'                  => $record->amount,
       'payment_account_deposit' => toIndonesianCurrency($record->paymentAccount->deposit),
     ];
+  }
+
+  public static function getSchedulePaymentForm(): array
+  {
+    return [
+      Forms\Components\Section::make('')
+        ->description('Informasi pembayaran terjadwal')
+        ->schema([
+          Forms\Components\Select::make('payment_account_id')
+            ->label('Akun Kas')
+            ->relationship('paymentAccount', titleAttribute: 'name')
+            ->native(false)
+            ->required()
+            ->live()
+            ->default(function (?Billing $record) {
+              return $record->payment_account_id;
+            })
+            ->afterStateUpdated(function (Forms\Set $set, ?string $state) {
+              $set('payment_account_to_id', null);
+
+              if (!$state) return $set('payment_account_deposit', 'Rp0');
+
+              $paymentAccount = PaymentAccount::find($state);
+
+              $set('payment_account_deposit', toIndonesianCurrency($paymentAccount->deposit));
+            }),
+          Forms\Components\TextInput::make('payment_account_deposit')
+            ->label('Saldo Akun Kas')
+            ->disabled()
+            ->default('Rp0'),
+          Forms\Components\TextInput::make('amount')
+            ->label('Nominal')
+            ->readOnly()
+            ->hint(fn (string $state) => toIndonesianCurrency($state ?? 0)),
+          Forms\Components\DatePicker::make('scheduled_date')
+            ->label('Tanggal Pembayaran')
+            ->displayFormat('d M Y')
+            ->closeOnDateSelection()
+            ->native(false)
+        ])
+      ];
+  }
+
+  public static function getSchedulePaymentFillForm(Billing $record): array
+  {
+    $scheduled = carbonTranslatedFormat($record->due_date, 'Y-m-d');
+
+    if (Carbon::parse($scheduled)->isPast()) {
+      $scheduled = now()->addDay()->toDateString();
+    }
+
+    return [
+      'amount'                  => $record->amount,
+      'scheduled_date'          => $scheduled,
+      'payment_account_deposit' => toIndonesianCurrency($record->paymentAccount->deposit),
+    ];
+  }
+
+  public static function getSchedulePaymentAction(Billing $record, Tables\Actions\Action $action, array $data): void
+  {
+    $item_name = $record->item->name;
+
+    $data = array_merge($data, [
+      'has_items'    => false,
+      'date'         => $data['scheduled_date'] ?? now()->toDateString(),
+      'name'         => $item_name . ' (' . $record->code . ')',
+      'attachments'  => [],
+      'type_id'      => PaymentAccount::PENGELUARAN,
+      'is_scheduled' => true,
+    ]);
+
+    $payment = new Payment();
+    $mutate  = $payment::mutateDataPayment($data);
+    $data    = $mutate['data'];
+
+    if ($mutate['status'] == false) {
+      Notification::make()
+        ->danger()
+        ->title('Proses gagal!')
+        ->body($mutate['message'])
+        ->send();
+
+      $action->halt();
+    }
+
+    $saved = $payment->create($data);
+
+    $record->afterSuccessPaid([
+      'payment_id'         => $saved->id,
+      'billing_status_id'  => BillingStatus::SCHEDULED,
+      'payment_account_id' => $data['payment_account_id'],
+    ]);
+
+    $date = carbonTranslatedFormat($data['scheduled_date'], 'd M Y');
+
+    Notification::make()
+      ->success()
+      ->title('Tagihan Dijadwalkan')
+      ->body("Tagihan {$item_name} telah dijadwalkan untuk pembayaran pada {$date}.")
+      ->send();
+  }
+
+  public static function getCancelSchedulePaymentAction(Billing $record): void
+  {
+    $payment = Payment::find($record->payment_id);
+
+    if ($payment) {
+      $payment->delete();
+    }
+
+    $record->payment_id = null;
+    $record->billing_status_id = BillingStatus::PENDING;
+    $record->save();
+
+    Notification::make()
+      ->success()
+      ->title('Pembatalan Berhasil')
+      ->body("Jadwal pembayaran untuk tagihan {$record->code} telah dibatalkan.")
+      ->send();
   }
 
   public static function getPages(): array

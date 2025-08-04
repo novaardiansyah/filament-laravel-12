@@ -20,6 +20,7 @@ class BillingStatusSeeder extends Seeder
       ['name' => 'Pending', ...$default],
       ['name' => 'Paid', ...$default],
       ['name' => 'Failed', ...$default],
+      ['name' => 'Scheduled', ...$default],
     ];
 
     BillingStatus::insert($result);

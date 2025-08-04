@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -30,5 +31,26 @@ class Billing extends Model
   public function billingPeriod(): BelongsTo
   {
     return $this->belongsTo(BillingPeriod::class, 'billing_period_id');
+  }
+
+  public function payment(): BelongsTo
+  {
+    return $this->belongsTo(Payment::class, 'payment_id');
+  }
+
+  public function afterSuccessPaid(array $data = []): void
+  {
+    $data['billing_status_id'] = $data['billing_status_id'] ?? BillingStatus::PAID;
+    $this->update($data);
+
+    if ($data['billing_status_id'] === BillingStatus::PAID) {
+      $periodDays = $this->billingPeriod->days ?? 7;
+  
+      $newRecord = $this->replicate();
+      $newRecord->billing_status_id = BillingStatus::PENDING;
+      $newRecord->due_date = Carbon::parse($this->due_date)->addDays($periodDays);
+      $newRecord->code = getCode('billing');
+      $newRecord->save();
+    }
   }
 }

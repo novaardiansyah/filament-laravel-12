@@ -12,14 +12,16 @@ class BillingStatus extends Model
   public const PENDING = 1;
   public const PAID = 2;
   public const FAILED = 3;
+  public const SCHEDULED = 4;
 
   public static function getName(int $status): string
   {
     return match ($status) {
-      self::PENDING => 'Pending',
-      self::PAID    => 'Paid',
-      self::FAILED  => 'Failed',
-      default       => 'Unknown Status',
+      self::PENDING   => 'Pending',
+      self::PAID      => 'Paid',
+      self::FAILED    => 'Failed',
+      self::SCHEDULED => 'Scheduled',
+      default  => 'Unknown Status',
     };
   }
 }

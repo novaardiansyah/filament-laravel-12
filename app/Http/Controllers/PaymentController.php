@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BillingStatus;
 use App\Models\Payment;
 
 class PaymentController extends Controller
@@ -20,7 +21,7 @@ class PaymentController extends Controller
       return ['status' => false, 'message' => 'No scheduled payments found for today.'];
     }
 
-    $scheduledPayments->each(function ($payment) {
+    $scheduledPayments->each(function (Payment $payment) {
       $payment->is_scheduled = false;
       $payment->save();
 
@@ -44,6 +45,10 @@ class PaymentController extends Controller
 
       if ($payment->payment_account_to && $payment->payment_account_to->isDirty()) {
         $payment->payment_account_to->save();
+      }
+
+      if ($payment->billing) {
+        $payment->billing->afterSuccessPaid();
       }
     });
 

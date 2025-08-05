@@ -1,47 +1,32 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Jobs\BillingResource;
 
 use App\Mail\BillingResource\NotifReminderMail;
-use App\Mail\ContactMessageResource\NotifContactMail;
 use App\Models\Billing;
 use App\Models\BillingStatus;
 use App\Models\EmailLog;
-use Illuminate\Http\Request;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Mail;
 
-class TestingController extends Controller
+class NotifReminderJob implements ShouldQueue
 {
+  use Queueable;
+
+  /**
+   * Create a new job instance.
+   */
   public function __construct()
   {
-    $env = config('app.env');
-    if ($env != 'local') {
-      abort(404, 'Not Found');
-    }
+    //
   }
 
-  public function index(Request $request)
+  /**
+   * Execute the job.
+   */
+  public function handle(): void
   {
-    $preview = (bool) $request->input('preview', 0);
-
-    $data = [
-      'email'   => 'novaardiansyah78@gmail.com',
-      'subject' => 'Notifikasi: Pesan masuk baru dari situs web',
-    ];
-
-    if (!$preview) {
-      Mail::to($data['email'])->queue(new NotifContactMail($data));
-      echo 'Email has been queued for sending.';
-    }
-
-    $process = new NotifContactMail($data);
-    return $process->render();
-  }
-
-  public function email_preview(Request $request)
-  {
-    $preview = (bool) $request->input('preview', 0);
-
     $now = now()->toDateTimeString();
 
     $daysStr = getSetting('billing_due_reminder_days', '1 Hari');
@@ -76,11 +61,6 @@ class TestingController extends Controller
       'reminder_days' => $daysStr,
     ];
 
-    if (!$preview) {
-      Mail::to($data['email'])->queue(new NotifReminderMail($data));
-      echo 'Email has been queued for sending.';
-    }
-
     $mailObj = new NotifReminderMail($data);
     $message = $mailObj->render();
 
@@ -94,12 +74,6 @@ class TestingController extends Controller
       'updated_at' => $now,
     ]);
 
-    $process = new NotifReminderMail($data);
-    return $process->render();
-  }
-
-  public function pdf_preview(Request $request) 
-  {
-
+    Mail::to($data['email'])->queue(new NotifReminderMail($data));
   }
 }

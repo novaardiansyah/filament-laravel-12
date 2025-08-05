@@ -1,5 +1,6 @@
 <?php
 
+use App\Jobs\BillingResource\NotifReminderJob;
 use App\Jobs\PaymentAccountResource\DailyReportJob;
 use App\Jobs\PaymentAccountResource\WeeklyReportJob;
 use App\Jobs\PaymentResource\ScheduledPaymentJob;
@@ -13,6 +14,10 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 if (config('app.env') != 'staging') {
+  // ! Notifikasi: Pengingat Tagihan Pembayaran
+  Schedule::job(new NotifReminderJob())
+    ->dailyAt('15:54');
+
   // ! Notifikasi: Laporan Keuangan Harian
   Schedule::job(new DailyReportJob())
     ->dailyAt('23:45');

@@ -51,126 +51,121 @@ class PaymentResource extends Resource
   {
     return $form
       ->schema([
-        Forms\Components\Group::make([
-          Forms\Components\Section::make('Keuangan')
-            ->description('Detail pencatatan saldo keuangan.')
-            ->columns(2)
-            ->schema([
-              Forms\Components\Group::make([
-                Forms\Components\Toggle::make('has_items')
-                  ->label('Produk/Layanan')
-                  ->disabledOn('edit')
-                  ->live(onBlur: true)
-                  ->afterStateUpdated(function (Forms\Set $set, string $state): void {
-                    if ($state) {
-                      $set('amount', 0);
-                      $set('type_id', 1);
-                      $set('has_charge', false);
-                    }
-                  }),
-                Forms\Components\Toggle::make('has_charge')
-                  ->label('Tanpa Tagihan')
-                  ->disabled(function (callable $get, callable $set, string $operation) {
-                    if ($operation === 'edit')
-                      return true;
-                    return $get('has_items');
-                  }),
-                Forms\Components\Toggle::make('is_scheduled')
-                  ->label('Jadwalkan Tagihan')
-                  ->disabledOn('edit'),
-              ])
-              ->columnSpanFull()
-              ->columns(3),
+        Forms\Components\Section::make([
+          Forms\Components\Group::make([
+            Forms\Components\Toggle::make('has_items')
+              ->label('Produk/Layanan')
+              ->disabledOn('edit')
+              ->live(onBlur: true)
+              ->afterStateUpdated(function (Forms\Set $set, string $state): void {
+                if ($state) {
+                  $set('amount', 0);
+                  $set('type_id', 1);
+                  $set('has_charge', false);
+                }
+              }),
+            Forms\Components\Toggle::make('has_charge')
+              ->label('Tanpa Tagihan')
+              ->disabled(function (callable $get, callable $set, string $operation) {
+                if ($operation === 'edit')
+                  return true;
+                return $get('has_items');
+              }),
+            Forms\Components\Toggle::make('is_scheduled')
+              ->label('Jadwalkan Tagihan')
+              ->disabledOn('edit'),
+          ])
+            ->columnSpanFull()
+            ->columns(3),
 
-              Forms\Components\TextInput::make('amount')
-                ->label('Nominal')
-                ->required()
-                ->disabled(fn(Forms\Get $get) => $get('has_items'))
-                ->numeric()
-                ->live(onBlur: true)
-                ->hint(fn(?string $state) => toIndonesianCurrency($state ?? 0)),
-              Forms\Components\DatePicker::make('date')
-                ->label('Tanggal')
-                ->required()
-                ->default(Carbon::now())
-                ->displayFormat('d M Y')
-                ->closeOnDateSelection()
-                ->native(false),
-              Forms\Components\Textarea::make('name')
-                ->label('Catatan')
-                ->nullable()
-                ->columnSpanFull()
-                ->required(fn(Forms\Get $get) => !$get('has_items'))
-                ->rows(3),
-              Forms\Components\FileUpload::make('attachments')
-                ->label('Bukti Transaksi')
-                ->directory('img/payment')
-                ->image()
-                ->imageEditor()
-                ->multiple()
-                ->columnSpanFull(),
-            ]),
+          Forms\Components\TextInput::make('amount')
+            ->label('Nominal')
+            ->required()
+            ->disabled(fn(Forms\Get $get) => $get('has_items'))
+            ->numeric()
+            ->live(onBlur: true)
+            ->hint(fn(?string $state) => toIndonesianCurrency($state ?? 0)),
+          Forms\Components\DatePicker::make('date')
+            ->label('Tanggal')
+            ->required()
+            ->default(Carbon::now())
+            ->displayFormat('d M Y')
+            ->closeOnDateSelection()
+            ->native(false),
+          Forms\Components\Textarea::make('name')
+            ->label('Catatan')
+            ->nullable()
+            ->columnSpanFull()
+            ->required(fn(Forms\Get $get) => !$get('has_items'))
+            ->rows(3),
+          Forms\Components\FileUpload::make('attachments')
+            ->label('Bukti Transaksi')
+            ->directory('img/payment')
+            ->image()
+            ->imageEditor()
+            ->multiple()
+            ->columnSpanFull(),
         ])
-          ->columnSpan(2),
+          ->description('Informasi umum transaksi')
+          ->columns(2)
+          ->columnSpan(['sm' => 3, 'md' => 2]),
 
-        Forms\Components\Group::make([
-          Forms\Components\Section::make('Akun Kas')
-            ->collapsible()
-            ->schema([
-              Forms\Components\TextInput::make('code')
-                ->label('ID Transaksi')
-                ->placeholder('Auto Generated')
-                ->disabled()
-                ->visibleOn('edit'),
-              Forms\Components\Select::make('type_id')
-                ->label('Tipe Transaksi')
-                ->options(function (Forms\Get $get): Collection {
-                  if ($get('has_items')) return PaymentType::where('id', 1)->pluck('name', 'id');
-                  return PaymentType::all()->pluck('name', 'id');
-                })
-                ->live(onBlur: true)
-                ->native(false)
-                ->default(1)
-                ->required()
-                ->disabledOn('edit'),
-              Forms\Components\Select::make('payment_account_id')
-                ->label('Akun Kas')
-                ->relationship('payment_account', titleAttribute: 'name')
-                ->native(false)
-                ->live(onBlur: true)
-                ->required()
-                ->disabledOn('edit')
-                ->afterStateUpdated(function (Forms\Set $set, ?string $state, string $operation) {
-                  $set('payment_account_to_id', null);
+        Forms\Components\Section::make([
+          Forms\Components\TextInput::make('code')
+            ->label('ID Transaksi')
+            ->placeholder('Auto Generated')
+            ->disabled()
+            ->visibleOn('edit'),
+          Forms\Components\Select::make('type_id')
+            ->label('Tipe Transaksi')
+            ->options(function (Forms\Get $get): Collection {
+              if ($get('has_items')) return PaymentType::where('id', 1)->pluck('name', 'id');
+              return PaymentType::all()->pluck('name', 'id');
+            })
+            ->live(onBlur: true)
+            ->native(false)
+            ->default(1)
+            ->required()
+            ->disabledOn('edit'),
+          Forms\Components\Select::make('payment_account_id')
+            ->label('Akun Kas')
+            ->relationship('payment_account', titleAttribute: 'name')
+            ->native(false)
+            ->live(onBlur: true)
+            ->required()
+            ->disabledOn('edit')
+            ->afterStateUpdated(function (Forms\Set $set, ?string $state, string $operation) {
+              $set('payment_account_to_id', null);
 
-                  if (!$state)
-                    return $set('payment_account_deposit', 'Rp. 0');
+              if (!$state)
+                return $set('payment_account_deposit', 'Rp. 0');
 
-                  $payment_account = PaymentAccount::find($state);
+              $payment_account = PaymentAccount::find($state);
 
-                  if ($operation === 'create') {
-                    $set('payment_account_deposit', toIndonesianCurrency($payment_account->deposit));
-                  }
-                }),
-              Forms\Components\Select::make('payment_account_to_id')
-                ->label('Akun Kas Tujuan')
-                ->options(function ($get) {
-                  if (!$get('payment_account_id'))
-                    return [];
-                  return PaymentAccount::where('id', '!=', $get('payment_account_id'))
-                    ->pluck('name', 'id');
-                })
-                ->native(false)
-                ->required(fn($get): bool => ($get('type_id') == 3 || $get('type_id') == 4))
-                ->visible(fn($get): bool => ($get('type_id') == 3 || $get('type_id') == 4))
-                ->disabled(fn($get, string $operation): bool => !($get('type_id') == 3 || $get('type_id') == 4) || $operation == 'edit'),
-              Forms\Components\TextInput::make('payment_account_deposit')
-                ->label('Saldo Akun Kas')
-                ->disabled()
-                ->default('Rp. 0'),
-            ]),
+              if ($operation === 'create') {
+                $set('payment_account_deposit', toIndonesianCurrency($payment_account->deposit));
+              }
+            }),
+          Forms\Components\Select::make('payment_account_to_id')
+            ->label('Akun Kas Tujuan')
+            ->options(function ($get) {
+              if (!$get('payment_account_id'))
+                return [];
+              return PaymentAccount::where('id', '!=', $get('payment_account_id'))
+                ->pluck('name', 'id');
+            })
+            ->native(false)
+            ->required(fn($get): bool => ($get('type_id') == 3 || $get('type_id') == 4))
+            ->visible(fn($get): bool => ($get('type_id') == 3 || $get('type_id') == 4))
+            ->disabled(fn($get, string $operation): bool => !($get('type_id') == 3 || $get('type_id') == 4) || $operation == 'edit'),
+          Forms\Components\TextInput::make('payment_account_deposit')
+            ->label('Saldo Akun Kas')
+            ->disabled()
+            ->default('Rp. 0'),
         ])
-          ->columnSpan(1)
+        ->description('Informasi akun kas')
+        ->columns(1)
+        ->columnSpan(['sm' => 3, 'md' => 1])
       ])
       ->columns(3);
   }

@@ -27,7 +27,7 @@
     }
 
     .table thead th {
-      vertical-align: bottom;
+      vertical-align: middle;
       border-bottom: 2px solid #dee2e6;
     }
 

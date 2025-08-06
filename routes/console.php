@@ -16,7 +16,7 @@ Artisan::command('inspire', function () {
 if (config('app.env') != 'staging') {
   // ! Notifikasi: Pengingat Tagihan Pembayaran
   Schedule::job(new NotifReminderJob())
-    ->dailyAt('15:54');
+    ->dailyAt('00:05');
 
   // ! Notifikasi: Laporan Keuangan Harian
   Schedule::job(new DailyReportJob())

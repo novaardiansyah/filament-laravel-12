@@ -17,6 +17,9 @@ Route::group(['middleware' => 'auth', 'prefix' => 'testing', 'as' => 'testing.']
 
   Route::get('/email-preview', [TestingController::class, 'email_preview'])
     ->name('email_preview');
+
+  Route::get('/pdf-preview', [TestingController::class, 'pdf_preview'])
+    ->name('pdf_preview');
 });
 
 Route::get('download/{path}/{extension}', [DownloadController::class, 'index'])

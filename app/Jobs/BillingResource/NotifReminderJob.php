@@ -6,6 +6,7 @@ use App\Mail\BillingResource\NotifReminderMail;
 use App\Models\Billing;
 use App\Models\BillingStatus;
 use App\Models\EmailLog;
+use App\Models\User;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Mail;
@@ -28,6 +29,7 @@ class NotifReminderJob implements ShouldQueue
   public function handle(): void
   {
     $now = now()->toDateTimeString();
+    $user = auth()->user() ?? User::find(1);
 
     $daysStr = getSetting('billing_due_reminder_days', '1 Hari');
     $days    = (int) str_replace(' Hari', '', $daysStr);
@@ -52,6 +54,8 @@ class NotifReminderJob implements ShouldQueue
       ->whereNotIn('billing_status_id', [BillingStatus::PAID])
       ->first();
 
+    $pdf = $this->make_pdf( $now,$startDate, $endDate, $user);
+
     $data = [
       'log_name'      => 'billing_reminder_notification',
       'email'         => config('app.author_email'),
@@ -59,6 +63,9 @@ class NotifReminderJob implements ShouldQueue
       'created_at'    => $now,
       'summary'       => $summary,
       'reminder_days' => $daysStr,
+      'attachments'   => [
+        storage_path('app/' . $pdf['filepath']),
+      ],
     ];
 
     $mailObj = new NotifReminderMail($data);
@@ -75,5 +82,48 @@ class NotifReminderJob implements ShouldQueue
     ]);
 
     Mail::to($data['email'])->queue(new NotifReminderMail($data));
+  }
+
+  public function make_pdf($now, $startDate, $endDate, User $user): array
+  {
+    $mpdf     = new \Mpdf\Mpdf();
+    $rowIndex = 1;
+
+    $mpdf->WriteHTML(view('billing-resource.make-pdf.header', [
+      'now' => carbonTranslatedFormat($now, 'd/m/Y H:i'),
+    ])->render());
+    
+    $total = 0;
+
+    Billing::with(['billingPeriod:id,name', 'item:id,name', 'billingStatus:id,name', 'paymentAccount:id,name', 'payment:id,name'])
+      ->whereBetween('due_date', [$startDate, $endDate])
+      ->whereNotIn('billing_status_id', [BillingStatus::PAID])  
+      ->orderBy('due_date', 'asc')
+      ->chunk(200, function ($billings) use ($mpdf, &$rowIndex, &$total) {
+        foreach ($billings as $data) {
+          $total += $data->amount;
+
+          $view = view('billing-resource.make-pdf.body', [
+            'data'      => $data,
+            'loopIndex' => $rowIndex++,
+          ])->render();
+
+          $mpdf->WriteHTML($view);
+        }
+      });
+    
+    $mpdf->WriteHTML('
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="6" style="text-align: center; font-weight: bold;">Total Transaksi</td>
+          <td style="font-weight: bold; text-align: right;">'. ($total > 0 ? toIndonesianCurrency($total) : '') .'</td>
+        </tr>
+      </tfoot>
+    ');
+
+    $pdf = makePdf($mpdf, 'billing-reminder', $user, false, false, false);
+
+    return $pdf;
   }
 }

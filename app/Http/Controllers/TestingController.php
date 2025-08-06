@@ -7,6 +7,7 @@ use App\Mail\ContactMessageResource\NotifContactMail;
 use App\Models\Billing;
 use App\Models\BillingStatus;
 use App\Models\EmailLog;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
@@ -100,6 +101,55 @@ class TestingController extends Controller
 
   public function pdf_preview(Request $request) 
   {
+    $preview = (bool) $request->input('preview', 0);
 
+    $user = auth()->user() ?? User::find(1);
+    $now  = now()->toDateTimeString();
+
+    $daysStr = getSetting('billing_due_reminder_days', '1 Hari');
+    $days    = (int) str_replace(' Hari', '', $daysStr);
+
+    $startDate = now()->toDateString();
+    $endDate   = now()->addDays($days)->toDateString();
+    
+    $mpdf     = new \Mpdf\Mpdf();
+    $rowIndex = 1;
+
+    $mpdf->WriteHTML(view('billing-resource.make-pdf.header', [
+      'now' => carbonTranslatedFormat($now, 'd/m/Y H:i'),
+    ])->render());
+    
+    $total = 0;
+
+    Billing::with(['billingPeriod:id,name', 'item:id,name', 'billingStatus:id,name', 'paymentAccount:id,name', 'payment:id,name'])
+      ->whereBetween('due_date', [$startDate, $endDate])
+      ->whereNotIn('billing_status_id', [BillingStatus::PAID])  
+      ->orderBy('due_date', 'asc')
+      ->chunk(200, function ($billings) use ($mpdf, &$rowIndex, &$total) {
+        foreach ($billings as $data) {
+          $total += $data->amount;
+
+          $view = view('billing-resource.make-pdf.body', [
+            'data'      => $data,
+            'loopIndex' => $rowIndex++,
+          ])->render();
+
+          $mpdf->WriteHTML($view);
+        }
+      });
+    
+    $mpdf->WriteHTML('
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="6" style="text-align: center; font-weight: bold;">Total Transaksi</td>
+          <td style="font-weight: bold; text-align: right;">'. ($total > 0 ? toIndonesianCurrency($total) : '') .'</td>
+        </tr>
+      </tfoot>
+    ');
+
+    $pdf = makePdf($mpdf, 'billing-reminder', $user, $preview, false, false);
+
+    return response()->json($pdf);
   }
 }

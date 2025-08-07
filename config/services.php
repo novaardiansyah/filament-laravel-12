@@ -50,5 +50,10 @@ return [
     'token'        => env('TINYURL_API_KEY', ''),
     'url'          => env('TINYURL_URL', ''),
     'alias_domain' => env('TINYURL_DOMAIN_ALIAS', ''),
-  ]
+  ],
+
+  'telegram-bot-api' => [
+    'token' => env('TELEGRAM_BOT_TOKEN', 'YOUR_BOT_TOKEN_HERE'),
+    'chat_id' => env('TELEGRAM_CHAT_ID', 'YOUR_CHAT_ID_HERE'),
+  ],
 ];

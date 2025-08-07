@@ -7,9 +7,11 @@ use App\Models\ActivityLog;
 use App\Models\EmailLog;
 use App\Models\Setting;
 use App\Models\User;
+use App\Notifications\TelegramNotification;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Notification;
 
 class LogUserLogin
 {
@@ -117,5 +119,11 @@ class LogUserLogin
     ]);
 
     Mail::to($data['email'])->queue(new NotifUserLoginMail($data));
+
+    $message = view('user-resource.telegram.notif-user-login-mail', $data)->render();
+
+    Notification::route('telegram', config('services.telegram-bot-api.chat_id'))->notify(new TelegramNotification([
+      'message' => $message
+    ]));
   }
 }

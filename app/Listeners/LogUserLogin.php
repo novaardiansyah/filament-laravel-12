@@ -7,6 +7,7 @@ use App\Models\ActivityLog;
 use App\Models\EmailLog;
 use App\Models\Setting;
 use App\Models\User;
+use App\Notifications\TelegramLocationNotification;
 use App\Notifications\TelegramNotification;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Support\Facades\Http;
@@ -125,5 +126,14 @@ class LogUserLogin
     Notification::route('telegram', config('services.telegram-bot-api.chat_id'))->notify(new TelegramNotification([
       'message' => $message
     ]));
+
+    if ($geolocation) {
+      $gelocationData = explode(',', $geolocation);
+
+      Notification::route('telegram', config('services.telegram-bot-api.chat_id'))->notify(new TelegramLocationNotification([
+        'latitude'  => $gelocationData[0] ?? null,
+        'longitude' => $gelocationData[1] ?? null,
+      ]));
+    }
   }
 }

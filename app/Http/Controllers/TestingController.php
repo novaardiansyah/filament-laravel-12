@@ -8,6 +8,7 @@ use App\Models\Billing;
 use App\Models\BillingStatus;
 use App\Models\EmailLog;
 use App\Models\User;
+use App\Notifications\TelegramLocationNotification;
 use App\Notifications\TelegramNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -157,21 +158,7 @@ class TestingController extends Controller
 
   public function telegram_bot(Request $request)
   {
-    $message = view('user-resource.telegram.notif-user-login-mail', [
-      'email'       => 'nova@sa.com',
-      'ip'          => '2a09:bac5:3a20:24d2::3ab:2',
-      'location'    => 'Jakarta, Jakarta, ID (12850)',
-      'geolocation' => '-6.2146, 106.8451',
-      'timezone'    => 'Asia/Jakarta',
-      'device'      => 'Mozilla/5.0 (Android 12; Mobile; rv:141.0) Gecko/141.0 Firefox/141.0',
-      'login_time'  => now()->toDateTimeString(),
-      'referer'     => 'https://personal.novadev.my.id/admin/login',
-    ])->render();
-
-    Notification::route('telegram', '1998180905')->notify(new TelegramNotification([
-      'message' => $message
-    ]));
-
+    Notification::route('telegram', config('services.telegram-bot-api.chat_id'))->notify(new TelegramLocationNotification());
     return response()->json(['message' => 'Telegram notification sent successfully.']);
   }
 }

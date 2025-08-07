@@ -5,16 +5,16 @@ namespace App\Notifications;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
-use NotificationChannels\Telegram\TelegramMessage;
+use NotificationChannels\Telegram\TelegramLocation;
 
-class TelegramNotification extends Notification implements ShouldQueue
+class TelegramLocationNotification extends Notification implements ShouldQueue
 {
   use Queueable;
 
   /**
    * Create a new notification instance.
    */
-  public function __construct(private array $data)
+  public function __construct(private array $data = [])
   {
     //
   }
@@ -32,12 +32,11 @@ class TelegramNotification extends Notification implements ShouldQueue
   /**
    * Get the mail representation of the notification.
    */
-  public function toTelegram($notifiable): TelegramMessage
-  { 
-    $message = $this->data['message'] ?? 'Hello from your Laravel Telegram bot!';
-
-    return TelegramMessage::create()
-      ->content($message);
+  public function toTelegram(object $notifiable): TelegramLocation
+  {
+    return TelegramLocation::create()
+      ->latitude($this->data['latitude'] ?? '-6.245201142095669')
+      ->longitude($this->data['longitude'] ?? '106.64952076742718');
   }
 
   /**

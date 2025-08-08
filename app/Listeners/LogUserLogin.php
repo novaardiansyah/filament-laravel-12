@@ -106,34 +106,45 @@ class LogUserLogin
       'created_at'  => $now,
     ];
 
-    $mailObj = new NotifUserLoginMail($data);
-    $message = $mailObj->render();
+    // ! Kirim notifikasi ke Email
+    $emailEnabled = getSetting('email_login_notification', 'Tidak');
+    if (textLower($emailEnabled) === 'ya') {
+      \Log::info('784 --> Send login notification to email');
 
-    EmailLog::create([
-      'status_id'  => 2,
-      'name'       => $data['log_name'],
-      'email'      => $data['email'],
-      'subject'    => $data['subject'],
-      'message'    => $message,
-      'created_at' => $now,
-      'updated_at' => $now,
-    ]);
+      $mailObj = new NotifUserLoginMail($data);
+      $message = $mailObj->render();
+  
+      EmailLog::create([
+        'status_id'  => 2,
+        'name'       => $data['log_name'],
+        'email'      => $data['email'],
+        'subject'    => $data['subject'],
+        'message'    => $message,
+        'created_at' => $now,
+        'updated_at' => $now,
+      ]);
+  
+      Mail::to($data['email'])->queue(new NotifUserLoginMail($data));
+    }
 
-    Mail::to($data['email'])->queue(new NotifUserLoginMail($data));
+    // ! Kirim notifikasi ke Telegram
+    $telegramEnabled = getSetting('telegram_login_notification', 'Tidak');
+    if (textLower($telegramEnabled) === 'ya') {
+      \Log::info('785 --> Send login notification to Telegram');
 
-    $message = view('user-resource.telegram.notif-user-login-mail', $data)->render();
-
-    Notification::route('telegram', config('services.telegram-bot-api.chat_id'))->notify(new TelegramNotification([
-      'message' => $message
-    ]));
-
-    if ($geolocation) {
-      $gelocationData = explode(',', $geolocation);
-
-      Notification::route('telegram', config('services.telegram-bot-api.chat_id'))->notify(new TelegramLocationNotification([
-        'latitude'  => $gelocationData[0] ?? null,
-        'longitude' => $gelocationData[1] ?? null,
-      ]));
+      $telegramMsg  = view('user-resource.telegram.notif-user-login-mail', $data)->render();
+      $telegramLoc = null;
+  
+      if ($geolocation) {
+        $gelocationData = explode(',', $geolocation);
+  
+        $telegramLoc = [
+          'latitude'  => $gelocationData[0] ?? null,
+          'longitude' => $gelocationData[1] ?? null,
+        ];
+      }
+  
+      sendTelegramNotification($telegramMsg, $telegramLoc);
     }
   }
 }

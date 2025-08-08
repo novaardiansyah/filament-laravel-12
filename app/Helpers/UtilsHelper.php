@@ -5,11 +5,14 @@ use App\Models\Generate;
 use App\Models\ScheduledFileDeletion;
 use App\Models\Setting;
 use App\Models\User;
+use App\Notifications\TelegramLocationNotification;
+use App\Notifications\TelegramNotification;
 use Carbon\Carbon;
 use Ramsey\Uuid\Uuid;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Database\Eloquent\Model;
 use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Notification AS NotificationFacade;
 use Filament\Notifications\Actions\Action;
 
 function getSetting(string $key, $default = null)
@@ -190,15 +193,33 @@ function getOptionMonths($short = false): array
 
 function textCapitalize($text)
 {
-  return ucwords(strtolower($text));
+  return trim(ucwords(strtolower($text)));
 }
 
 function textUpper($text)
 {
-  return strtoupper($text);
+  return trim(strtoupper($text));
 }
 
 function textLower($text)
 {
-  return strtolower($text);
+  return trim(strtolower($text));
+}
+
+function sendTelegramNotification($message = null, $location = null, $chat_id = null)
+{
+  $chat_id = $chat_id ?? config('services.telegram-bot-api.chat_id');
+
+  if ($message) {
+    NotificationFacade::route('telegram', $chat_id)->notify(new TelegramNotification([
+      'message' => $message
+    ]));
+
+    \Log::info('673 --> Telegram message notification sent');
+  }
+
+  if ($location) {
+    NotificationFacade::route('telegram', $chat_id)->notify(new TelegramLocationNotification($location));
+    \Log::info('674 --> Telegram location notification sent');
+  }
 }

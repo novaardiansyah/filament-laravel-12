@@ -159,16 +159,27 @@ class PaymentAccountResource extends Resource implements HasShieldPermissions
         ->schema([
           Forms\Components\TextInput::make('deposit')
             ->label('Saldo Awal')
-            ->numeric()
             ->disabled()
-            ->default(fn (PaymentAccount $record): int => $record->deposit)
-            ->hint(fn (?string $state) => toIndonesianCurrency($state ?? 0, showCurrency: self::showPaymentCurrency())),
+            ->default(fn (PaymentAccount $record): string => toIndonesianCurrency($record->deposit ?? 0)),
           Forms\Components\TextInput::make('deposit_to')
             ->label('Saldo Akhir')
             ->numeric()
             ->required()
             ->live(onBlur: true)
-            ->hint(fn (?string $state) => toIndonesianCurrency($state ?? 0, showCurrency: self::showPaymentCurrency())),
+            ->hint(fn (?string $state) => toIndonesianCurrency($state ?? 0, showCurrency: self::showPaymentCurrency()))
+            ->afterStateUpdated(function (callable $set, PaymentAccount $record, ?string $state) {
+              $saldo_awal  = (int) $record->deposit;
+              $saldo_akhir = (int) ($state ?? 0);
+
+              $selisih = $saldo_awal - $saldo_akhir;
+              $selisih = $selisih > 0 ? -$selisih : abs($selisih);
+
+              $set('difference', toIndonesianCurrency($selisih));
+            }),
+          Forms\Components\TextInput::make('difference')
+            ->label('Selisih Saldo')
+            ->disabled()
+            ->default(fn() => toIndonesianCurrency(0)),
         ])
     ];
   }

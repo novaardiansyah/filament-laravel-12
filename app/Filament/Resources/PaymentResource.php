@@ -33,7 +33,6 @@ class PaymentResource extends Resource
   protected static ?string $navigationGroup = 'Keuangan';
   protected static ?int $navigationSort = 20;
   protected static ?string $label = 'Keuangan';
-
   protected static ?string $recordTitleAttribute = 'name';
 
   protected static function showPaymentCurrency(): bool
@@ -103,6 +102,8 @@ class PaymentResource extends Resource
             ->directory('img/payment')
             ->image()
             ->imageEditor()
+            ->enableDownload()
+            ->enableOpen()
             ->multiple()
             ->columnSpanFull(),
         ])

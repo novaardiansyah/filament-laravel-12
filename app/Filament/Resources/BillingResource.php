@@ -347,6 +347,7 @@ class BillingResource extends Resource
             ->label('Tanggal Pembayaran')
             ->displayFormat('d M Y')
             ->closeOnDateSelection()
+            ->required()
             ->native(false)
         ])
       ];

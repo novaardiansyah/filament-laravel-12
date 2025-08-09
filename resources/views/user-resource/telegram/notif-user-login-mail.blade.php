@@ -2,7 +2,7 @@ Kami ingin menginformasikan bahwa ada pengguna yang baru saja login ke situs web
 
 *Detail Pengguna:*
 
-  - *Alamat Email*: {{ $email ?? '-' }}
+  - *Alamat Email*: {{ $email_user ?? '-' }}
   - *Alamat IP*: {{ $ip_address ?? '-' }}
   - *Lokasi*: {{ $address ?? '-' }}
   - *Geolokasi*: {{ $geolocation ?? '-' }}

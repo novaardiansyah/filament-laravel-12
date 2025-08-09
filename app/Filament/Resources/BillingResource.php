@@ -120,7 +120,7 @@ class BillingResource extends Resource
         Tables\Columns\TextColumn::make('code')
           ->label('ID Tagihan')
           ->searchable()
-          ->toggleable()
+          ->toggleable(isToggledHiddenByDefault: true)
           ->copyable(),
         Tables\Columns\TextColumn::make('item.name')
           ->label('Tagihan')
@@ -129,7 +129,7 @@ class BillingResource extends Resource
         Tables\Columns\TextColumn::make('paymentAccount.name')
           ->label('Akun Pembayaran')
           ->searchable()
-          ->toggleable(),
+          ->toggleable(isToggledHiddenByDefault: true),
         Tables\Columns\TextColumn::make('amount')
           ->label('Jumlah Tagihan')
           ->sortable()
@@ -139,7 +139,7 @@ class BillingResource extends Resource
           ->label('Tanggal Tagihan')
           ->dateTime('d M Y')
           ->sortable()
-          ->toggleable(),
+          ->toggleable(isToggledHiddenByDefault: true),
         Tables\Columns\TextColumn::make('payment.date')
           ->label('Tanggal Terjadwal')
           ->dateTime('d M Y')
@@ -177,12 +177,7 @@ class BillingResource extends Resource
         Tables\Actions\ActionGroup::make([
           Tables\Actions\EditAction::make()
             ->modalWidth(MaxWidth::FourExtraLarge)
-            ->color('primary')
-            ->mutateRecordDataUsing(function (?Billing $record, array $data): array {
-              $billingPeriod = BillingPeriod::getName($record->billing_period_id) ?? 'Monthly';
-              $data['billing_period_id'] = $billingPeriod;
-              return $data;
-            }),
+            ->color('primary'),
 
           Tables\Actions\Action::make('already_paid')
             ->label('Sudah Dibayar')
@@ -405,6 +400,7 @@ class BillingResource extends Resource
       'payment_id'         => $saved->id,
       'billing_status_id'  => BillingStatus::SCHEDULED,
       'payment_account_id' => $data['payment_account_id'],
+      'due_date'           => $data['scheduled_date']
     ]);
 
     $date = carbonTranslatedFormat($data['scheduled_date'], 'd M Y');

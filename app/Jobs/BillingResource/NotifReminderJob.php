@@ -37,7 +37,7 @@ class NotifReminderJob implements ShouldQueue
     $startDate = now()->toDateString();
     $endDate   = now()->addDays($days)->toDateString();
 
-    $billing = Billing::whereBetween('due_date', [$startDate, $endDate])
+    $billing = Billing::whereBetween('billing_date', [$startDate, $endDate])
       ->whereNotIn('billing_status_id', [BillingStatus::PAID])
       ->first();
 
@@ -50,7 +50,7 @@ class NotifReminderJob implements ShouldQueue
       COUNT(CASE WHEN billing_period_id = 1 THEN 1 ELSE NULL END) AS daily_count,
       COUNT(CASE WHEN billing_period_id = 2 THEN 1 ELSE NULL END) AS weekly_count,
       COUNT(CASE WHEN billing_period_id = 3 THEN 1 ELSE NULL END) AS monthly_count
-    ')->whereBetween('due_date', [$startDate, $endDate])
+    ')->whereBetween('billing_date', [$startDate, $endDate])
       ->whereNotIn('billing_status_id', [BillingStatus::PAID])
       ->first();
 
@@ -96,9 +96,9 @@ class NotifReminderJob implements ShouldQueue
     $total = 0;
 
     Billing::with(['billingPeriod:id,name', 'item:id,name', 'billingStatus:id,name', 'paymentAccount:id,name', 'payment:id,name'])
-      ->whereBetween('due_date', [$startDate, $endDate])
+      ->whereBetween('billing_date', [$startDate, $endDate])
       ->whereNotIn('billing_status_id', [BillingStatus::PAID])  
-      ->orderBy('due_date', 'asc')
+      ->orderBy('billing_date', 'asc')
       ->chunk(200, function ($billings) use ($mpdf, &$rowIndex, &$total) {
         foreach ($billings as $data) {
           $total += $data->amount;

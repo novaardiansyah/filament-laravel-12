@@ -88,7 +88,7 @@ class BillingResource extends Resource
             ->required()
             ->default(BillingPeriod::BILLING_PERIODS['Monthly']),
 
-          Forms\Components\DatePicker::make('due_date')
+          Forms\Components\DatePicker::make('billing_date')
             ->label('Tanggal Tagihan')
             ->default(now())
             ->native(false)
@@ -135,7 +135,7 @@ class BillingResource extends Resource
           ->sortable()
           ->toggleable()
           ->formatStateUsing(fn ($state) => toIndonesianCurrency($state, showCurrency: self::showPaymentCurrency())),
-        Tables\Columns\TextColumn::make('due_date')
+        Tables\Columns\TextColumn::make('billing_date')
           ->label('Tanggal Tagihan')
           ->dateTime('d M Y')
           ->sortable()
@@ -354,7 +354,7 @@ class BillingResource extends Resource
 
   public static function getSchedulePaymentFillForm(Billing $record): array
   {
-    $scheduled = carbonTranslatedFormat($record->due_date, 'Y-m-d');
+    $scheduled = carbonTranslatedFormat($record->billing_date, 'Y-m-d');
 
     if (Carbon::parse($scheduled)->isPast()) {
       $scheduled = now()->addDay()->toDateString();
@@ -400,7 +400,7 @@ class BillingResource extends Resource
       'payment_id'         => $saved->id,
       'billing_status_id'  => BillingStatus::SCHEDULED,
       'payment_account_id' => $data['payment_account_id'],
-      'due_date'           => $data['scheduled_date']
+      'billing_date'       => $data['scheduled_date']
     ]);
 
     $date = carbonTranslatedFormat($data['scheduled_date'], 'd M Y');

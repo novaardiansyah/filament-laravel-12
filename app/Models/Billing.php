@@ -12,6 +12,10 @@ class Billing extends Model
   use SoftDeletes;
   protected $table = 'billings'; 
   protected $guarded = ['id'];
+
+  protected $casts = [
+    'billing_date' => 'date',
+  ];
   
   public function billingStatus(): BelongsTo
   {
@@ -48,7 +52,7 @@ class Billing extends Model
   
       $newRecord = $this->replicate();
       $newRecord->billing_status_id = BillingStatus::PENDING;
-      $newRecord->due_date = Carbon::parse($this->due_date)->addDays($periodDays);
+      $newRecord->billing_date = Carbon::parse($this->billing_date)->addDays($periodDays);
       $newRecord->code = getCode('billing');
       $newRecord->save();
     }

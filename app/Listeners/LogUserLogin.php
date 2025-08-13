@@ -132,7 +132,7 @@ class LogUserLogin
     if (textLower($telegramEnabled) === 'ya') {
       \Log::info('785 --> Send login notification to Telegram');
 
-      $telegramMsg  = view('user-resource.telegram.notif-user-login-mail', $data)->render();
+      $telegramMsg  = view('user-resource.telegram.notif-user-login', $data)->render();
       $telegramLoc = null;
   
       if ($geolocation) {

@@ -9,4 +9,7 @@ class Note extends Model
 {
   use SoftDeletes;
   protected $guarded = ['id'];
+  protected $casts = [
+    'send_notification' => 'boolean',
+  ];
 }

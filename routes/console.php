@@ -1,6 +1,7 @@
 <?php
 
 use App\Jobs\BillingResource\NotifReminderJob;
+use App\Jobs\NoteResource\NotifReminderJob AS NoteNotifReminderJob;
 use App\Jobs\PaymentAccountResource\DailyReportJob;
 use App\Jobs\PaymentAccountResource\WeeklyReportJob;
 use App\Jobs\PaymentResource\ScheduledPaymentJob;
@@ -33,4 +34,8 @@ if (config('app.env') != 'staging') {
   // ! Proses: Pembersihan File Harian
   Schedule::job(new DailyFileCleanupJob())
     ->dailyAt('23:59');
+
+  // ! Proses: Pengingat Notifikasi Catatan
+  Schedule::job(new NoteNotifReminderJob())
+    ->everyTwoHours();
 }

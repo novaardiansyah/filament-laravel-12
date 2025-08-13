@@ -137,10 +137,6 @@ class NoteResource extends Resource
 
   public static function getEditMutateRecordData(array $data): array
   {
-    if ($data['notification_at']) {
-      $data['send_notification'] = true;
-    }
-
     return $data;
   }
 
@@ -155,10 +151,6 @@ class NoteResource extends Resource
 
     if ($action instanceof \Filament\Tables\Actions\EditAction) {
       // ! Do something...
-    }
-
-    if (!$data['send_notification']) {
-      $data['notification_at'] = null;
     }
 
     return $data;

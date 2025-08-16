@@ -139,7 +139,7 @@ class BillingResource extends Resource
           ->label('Tanggal Tagihan')
           ->dateTime('d M Y')
           ->sortable()
-          ->toggleable(isToggledHiddenByDefault: true),
+          ->toggleable(),
         Tables\Columns\TextColumn::make('payment.date')
           ->label('Tanggal Terjadwal')
           ->dateTime('d M Y')

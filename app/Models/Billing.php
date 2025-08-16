@@ -54,6 +54,7 @@ class Billing extends Model
       $newRecord->billing_status_id = BillingStatus::PENDING;
       $newRecord->billing_date = Carbon::parse($this->billing_date)->addDays($periodDays);
       $newRecord->code = getCode('billing');
+      $newRecord->payment_id = null;
       $newRecord->save();
     }
   }

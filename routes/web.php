@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DownloadController;
+use App\Http\Controllers\EmailController;
 use App\Http\Controllers\ShortUrlController;
 use App\Http\Controllers\TestingController;
 use Illuminate\Support\Facades\Route;
@@ -23,6 +24,11 @@ Route::group(['middleware' => 'auth', 'prefix' => 'testing', 'as' => 'testing.']
 
   Route::get('/telegram-bot', [TestingController::class, 'telegram_bot'])
     ->name('telegram_bot');
+});
+
+Route::group(['middleware' => 'auth', 'prefix' => 'admin/emails', 'as' => 'admin.emails.'], function () {
+  Route::get('/{email}/preview', [EmailController::class, 'show'])
+    ->name('preview');
 });
 
 Route::get('download/{path}/{extension}', [DownloadController::class, 'index'])

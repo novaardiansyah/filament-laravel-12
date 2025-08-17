@@ -6,10 +6,12 @@ use App\Filament\Resources\EmailResource\Pages;
 use App\Models\Email;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Infolists;
 
 class EmailResource extends Resource
 {
@@ -90,13 +92,12 @@ class EmailResource extends Resource
       ->filters([
         //
       ])
-      // ->recordAction(null)
-      ->recordUrl(null)
       ->defaultSort('updated_at', 'desc')
       ->actions([
         Tables\Actions\ActionGroup::make([
           Tables\Actions\ViewAction::make()
             ->color('info')
+            ->icon('heroicon-o-eye')
             ->mutateRecordDataUsing(function (array $data, Email $record): array {
               $data['body'] = str($record->email_log->message)->sanitizeHtml() ?? '';
               return $data;
@@ -119,6 +120,13 @@ class EmailResource extends Resource
                 ->success()
                 ->send();
             }),
+          
+          Tables\Actions\Action::make('preview_email')
+            ->label('Pratinjau Email')
+            ->icon('heroicon-o-document-magnifying-glass')
+            ->color('warning')
+            ->url(fn (Email $record): string => route('admin.emails.preview', $record))
+            ->openUrlInNewTab(),
 
           Tables\Actions\EditAction::make()
             ->color('primary'),
@@ -138,6 +146,40 @@ class EmailResource extends Resource
     return [
       //
     ];
+  }
+
+  public static function infolist(Infolist $infolist): Infolist
+  {
+    return $infolist
+      ->schema([
+        Infolists\Components\Section::make([
+            Infolists\Components\TextEntry::make('recipient')
+              ->label('Kepada')
+              ->formatStateUsing(fn(string $state): string => textLower($state)),
+            Infolists\Components\TextEntry::make('subject')
+              ->label('Subjek'),
+            Infolists\Components\TextEntry::make('email_log.message')
+              ->label('Pesan')
+              ->columnSpanFull()
+              ->html(),
+          ])
+          ->columns(2),
+
+        Infolists\Components\Section::make([
+            Infolists\Components\TextEntry::make('has_send')
+              ->label('Status')
+              ->formatStateUsing(fn(bool $state): string => $state ? 'Terkirim' : 'Belum Terkirim')
+              ->badge()
+              ->color(fn(bool $state): string => $state ? 'success' : 'danger'),
+            Infolists\Components\TextEntry::make('created_at')
+              ->label('Dibuat pada')
+              ->dateTime('d M Y H:i'),
+            Infolists\Components\TextEntry::make('updated_at')
+              ->label('Diubah pada')
+              ->dateTime('d M Y H:i'),
+          ])
+          ->columns(3),
+      ]);
   }
 
   public static function getPages(): array

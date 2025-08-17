@@ -6,6 +6,7 @@ use App\Filament\Resources\EmailResource\Pages;
 use App\Models\Email;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -45,6 +46,9 @@ class EmailResource extends Resource
             ->downloadable()
             ->openable()
             ->directory('attachments'),
+          Forms\Components\Toggle::make('save_as_draft')
+            ->label('Simpan sebagai draft')
+            ->default(true)
         ])
         ->description('Informasi kirim email')
         ->columns(1)
@@ -67,6 +71,11 @@ class EmailResource extends Resource
           ->label('Subjek')
           ->sortable()
           ->searchable(),
+        Tables\Columns\TextColumn::make('has_send')
+          ->label('Status')
+          ->formatStateUsing(fn(bool $state): string => $state ? 'Terkirim' : 'Belum Terkirim')
+          ->badge()
+          ->color(fn(bool $state): string => $state ? 'success' : 'danger'),
         Tables\Columns\TextColumn::make('created_at')
           ->label('Dibuat pada')
           ->dateTime('d/m/Y H:i')
@@ -93,6 +102,23 @@ class EmailResource extends Resource
               return $data;
             })
             ->slideOver(),
+
+          Tables\Actions\Action::make('send_email')
+            ->label('Kirim Email')
+            ->icon('heroicon-o-envelope')
+            ->color('success')
+            ->visible(fn(Email $record): bool => !$record->has_send)
+            ->requiresConfirmation()
+            ->modalHeading('Konfirmasi Pengiriman Email')
+            ->action(function (Email $record) {
+              $record->sendEmail();
+
+              Notification::make()
+                ->title('Pesan Terkirim')
+                ->body('Pesan berhasil dikirim ke email: ' . $record->recipient)
+                ->success()
+                ->send();
+            }),
 
           Tables\Actions\EditAction::make()
             ->color('primary'),

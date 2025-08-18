@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Email;
+use App\Models\EmailLog;
 use Illuminate\Http\Request;
 
-class EmailController extends Controller
+class EmailLogController extends Controller
 {
   /**
    * Display a listing of the resource.
@@ -34,21 +34,10 @@ class EmailController extends Controller
   /**
    * Display the specified resource.
    */
-  public function show(Email $email)
+  public function show(EmailLog $email)
   {
-    $message = $email->email_log->message ?? $email->body;
-    $hasLayout = $email->email_log_id ? true : false;
-    
     $data = $email->toArray();
-    $data['message'] = $message;
-
-    /**
-     * * view('email-resource.preview-with-layout')
-     * * view('email-resource.preview')
-     */
-    $view = $hasLayout ? 'email-resource.preview-with-layout' : 'email-resource.preview';
-
-    return view($view, compact('data', 'hasLayout'));
+    return view('email-log-resource.preview-with-layout', compact('data'));
   }
 
   /**

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DownloadController;
 use App\Http\Controllers\EmailController;
+use App\Http\Controllers\EmailLogController;
 use App\Http\Controllers\ShortUrlController;
 use App\Http\Controllers\TestingController;
 use Illuminate\Support\Facades\Route;
@@ -28,6 +29,11 @@ Route::group(['middleware' => 'auth', 'prefix' => 'testing', 'as' => 'testing.']
 
 Route::group(['middleware' => 'auth', 'prefix' => 'admin/emails', 'as' => 'admin.emails.'], function () {
   Route::get('/{email}/preview', [EmailController::class, 'show'])
+    ->name('preview');
+});
+
+Route::group(['middleware' => 'auth', 'prefix' => 'admin/email-logs', 'as' => 'admin.email_logs.'], function () {
+  Route::get('/{email}/preview', [EmailLogController::class, 'show'])
     ->name('preview');
 });
 

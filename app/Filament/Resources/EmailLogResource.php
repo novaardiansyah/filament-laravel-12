@@ -80,6 +80,13 @@ class EmailLogResource extends Resource
             ->modalWidth(MaxWidth::ThreeExtraLarge)
             ->slideOver()
             ->color('primary'),
+
+          Tables\Actions\Action::make('preview_email')
+            ->label('Pratinjau Email')
+            ->icon('heroicon-o-document-magnifying-glass')
+            ->color('warning')
+            ->url(fn (EmailLog $record): string => route('admin.email_logs.preview', $record))
+            ->openUrlInNewTab(),
         ]),
       ])
       ->bulkActions([

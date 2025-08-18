@@ -6,15 +6,8 @@
   {{ $data['subject'] }}
 @endsection
 
-@php
-  $name = explode('@', $data['recipient'])[0];
-  if (strlen($name) > 8) {
-    $name = substr($name, 0, 8) . '..';
-  }
-@endphp
-
 @section('header')
-  Hai {{ textCapitalize($name) }},
+  Hai {{ $data['recipient'] }},
 @endsection
 
 @section('content')

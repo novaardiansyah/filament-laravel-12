@@ -28,10 +28,25 @@ class EmailResource extends Resource
     return $form
       ->schema([
         Forms\Components\Section::make([
-          Forms\Components\TextInput::make('recipient')
-            ->label('Kepada')
-            ->required()
-            ->maxLength(255),
+          Forms\Components\Group::make([
+            Forms\Components\TextInput::make('to')
+              ->label('Email Tujuan')
+              ->required()
+              ->email()
+              ->maxLength(255)
+              ->live(onBlur: true)
+              ->afterStateUpdated(function (Forms\Set $set, string $state) {
+                if (!$state) return;
+                $name = textCapitalize(explode('@', $state)[0]);
+                $set('recipient', $name);
+              }),
+            Forms\Components\TextInput::make('recipient')
+              ->label('Kepada')
+              ->required()
+              ->maxLength(255),
+          ])
+          ->columns(2),
+
           Forms\Components\TextInput::make('subject')
             ->label('Subjek')
             ->maxLength(255),
@@ -51,6 +66,7 @@ class EmailResource extends Resource
           Forms\Components\Toggle::make('save_as_draft')
             ->label('Simpan sebagai draft')
             ->default(true)
+            ->visibleOn('create')
         ])
         ->description('Informasi kirim email')
         ->columns(1)
@@ -66,6 +82,10 @@ class EmailResource extends Resource
           ->label('#'),
         Tables\Columns\TextColumn::make('recipient')
           ->label('Kepada')
+          ->sortable()
+          ->searchable(),
+        Tables\Columns\TextColumn::make('to')
+          ->label('Email Tujuan')
           ->sortable()
           ->searchable()
           ->formatStateUsing(fn(string $state): string => textLower($state)),
@@ -99,7 +119,7 @@ class EmailResource extends Resource
             ->color('info')
             ->icon('heroicon-o-eye')
             ->mutateRecordDataUsing(function (array $data, Email $record): array {
-              $data['body'] = str($record->email_log->message)->sanitizeHtml() ?? '';
+              $data['body'] = $record->email_log->message ?? $record->body;
               return $data;
             })
             ->slideOver(),
@@ -116,7 +136,7 @@ class EmailResource extends Resource
 
               Notification::make()
                 ->title('Pesan Terkirim')
-                ->body('Pesan berhasil dikirim ke email: ' . $record->recipient)
+                ->body('Pesan berhasil dikirim ke email: ' . $record->to)
                 ->success()
                 ->send();
             }),
@@ -158,7 +178,7 @@ class EmailResource extends Resource
               ->formatStateUsing(fn(string $state): string => textLower($state)),
             Infolists\Components\TextEntry::make('subject')
               ->label('Subjek'),
-            Infolists\Components\TextEntry::make('email_log.message')
+            Infolists\Components\TextEntry::make('body')
               ->label('Pesan')
               ->columnSpanFull()
               ->html(),

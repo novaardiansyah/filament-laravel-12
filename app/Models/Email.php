@@ -38,7 +38,8 @@ class Email extends Model
 
     $send = [
       'log_name'    => 'send_app_mail',
-      'email'       => $record->recipient,
+      'email'       => $record->to,
+      'recipient'   => $record->recipient,
       'subject'     => $record->subject,
       'body'        => $record->body,
       'attachments' => $attachments,

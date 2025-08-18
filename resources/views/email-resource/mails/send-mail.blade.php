@@ -5,7 +5,7 @@
 @endsection
 
 @section('header')
-  Hai {{ explode('@', $data['email'])[0] }},
+  Hai {{ textCapitalize($data['recipient']) }},
 @endsection
 
 @section('content')

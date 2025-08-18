@@ -12,4 +12,9 @@ class Note extends Model
   protected $casts = [
     'send_notification' => 'boolean',
   ];
+
+  public function getRouteKeyName(): string
+  {
+    return 'code';
+  }
 }

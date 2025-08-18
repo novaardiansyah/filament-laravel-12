@@ -66,8 +66,9 @@ class NoteResource extends Resource
           ->badge()
           ->color('info')
           ->copyable()
+          ->copyableState(fn (Note $record): string => route('admin.notes.detail', $record))
           ->searchable()
-          ->toggleable(isToggledHiddenByDefault: true),
+          ->toggleable(),
         Tables\Columns\TextColumn::make('title')
           ->label('Judul')
           ->searchable()
@@ -100,8 +101,6 @@ class NoteResource extends Resource
           ->toggleable(),
       ])
       ->defaultSort('updated_at', 'desc')
-      ->recordAction(null)
-      ->recordUrl(null)
       ->filters([
         //
       ])

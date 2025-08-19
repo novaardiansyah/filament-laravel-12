@@ -7,7 +7,9 @@ use App\Models\Setting;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Support\Enums\MaxWidth;
 use Filament\Tables;
 use Filament\Tables\Table;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
@@ -178,6 +180,8 @@ class SettingResource extends Resource implements HasShieldPermissions
       ->filters([
         //
       ])
+      ->recordAction('edit_value')
+      ->recordUrl(null)
       ->headerActions([
         ExportAction::make()->exports([
           ExcelExport::make('table')->fromTable()
@@ -194,6 +198,16 @@ class SettingResource extends Resource implements HasShieldPermissions
 
           Tables\Actions\EditAction::make()
             ->color('primary'),
+
+          Tables\Actions\Action::make('edit_value')
+            ->label('Ganti Nilai')
+            ->icon('heroicon-o-arrows-right-left')
+            ->modalHeading('Ganti nilai pengaturan aplikasi')
+            ->modalWidth(MaxWidth::ExtraLarge)
+            ->color('primary')
+            ->form(self::getFormEditValue())
+            ->fillForm(fn (Setting $record) => self::fillFormEditValue($record))
+            ->action(fn (Setting $record, array $data) => self::actionFormEditValue($record, $data)),
 
           Tables\Actions\DeleteAction::make(),
           Tables\Actions\ForceDeleteAction::make(),
@@ -223,5 +237,71 @@ class SettingResource extends Resource implements HasShieldPermissions
       'create' => Pages\CreateSetting::route('/create'),
       'edit' => Pages\EditSetting::route('/{record}/edit'),
     ];
+  }
+
+  public static function getFormEditValue(): array 
+  {
+    return [
+      Forms\Components\Section::make()
+        ->description('Informasi pengaturan aplikasi')
+        ->collapsible()
+        ->columnSpan(2)
+        ->schema([
+          Forms\Components\TextInput::make('name')
+            ->label('Nama pengaturan')
+            ->disabled(),
+
+          Forms\Components\TextInput::make('options')
+            ->label('Opsi nilai')
+            ->hidden(),
+
+          Forms\Components\Toggle::make('has_options')
+            ->label('Punya opsi nilai')
+            ->live()
+            ->hidden(),
+
+          Forms\Components\Textarea::make('value')
+            ->label('Nilai')
+            ->required()
+            ->rows(3)
+            ->maxLength(255)
+            ->visible(fn(Forms\Get $get) => !$get('has_options')),
+
+          Forms\Components\Select::make('value_option')
+            ->label('Pilihan nilai')
+            ->required()
+            ->native(false)
+            ->searchable()
+            ->options(function (Forms\Get $get) {
+              $options = $get('options') ?? [];
+              return collect($options)->mapWithKeys(function ($option) {
+                return [$option => $option];
+              });
+            })
+            ->visible(fn(Forms\Get $get) => $get('has_options')),
+          ])
+    ];
+  }
+
+  public static function fillFormEditValue(Setting $record): array
+  {
+    return [
+      'name'         => $record->name,
+      'value'        => $record->value,
+      'has_options'  => $record->has_options,
+      'options'      => $record->options ? explode(',', $record->options) : [],
+      'value_option' => $record->value,
+    ];
+  }
+
+  public static function actionFormEditValue(Setting $record, array $data): void
+  {
+    $value = $data['value'] ?? $data['value_option'];
+    $record->update(['value' => $value]);
+
+    Notification::make()
+      ->title('Nilai pengaturan berhasil diubah.')
+      ->success()
+      ->send();
   }
 }

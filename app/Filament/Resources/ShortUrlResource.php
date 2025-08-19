@@ -3,15 +3,15 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ShortUrlResource\Pages;
-use App\Filament\Resources\ShortUrlResource\RelationManagers;
 use App\Models\ShortUrl;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Infolists\Infolist;
+use Filament\Infolists;
 use Filament\Resources\Resource;
+use Filament\Support\Enums\MaxWidth;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class ShortUrlResource extends Resource
 {
@@ -71,12 +71,13 @@ class ShortUrlResource extends Resource
           ->wrap()
           ->limit(40),
         Tables\Columns\TextColumn::make('short_url')
-          ->copyable()
           ->label('Short URL')
           ->searchable()
           ->toggleable()
           ->wrap()
           ->limit(40)
+          ->copyable()
+          ->copyableState(fn (string $state, ShortUrl $record): string => $record->tiny_url ?? $state)
           ->formatStateUsing(fn (string $state, ShortUrl $record): string => $record->tiny_url ?? $state),
         Tables\Columns\TextColumn::make('is_active')
           ->label('Status')
@@ -106,10 +107,17 @@ class ShortUrlResource extends Resource
         //
       ])
       ->defaultSort('updated_at', 'desc')
-      ->recordAction(null)
+      ->recordAction('view')
       ->recordUrl(null)
       ->actions([
         Tables\Actions\ActionGroup::make([
+          Tables\Actions\ViewAction::make()
+            ->modalHeading('Detail Short URL')
+            ->color('info')
+            ->icon('heroicon-o-eye')
+            ->modalWidth(MaxWidth::TwoExtraLarge)
+            ->slideOver(),
+
           Tables\Actions\DeleteAction::make(),
         ])
       ])
@@ -134,5 +142,57 @@ class ShortUrlResource extends Resource
       'create' => Pages\CreateShortUrl::route('/create'),
       'edit' => Pages\EditShortUrl::route('/{record}/edit'),
     ];
+  }
+
+  public static function infolist(Infolist $infolist): Infolist
+  {
+    return $infolist
+      ->schema([
+        Infolists\Components\Section::make([
+            Infolists\Components\TextEntry::make('long_url')
+              ->label('URL Asli')
+              ->badge()
+              ->color('info')
+              ->copyable(),
+
+            Infolists\Components\TextEntry::make('short_url')
+              ->label('Short URL')
+              ->badge()
+              ->color('info')
+              ->copyable()
+              ->copyableState(fn (string $state, ShortUrl $record): string => $record->tiny_url ?? $state)
+              ->formatStateUsing(fn (string $state, ShortUrl $record): string => $record->tiny_url ?? $state),
+          ])
+          ->columns(2),
+
+        Infolists\Components\Section::make([
+          Infolists\Components\TextEntry::make('code')
+              ->label('Kode'),
+            
+          Infolists\Components\TextEntry::make('is_active')
+            ->label('Status')
+            ->badge()
+            ->color(fn (bool $state): string => $state ? 'success' : 'danger')
+            ->formatStateUsing(fn (bool $state): string => $state ? 'Aktif' : 'Tidak Aktif'),
+
+          Infolists\Components\TextEntry::make('clicks')
+            ->label('Total Klik')
+            ->badge()
+            ->color('info')
+            ->formatStateUsing(fn (int $state): string => number_format($state, 0, ',', '.')),
+        ])
+        ->columns(3),
+
+        Infolists\Components\Section::make([
+            Infolists\Components\TextEntry::make('created_at')
+              ->label('Dibuat pada')
+              ->dateTime('d M Y H:i'),
+
+            Infolists\Components\TextEntry::make('updated_at')
+              ->label('Diubah pada')
+              ->dateTime('d M Y H:i'),
+          ])
+          ->columns(3),
+      ]);
   }
 }

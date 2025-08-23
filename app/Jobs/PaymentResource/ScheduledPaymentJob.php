@@ -8,6 +8,7 @@ use App\Models\EmailLog;
 use App\Models\Payment;
 use App\Models\PaymentAccount;
 use App\Services\PaymentService;
+use Carbon\Carbon;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Mail;
@@ -38,8 +39,9 @@ class ScheduledPaymentJob implements ShouldQueue
       return;
     }
 
-    $now   = now()->toDateTimeString();
-    $today = now()->toDateString();
+    $now      = now()->toDateTimeString();
+    $today    = Carbon::now()->format('Y-m-d');
+    $tomorrow = Carbon::now()->addDay()->format('Y-m-d');
 
     $send = [
       'filename'   => 'scheduled-payment-report',
@@ -58,7 +60,7 @@ class ScheduledPaymentJob implements ShouldQueue
       COUNT(CASE WHEN type_id = 1 THEN id END) AS daily_expense_count,
       COUNT(CASE WHEN type_id = 2 THEN id END) AS daily_income_count,
       COUNT(CASE WHEN type_id NOT IN (1, 2) THEN id END) AS daily_other_count
-    ")->where('date', $today)->first();
+    ")->whereBetween('date', [$today, $tomorrow])->first();
 
     $data = [
       'log_name'         => 'scheduled_payment_notification',

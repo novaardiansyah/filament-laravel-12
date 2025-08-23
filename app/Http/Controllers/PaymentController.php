@@ -4,13 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\BillingStatus;
 use App\Models\Payment;
+use Carbon\Carbon;
 
 class PaymentController extends Controller
 {
   public static function scheduledPayment(): array
   {
-    $today = now()->format('Y-m-d');
-    $tomorrow = now()->addDay()->format('Y-m-d');
+    $today    = Carbon::now()->format('Y-m-d');
+    $tomorrow = Carbon::now()->addDay()->format('Y-m-d');
 
     $scheduledPayments = Payment::with(['payment_account:id,name,deposit', 'payment_account_to:id,name,deposit'])->where('is_scheduled', true)
       ->whereBetween('date', [$today, $tomorrow])

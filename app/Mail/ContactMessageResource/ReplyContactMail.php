@@ -31,7 +31,7 @@ class ReplyContactMail extends Mailable implements ShouldQueue
     return new Envelope(
       subject: $this->data['subject'],
       replyTo: [
-        new Address('admin@novaardiansyah.my.id', config('app.author_name')),
+        new Address(config('app.author_email'), config('app.author_name')),
       ]
     );
   }

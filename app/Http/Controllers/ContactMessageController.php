@@ -3,16 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Jobs\ContactMessageResource\StoreMessageJob;
-use App\Mail\ContactMessageResource\NotifContactMail;
-use App\Mail\ContactMessageResource\ReplyContactMail;
 use App\Models\ContactMessage;
-use App\Models\EmailLog;
 use Illuminate\Http\Request;
-use Illuminate\Session\Store;
 use Validator;
 use \Illuminate\Validation\Validator AS validationValidator;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Mail;
 
 class ContactMessageController extends Controller
 {

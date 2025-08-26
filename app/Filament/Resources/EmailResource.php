@@ -148,6 +148,33 @@ class EmailResource extends Resource
             ->url(fn (Email $record): string => route('admin.emails.preview', $record))
             ->openUrlInNewTab(),
 
+          Tables\Actions\Action::make('replicate')
+            ->color('success')
+            ->label('Duplikat')
+            ->icon('heroicon-o-document-duplicate')
+            ->requiresConfirmation()
+            ->modalHeading('Konfirmasi Duplikasi Email')
+            ->action(function (Email $record, Tables\Actions\Action $action) {
+              $newEmail = $record->replicate();
+
+              $newEmail->code       = getCode('email');
+              $newEmail->subject    = $record->subject . ' (copy)';
+              $newEmail->has_send   = false;
+              $newEmail->created_at = now();
+              $newEmail->updated_at = now();
+
+              $newEmail->save();
+              $action->success();
+
+              Notification::make()
+                ->title('Duplikat Berhasil')
+                ->body('Email berhasil diduplikat.')
+                ->success()
+                ->send();
+
+              return redirect(url("/admin/emails?tableAction=edit&tableActionRecord={$newEmail->id}"));
+            }),
+
           Tables\Actions\EditAction::make()
             ->color('primary'),
 

@@ -66,7 +66,6 @@ class EmailResource extends Resource
           Forms\Components\Toggle::make('save_as_draft')
             ->label('Simpan sebagai draft')
             ->default(true)
-            ->visibleOn('create')
         ])
         ->description('Informasi kirim email')
         ->columns(1)
@@ -176,7 +175,17 @@ class EmailResource extends Resource
             }),
 
           Tables\Actions\EditAction::make()
-            ->color('primary'),
+            ->color('primary')
+            ->mutateRecordDataUsing(function (array $data): array {
+              $data['save_as_draft'] = true;
+              return $data;
+            })
+            ->after(function (array $data, Email $record) {
+              $saveAsDraft = (bool) $data['save_as_draft'];
+              if ($saveAsDraft) return;
+
+              $record->sendEmail();
+            }),
 
           Tables\Actions\DeleteAction::make(),
         ]),

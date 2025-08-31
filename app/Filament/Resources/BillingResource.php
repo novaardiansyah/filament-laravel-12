@@ -184,7 +184,7 @@ class BillingResource extends Resource
             ->icon('heroicon-o-check-circle')
             ->color('info')
             ->visible(fn (Billing $record) => $record->billing_status_id != BillingStatus::PAID)
-            ->modalWidth(MaxWidth::Medium)
+            ->modalWidth(MaxWidth::FourExtraLarge)
             ->form(self::getAlreadyPaidForm())
             ->fillForm(fn (Billing $record) => self::getAlreadyPaidFillForm($record))
             ->action(fn (Billing $record, Tables\Actions\Action $action, array $data) => self::getAlreadyPaidAction($record, $action, $data)),
@@ -229,11 +229,8 @@ class BillingResource extends Resource
   public static function getAlreadyPaidForm(): array
   {
     return [
-      Forms\Components\Section::make('')
-        ->description('Informasi pembayaran')
-        ->schema([
-          Forms\Components\Toggle::make('has_charge')
-            ->label('Tanpa Tagihan?'),
+      Forms\Components\Group::make([
+        Forms\Components\Section::make([
           Forms\Components\Select::make('payment_account_id')
             ->label('Akun Kas')
             ->relationship('paymentAccount', titleAttribute: 'name')
@@ -260,8 +257,21 @@ class BillingResource extends Resource
             ->label('Nominal')
             ->readOnly()
             ->hint(fn (string $state) => toIndonesianCurrency($state ?? 0)),
+          ])
+          ->columnSpan(2)
+          ->description('Informasi pembayaran'),
+
+        Forms\Components\Section::make([
+          Forms\Components\Toggle::make('has_charge')
+            ->label('Tanpa Tagihan?'),
+          Forms\Components\Toggle::make('end_billing')
+            ->label('Selesai Tagihan?'),
         ])
-      ];
+        ->columnSpan(1)
+        ->description('Informasi lainnya'),
+      ])
+      ->columns(3)
+    ];
   }
 
   public static function getAlreadyPaidAction(Billing $record, Tables\Actions\Action $action, array $data): void
@@ -294,6 +304,7 @@ class BillingResource extends Resource
 
     $record->afterSuccessPaid([
       'payment_account_id' => $data['payment_account_id'],
+      'end_billing'        => $data['end_billing'],
     ]);
 
     Notification::make()

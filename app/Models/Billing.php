@@ -47,7 +47,7 @@ class Billing extends Model
     $data['billing_status_id'] = $data['billing_status_id'] ?? BillingStatus::PAID;
     $this->update($data);
 
-    if ($data['billing_status_id'] === BillingStatus::PAID) {
+    if ($data['billing_status_id'] === BillingStatus::PAID && !$data['end_billing']) {
       $periodDays = $this->billingPeriod->days ?? 7;
   
       $newRecord = $this->replicate();

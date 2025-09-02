@@ -62,14 +62,6 @@ class BillingResource extends Resource
               }
             }),
 
-          Forms\Components\TextInput::make('amount')
-            ->label('Nominal Tagihan')
-            ->numeric()
-            ->minValue(0)
-            ->live(onBlur: true)
-            ->required()
-            ->hint(fn(?string $state) => toIndonesianCurrency($state ?? 0)),
-          
           Forms\Components\Select::make('payment_account_id')
             ->label('Akun Pembayaran')
             ->relationship('paymentAccount', 'name')
@@ -79,7 +71,31 @@ class BillingResource extends Resource
             ->default(PaymentAccount::PERMATA_BANK)
             ->required(),
 
-          Forms\Components\Select::make('billing_period_id')
+          Forms\Components\TextInput::make('amount')
+            ->label('Nominal Tagihan')
+            ->numeric()
+            ->minValue(0)
+            ->live(onBlur: true)
+            ->required()
+            ->hint(fn(?string $state) => toIndonesianCurrency($state ?? 0)),
+
+          Forms\Components\TextInput::make('cycle_count')
+            ->label('Siklus Tagihan')
+            ->numeric()
+            ->minValue(1)
+            ->default(3)
+            ->live(onBlur: true)
+            ->required()
+            ->hint(function(?string $state, callable $get) {
+              $cycle  = (int) $state ?? 0;
+              $amount = (int) $get('amount') ?? 0;
+              $total  = toIndonesianCurrency($cycle * $amount);
+
+              return "x{$cycle} ({$total})";
+            }),
+          
+          Forms\Components\Group::make([
+            Forms\Components\Select::make('billing_period_id')
             ->label('Periode Tagihan')
             ->relationship('billingPeriod', 'name')
             ->native(false)
@@ -104,6 +120,9 @@ class BillingResource extends Resource
             ->default(BillingStatus::PENDING)
             ->preload()
             ->disabledOn('edit'),
+          ])
+          ->columns(3)
+          ->columnSpanFull(),
         ])
           ->description('Informasi tagihan')
           ->columns(2)
@@ -123,7 +142,7 @@ class BillingResource extends Resource
           ->toggleable(isToggledHiddenByDefault: true)
           ->copyable(),
         Tables\Columns\TextColumn::make('item.name')
-          ->label('Tagihan')
+          ->label('Produk & Layanan')
           ->searchable()
           ->toggleable(),
         Tables\Columns\TextColumn::make('paymentAccount.name')
@@ -131,10 +150,16 @@ class BillingResource extends Resource
           ->searchable()
           ->toggleable(isToggledHiddenByDefault: true),
         Tables\Columns\TextColumn::make('amount')
-          ->label('Jumlah Tagihan')
+          ->label('Tagihan')
           ->sortable()
           ->toggleable()
           ->formatStateUsing(fn ($state) => toIndonesianCurrency($state, showCurrency: self::showPaymentCurrency())),
+        Tables\Columns\TextColumn::make('cycle_count')
+          ->label('Siklus Tagihan')
+          ->sortable()
+          ->badge()
+          ->color('info')
+          ->toggleable(isToggledHiddenByDefault: true),
         Tables\Columns\TextColumn::make('billing_date')
           ->label('Tanggal Tagihan')
           ->dateTime('d M Y')
@@ -316,9 +341,15 @@ class BillingResource extends Resource
 
   public static function getAlreadyPaidFillForm(Billing $record): array
   {
+    $cycle_count = (int) $record->cycle_count;
+    $end_billing = true;
+
+    if ($cycle_count > 0) $end_billing = false;
+    
     return [
       'amount'                  => $record->amount,
       'payment_account_deposit' => toIndonesianCurrency($record->paymentAccount->deposit),
+      'end_billing'             => $end_billing,
     ];
   }
 

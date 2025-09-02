@@ -45,6 +45,18 @@ class Billing extends Model
   public function afterSuccessPaid(array $data = []): void
   {
     $data['billing_status_id'] = $data['billing_status_id'] ?? BillingStatus::PAID;
+
+    if ((bool) $data['end_billing']) {
+      $data['cycle_count'] = 0;
+    } else {
+      $data['cycle_count'] = intval($this->cycle_count) - 1;
+    }
+
+    if ((int) $data['cycle_count'] < 1) {
+      $data['cycle_count'] = 0;
+      $data['end_billing'] = true;
+    }
+
     $this->update($data);
 
     if ($data['billing_status_id'] === BillingStatus::PAID && !$data['end_billing']) {

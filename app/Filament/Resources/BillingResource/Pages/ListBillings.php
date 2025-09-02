@@ -38,6 +38,8 @@ class ListBillings extends ListRecords
             $this->halt();
           }
 
+          $data['cycle_count'] = intval($data['cycle_count']) - 1;
+
           $data['code'] = getCode('billing');
           return $data;
         }),

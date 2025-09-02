@@ -106,7 +106,7 @@ class TestingController extends Controller
   {
     $preview = (bool) $request->input('preview', 0);
 
-    $user = auth()->user() ?? User::find(1);
+    $user = auth()->user() ?? User::find(4);
     $now  = now()->toDateTimeString();
 
     $daysStr = getSetting('billing_due_reminder_days', '1 Hari');

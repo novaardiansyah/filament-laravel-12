@@ -29,7 +29,7 @@ class NotifReminderJob implements ShouldQueue
   public function handle(): void
   {
     $now = now()->toDateTimeString();
-    $user = auth()->user() ?? User::find(1);
+    $user = auth()->user() ?? User::find(4);
 
     $daysStr = getSetting('billing_due_reminder_days', '1 Hari');
     $days    = (int) str_replace(' Hari', '', $daysStr);

@@ -46,7 +46,7 @@ function toIndonesianCurrency(float $number = 0, int $precision = 0, string $cur
 
 function makePdf(\Mpdf\Mpdf $mpdf, string $name, ?Model $user = null, $preview = false, $notification = true, $auto_close_tbody = true): array
 {
-  $user ??= User::find(1); // ! Default user if not provided
+  $user ??= User::find(4); // ! Default user if not provided
 
   $extension = 'pdf';
   $directory = 'filament-pdf';

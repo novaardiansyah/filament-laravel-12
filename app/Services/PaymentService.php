@@ -36,7 +36,7 @@ class PaymentService
     $totalExpense  = 0;
     $totalIncome   = 0;
     $totalTransfer = 0;
-    $user          = auth()->user() ?? User::find(1);  // ! Default user if not authenticated
+    $user          = auth()->user() ?? User::find(4);  // ! Default user if not authenticated
 
     $mpdf->WriteHTML(view('payment-resource.make-pdf.header', [
       'title'   => $data['title'] ?? 'Laporan keuangan',

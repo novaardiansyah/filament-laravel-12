@@ -26,7 +26,7 @@ class DailyFileCleanupJob implements ShouldQueue
   public function handle(): void
   {
     $now  = now();
-    $user = auth()->user() ?? User::find(1);  // ! Default user if not authenticated
+    $user = auth()->user() ?? User::find(4);  // ! Default user if not authenticated
     
     $subject = ScheduledFileDeletion::class;
     $causer_type = User::class;
@@ -39,7 +39,7 @@ class DailyFileCleanupJob implements ShouldQueue
     $files->each(function (ScheduledFileDeletion $file)use ($user, $subject, $causer_type, &$logs) {
       $deletion = $file->deleteFile();
 
-     ActivityLog::create([
+      ActivityLog::create([
         'log_name'     => 'Schedule',
         'description'  => "{$user->name} has deleted scheduled file: {$file->file_name}",
         'event'        => 'File Deletion',

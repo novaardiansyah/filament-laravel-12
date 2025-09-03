@@ -16,9 +16,9 @@ use Illuminate\Database\Eloquent\Model;
 class ItemsRelationManager extends RelationManager
 {
   protected static string $relationship = 'items';
-  protected static ?string $modelLabel = 'Barang';
-  protected static ?string $pluralModelLabel = 'Barang';
-  protected static ?string $title = 'Kelola Barang';
+  protected static ?string $modelLabel = 'Produk & Layanan';
+  protected static ?string $pluralModelLabel = 'Produk & Layanan';
+  protected static ?string $title = 'Kelola Produk & Layanan';
 
   public static function canViewForRecord(Model $ownerRecord, string $pageClass): bool
   {
@@ -41,11 +41,11 @@ class ItemsRelationManager extends RelationManager
     return $form
       ->schema([
         Forms\Components\Section::make('')
-          ->description('Informasi Barang')
+          ->description('Informasi Produk & Layanan')
           ->columns(2)
           ->schema([
             Forms\Components\TextInput::make('name')
-              ->label('Nama Barang')
+              ->label('Nama Produk & Layanan')
               ->required()
               ->maxLength(255),
             Forms\Components\Select::make('type.id')
@@ -182,8 +182,8 @@ class ItemsRelationManager extends RelationManager
           ->recordSelectSearchColumns(['name', 'code'])
           ->recordSelect(
             function (Forms\Components\Select $select) { 
-              return $select->placeholder('Pilih Barang')
-                ->hintIcon('heroicon-m-question-mark-circle', tooltip: 'Pencarian dengan menggunakan {nama} atau {ID Barang} pada master.')
+              return $select->placeholder('Pilih Produk & Layanan')
+                ->hintIcon('heroicon-m-question-mark-circle', tooltip: 'Pencarian dengan menggunakan {nama} atau {ID Produk & Layanan} pada master.')
                 ->live(onBlur: true)
                 ->afterStateUpdated(function($state, $set, $get): void {
                   $item = Item::find($state ?? 0);
@@ -197,7 +197,7 @@ class ItemsRelationManager extends RelationManager
           )
           ->form(fn ($action): array => [
             Forms\Components\Section::make('')
-              ->description('Informasi Barang')
+              ->description('Informasi Produk & Layanan')
               ->columns(2)
               ->schema([
                 $action->getRecordSelect(),

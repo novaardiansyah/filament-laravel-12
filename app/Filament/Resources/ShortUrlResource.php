@@ -31,11 +31,10 @@ class ShortUrlResource extends Resource
         Forms\Components\Section::make('')
           ->description('Informasi Short URL')
           ->columns(1)
-          ->columnSpan(2)
           ->schema([
             Forms\Components\Textarea::make('long_url')
               ->label('URL Asli')
-              ->placeholder('Silakan masukkan URL asli yang ingin Anda pendekkan, contoh: https://example.com')
+              ->placeholder('https://example.com')
               ->regex('/^(https?:\/\/)([^\s]+)$/')
               ->validationMessages([
                 'regex' => 'URL harus dimulai dengan http:// atau https:// dan tidak boleh mengandung spasi.',
@@ -49,7 +48,7 @@ class ShortUrlResource extends Resource
               ->helperText('Aktifkan untuk membuat Short URL ini tersedia dan dapat diakses.')
               ->default(true),
           ]),
-      ])->columns(3);
+      ]);
   }
 
   public static function table(Table $table): Table
@@ -139,8 +138,8 @@ class ShortUrlResource extends Resource
   {
     return [
       'index' => Pages\ListShortUrls::route('/'),
-      'create' => Pages\CreateShortUrl::route('/create'),
-      'edit' => Pages\EditShortUrl::route('/{record}/edit'),
+      // 'create' => Pages\CreateShortUrl::route('/create'),
+      // 'edit' => Pages\EditShortUrl::route('/{record}/edit'),
     ];
   }
 

@@ -6,10 +6,12 @@ use App\Filament\Resources\ShortUrlResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Support\Enums\MaxWidth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
 use Filament\Notifications\Notification;
 use App\Models\ShortUrl;
+use HeroQR\Core\QRCodeGenerator;
 
 class ListShortUrls extends ListRecords
 {
@@ -54,6 +56,18 @@ class ListShortUrls extends ListRecords
 
           $data['user_id'] = auth()->id();
           $data['tiny_url'] = $response['data']['tiny_url'] ?? null;
+
+          // ! Generate QR Code
+          $qrCodeManager = new QRCodeGenerator();
+
+          $qrCode = $qrCodeManager
+            ->setData( $data['tiny_url'] ?? $data['short_url']) 
+            ->generate();
+
+          $path = 'qrcodes/' . $data['code'];
+          $qrCode->saveTo(Storage::disk('public')->path($path));
+
+          $data['qrcode'] = $path . '.png';
 
           return $data;
         }),

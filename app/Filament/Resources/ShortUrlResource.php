@@ -78,6 +78,11 @@ class ShortUrlResource extends Resource
           ->copyable()
           ->copyableState(fn (string $state, ShortUrl $record): string => $record->tiny_url ?? $state)
           ->formatStateUsing(fn (string $state, ShortUrl $record): string => $record->tiny_url ?? $state),
+        Tables\Columns\ImageColumn::make('qrcode')
+          ->disk('public')
+          ->label('QR Code')
+          ->size(50)
+          ->toggleable(isToggledHiddenByDefault: true),
         Tables\Columns\TextColumn::make('is_active')
           ->label('Status')
           ->badge()
@@ -181,6 +186,14 @@ class ShortUrlResource extends Resource
             ->formatStateUsing(fn (int $state): string => number_format($state, 0, ',', '.')),
         ])
         ->columns(3),
+
+        Infolists\Components\Section::make([
+          Infolists\Components\ImageEntry::make('qrcode')
+            ->label('QR Code')
+            ->size(150)
+            ->disk('public')
+        ])
+        ->columns(2),
 
         Infolists\Components\Section::make([
             Infolists\Components\TextEntry::make('created_at')

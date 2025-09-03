@@ -114,7 +114,7 @@ class ItemsRelationManager extends RelationManager
           ->copyable()
           ->toggleable(),
         Tables\Columns\TextColumn::make('name')
-          ->label('Nama Barang')
+          ->label('Nama Produk & Layanan')
           ->sortable()
           ->toggleable(),
         Tables\Columns\TextColumn::make('price')

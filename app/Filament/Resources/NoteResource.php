@@ -6,6 +6,7 @@ use App\Filament\Resources\NoteResource\Pages;
 use App\Models\Note;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Tables;
@@ -116,6 +117,30 @@ class NoteResource extends Resource
             ->color('primary')
             ->mutateRecordDataUsing(fn (array $data) => self::getEditMutateRecordData($data))
             ->mutateFormDataUsing(fn (array $data, Tables\Actions\EditAction $action, Note $record) => NoteResource::getMutateFormData($data, $action, $record)),
+
+          Tables\Actions\Action::make('replicate')
+            ->color('success')
+            ->label('Duplikat')
+            ->icon('heroicon-o-document-duplicate')
+            ->requiresConfirmation()
+            ->modalHeading('Konfirmasi Duplikasi Catatan')
+            ->action(function (Note $record, Tables\Actions\Action $action) {
+              $newRecord = $record->replicate();
+
+              $newRecord->code = getCode('note');
+              $newRecord->title = $record->title . ' (copy)';
+
+              $newRecord->save();
+              $action->success();
+
+              Notification::make()
+                ->title('Duplikat Berhasil')
+                ->body('Catatan berhasil diduplikat.')
+                ->success()
+                ->send();
+
+              return true;
+            }),
 
           Tables\Actions\DeleteAction::make(),
         ])

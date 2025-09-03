@@ -41,6 +41,11 @@ class ShortUrlResource extends Resource
               ])
               ->required()
               ->rows(2)
+              ->maxLength(255)
+              ->disabledOn('edit'),
+            Forms\Components\Textarea::make('note')
+              ->label('Keterangan')
+              ->rows(3)
               ->maxLength(255),
             Forms\Components\Toggle::make('is_active')
               ->label('Status Aktif')
@@ -78,6 +83,8 @@ class ShortUrlResource extends Resource
           ->copyable()
           ->copyableState(fn (string $state, ShortUrl $record): string => $record->tiny_url ?? $state)
           ->formatStateUsing(fn (string $state, ShortUrl $record): string => $record->tiny_url ?? $state),
+        Tables\Columns\TextColumn::make('note')
+          ->label('Keterangan'),
         Tables\Columns\ImageColumn::make('qrcode')
           ->disk('public')
           ->label('QR Code')
@@ -121,6 +128,10 @@ class ShortUrlResource extends Resource
             ->icon('heroicon-o-eye')
             ->modalWidth(MaxWidth::TwoExtraLarge)
             ->slideOver(),
+
+          Tables\Actions\EditAction::make()
+            ->modalWidth(MaxWidth::TwoExtraLarge)
+            ->color('primary'),
 
           Tables\Actions\DeleteAction::make(),
         ])
@@ -192,8 +203,13 @@ class ShortUrlResource extends Resource
             ->label('QR Code')
             ->size(150)
             ->disk('public')
+            ->columns(1),
+
+          Infolists\Components\TextEntry::make('note')
+            ->label('Keterangan')
+            ->columns(2),
         ])
-        ->columns(2),
+        ->columns(3),
 
         Infolists\Components\Section::make([
             Infolists\Components\TextEntry::make('created_at')

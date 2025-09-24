@@ -121,7 +121,7 @@ class ActivityLogResource extends Resource
 
             if ($properties->count()) {
               $schema[] = Forms\Components\KeyValue::make('properties')
-                ->label(__('filament-logger::filament-logger.resource.label.properties'))
+                ->label(__('filamen t-logger::filament-logger.resource.label.properties'))
                 ->columnSpan('full');
             }
 

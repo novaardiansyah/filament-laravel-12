@@ -20,16 +20,16 @@ if (config('app.env') != 'staging') {
     ->dailyAt('00:05');
 
   // ! Notifikasi: Laporan Keuangan Harian
-  Schedule::job(new DailyReportJob())
-    ->dailyAt('23:45');
+  // Schedule::job(new DailyReportJob())
+  //   ->dailyAt('23:45');
 
   // ! Notifikasi: Ringkasan Laporan Keuangan Mingguan
-  Schedule::job(new WeeklyReportJob())
-    ->weeklyOn(7, '23:45');
+  // Schedule::job(new WeeklyReportJob())
+  //   ->weeklyOn(7, '23:45');
 
   // ! Proses: Pembayaran Terjadwal
-  Schedule::job(new ScheduledPaymentJob())
-    ->dailyAt('00:05');
+  // Schedule::job(new ScheduledPaymentJob())
+  //   ->dailyAt('00:05');
 
   // ! Proses: Pembersihan File Harian
   Schedule::job(new DailyFileCleanupJob())
